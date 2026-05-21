@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Acesso</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="menu">
+        <a href="/" class="menu-home">Home</a>
+    </div>
+
+    <div class="card">
+
+        <h2>Cadastro de Acesso</h2>
+
+        <form id="meuForm" method="POST" action="/">
+
+            <!-- linha 1 -->
+            <div class="row-name">
+
+                <div class="field grow">
+                    <label>Nome *</label>
+                    <input type="text" name="nome" required>
+                </div>
+
+                <div class="field documento">
+                    <label>Documento</label>
+
+                    <!-- DROPDOWN NOVO -->
+                    <select name="doc_nacional" id="doc_nacional_select">
+                        <option value="CPF" selected>CPF</option>
+                        <option value="PASSAPORTE">PASSAPORTE</option>
+                        <option value="RG">RG</option>
+                    </select>
+                </div>
+
+                <div class="field docnumero">
+                    <label>Nº do Documento</label>
+                    <input 
+                        type="text"
+                        id="numero_doc_input"
+                        name="numero_doc"
+                        placeholder="000.000.000-00"
+                        autocomplete="off"
+                        maxlength="20"
+                        inputmode="text"
+                    >
+                </div>
+
+            </div>
+
+            <!-- linha 2 -->
+            <div class="row-empresa">
+
+                <div class="field empresa">
+                    <label>Empresa</label>
+                    <input type="text" name="empresa">
+                </div>
+
+                <div class="field data">
+                    <label>DATA</label>
+                    <input 
+                        type="text"
+                        name="data_do_acesso"
+                        id="data_input"
+                        placeholder="00/00/0000"
+                        maxlength="10"
+                        inputmode="numeric"
+                    >
+                </div>
+
+                <div class="field dias">
+                    <label>QTD. DIAS</label>
+                    <input 
+                        type="number"
+                        name="qtd_dias"
+                        id="qtd_dias_input"
+                        maxlength="2"
+                    >
+                </div>
+
+            </div>
+
+            <!-- linha 3 -->
+            <div class="row">
+
+                <div class="field telefone">
+                    <label>Telefone</label>
+                    <input 
+                        type="text"
+                        id="telefone_input"
+                        name="telefone"
+                        placeholder="(00) 00000-0000"
+                        maxlength="15"
+                        inputmode="numeric"
+                    >
+                </div>
+
+                <div class="field veiculo">
+                    <label>Com Veículo</label>
+
+                    <div class="radio">
+                        <label><input type="radio" name="com_veiculo" value="sim"> SIM</label>
+                        <label><input type="radio" name="com_veiculo" value="nao" checked> NÃO</label>
+                    </div>
+
+                </div>
+
+                <div class="field placa hidden" id="placaField">
+                    <label>Placa</label>
+                    <input type="text" name="placa">
+                </div>
+
+                <div class="field tipo hidden" id="tipoField">
+                    <label>Tipo Veículo</label>
+
+                    <div class="radio">
+                        <label><input type="radio" name="tipo_veiculo" value="CARGA"> CARGA</label>
+                        <label><input type="radio" name="tipo_veiculo" value="PASSEIO"> PASSEIO</label>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <hr>
+
+            <!-- justificativa -->
+            <div class="row">
+
+                <div class="field justificativa">
+
+                    <label>Justificativa</label>
+
+                    <div class="grid-just">
+
+                        <div>
+                            <label><input type="radio" name="justificativa" value="Execução de Serviço"> Execução de Serviço</label>
+                            <label><input type="radio" name="justificativa" value="Entrega de Material"> Entrega de Material</label>
+                            <label><input type="radio" name="justificativa" value="Reunião"> Reunião</label>
+                        </div>
+
+                        <div>
+                            <label><input type="radio" name="justificativa" value="Visitante"> Visitante</label>
+                            <label><input type="radio" name="justificativa" value="Processo Seletivo"> Processo Seletivo</label>
+                            <label><input type="radio" name="justificativa" value="Integração"> Integração</label>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="field-setor">
+
+                    <div class="field">
+                        <label>Setor da Visita</label>
+                        <input type="text" name="visita_a">
+                    </div>
+
+                    <div class="field">
+                        <label>Contato Tecon</label>
+                        <input 
+                            type="text"
+                            name="tel_interno"
+                            id="tel_interno_input"
+                            placeholder="(00) 12345-6789"
+                            maxlength="15"
+                            inputmode="numeric"
+                        >
+                    </div>
+
+                    <!-- CAMPO AUTORIZADO CORRIGIDO -->
+                    <input type="hidden" id="autorizado" name="autorizado" value="SOLICITADO">
+
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+
+                <button 
+                    type="button"
+                    class="button-cancel"
+                    onclick="window.location.href='/'"
+                >
+                    Cancelar
+                </button>
+
+                <button type="submit" class="button-send">
+                    Enviar
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <script src="/scripts/script.js"></script>
+
+</body>
+
+</html>

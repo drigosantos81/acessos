@@ -1,0 +1,57 @@
+ /* CSS Específico para centralizar a tela de login na tela toda */
+ body {
+     background-color: #011C43;
+     /* O azul institucional do seu menu */
+     margin: 0;
+     height: 100vh;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+ }
+
+ .login-card {
+     background: white;
+     width: 100%;
+     max-width: 380px;
+     padding: 40px 30px;
+     border-radius: 8px;
+     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+ }
+
+ .login-card h2 {
+     text-align: center;
+     color: #333;
+     margin-bottom: 25px;
+     font-size: 22px;
+ }
+
+ .login-card .field {
+     margin-bottom: 20px;
+ }
+
+ .login-card input {
+     width: 100%;
+     /* Faz o input ocupar toda a caixa */
+     box-sizing: border-box;
+     font-size: 15px;
+ }
+
+ .btn-login {
+     width: 100%;
+     font-size: 16px;
+     font-weight: bold;
+     margin-top: 10px;
+     padding: 12px;
+ }
+
+ /* Caixa de erro que o Controller envia quando a senha está errada */
+ .message-error {
+     background-color: #fee2e2;
+     color: #dc2626;
+     padding: 12px;
+     border-radius: 6px;
+     margin-bottom: 20px;
+     text-align: center;
+     font-size: 14px;
+     border: 1px solid #f87171;
+ }

@@ -1,0 +1,475 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #f5f7fa;
+    font-family: Arial, Helvetica, sans-serif;
+    /* display: flex;
+    justify-content: center; */
+    padding: 0 0 0 0;
+}
+
+.card {
+    background: white;
+    width: 920px;
+    padding: 0 25px 25px 25px;
+    margin: 0 auto 15px auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-edit-mass {
+    background: white;
+    width: 920px;
+    /* padding: 1px 25px 25px 25px; */
+    margin: 0 auto 15px auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: flex-end;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.grow {
+    flex: 2;
+}
+
+/* #buscaNome {
+    width: 400px;
+} */
+
+/* documento maior */
+.documento {
+    flex: 0 0 220px;
+}
+
+/* cpf largura exata */
+.docnumero {
+    flex: 0 0 150px;
+}
+
+/* empresa maior */
+.empresa {
+    flex: 3;
+}
+
+/* data menor */
+.data {
+    flex: 0 0 130px;
+}
+
+/* 2 digitos */
+.dias {
+    flex: 0 0 55px;
+}
+
+/* telefone fixo */
+.telefone {
+    flex: 0 0 170px;
+}
+
+.veiculo {
+    flex: 0 0 200px;
+}
+
+.placa {
+    flex: 0 0 140px;
+}
+
+.tipo {
+    flex: 0 0 200px;
+}
+
+label {
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+input {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+/* radio alinhado na mesma linha */
+.radio {
+    display: flex;
+    gap: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f7f7f7;
+    align-items: center;
+}
+
+/* justificativa vertical */
+.justificativa {
+    flex: 2;
+}
+
+.justificativa label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+/* lado direito */
+.side {
+    flex: 1;
+    align-items: stretch;
+}
+
+.actions {
+    text-align: right;
+    margin-top: 20px;
+}
+
+button {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid #eee;
+}
+
+/* RODRIGO */
+
+.row-name {
+    display: grid;
+    grid-template-columns: 1fr 170px 130px;
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: flex-end;
+}
+
+.input-cpf {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.row-empresa {
+    display: grid;
+    grid-template-columns: 1fr 90px 75px;
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: flex-end;
+}
+
+.field-setor {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
+}
+
+.field-setor .field {
+    margin-bottom: 10px;
+}
+
+.actions-setor {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.button-send {
+    background: #00BEDD;
+    color: white;
+    border: none;
+    width: 110px;
+    padding: 15px 5px 15px 5px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.button-send:hover {
+    transition: 400ms;
+    background-color: dodgerblue;
+    /* azul atual */
+}
+
+
+/* NOVOS BOTÕES - CANCELAR */
+/* .menu {
+    background: #011C43;
+    margin: 0 -25px 20px -25px;
+    padding: 12px 25px;
+} */
+
+.menu {
+    background: #011C43;
+    width: 100%;
+    padding: 12px 25px;
+    box-sizing: border-box;
+    margin: 0 0 20px 0;
+    /* remove margens negativas */
+}
+
+.menu-home {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    margin: 0 0 0 30px;
+}
+
+.menu-home:hover {
+    opacity: 0.8;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: end;
+    gap: 10px;
+    margin-top: 25px;
+    padding: 0 10px 15px 0 ;
+}
+
+.button-cancel {
+    background: #e5e7eb;
+    color: #333;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100px;
+}
+
+.button-cancel:hover {
+    background: #d1d5db;
+    transition: 300ms;
+}
+
+/* =========================================
+   ESTILIZAÇÃO GERAL DE TABELAS (Home e Edição)
+========================================= */
+
+.header-page {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    padding: 15px 0 0 0;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin: 15px 0 0 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    /* Tamanho padrão da Home */
+}
+
+/* Redução de fonte ESPECÍFICA para a página de Edição Massiva */
+.card-edit-mass table {
+    font-size: 10px;
+    /* Fonte menor para quebrar em 2 linhas */
+}
+
+thead {
+    background: #f1f5f9;
+}
+
+/* Bordas horizontais e verticais */
+.table-container table th,
+.table-container table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid #e5e7eb;
+    /* Divisória horizontal */
+    border-right: 1px solid #e5e7eb;
+    /* Divisória vertical interna */
+    vertical-align: middle;
+    text-align: center;
+}
+
+/* Remove a linha vertical da última coluna (extremidade direita) */
+.table-container table th:last-child,
+.table-container table td:last-child {
+    border-right: none;
+}
+
+tbody tr:hover {
+    background: #f8fafc;
+}
+
+/* =========================================
+   LARGURAS DAS COLUNAS E AJUSTES FINOS
+========================================= */
+
+/* Centraliza os campos curtos (Datas, Dias, Veículo) */
+.table-container table th:nth-child(3),
+.table-container table td:nth-child(3),
+.table-container table th:nth-child(4),
+.table-container table td:nth-child(4),
+.table-container table th:nth-child(5),
+.table-container table td:nth-child(5),
+.table-container table th:nth-child(6),
+.table-container table td:nth-child(6) {
+    text-align: center;
+}
+
+/* =========================================
+   ESTILIZAÇÃO DA COLUNA AUTORIZADO
+========================================= */
+
+td.autorizado {
+    font-weight: normal;
+    background: none !important;
+
+    /* GANTE QUE A LINHA NÃO QUEBRE (Substitui o flexbox) */
+    display: table-cell !important;
+    text-align: left !important;
+    white-space: nowrap;
+    /* Impede o status de quebrar em duas linhas */
+}
+
+/* Espaçamento do ícone */
+td.autorizado i {
+    font-size: 14px;
+    margin-right: 6px;
+}
+
+/* Cores dos Status */
+td.autorizado.sim i {
+    color: #16a34a;
+}
+
+td.autorizado.nao i,
+td.autorizado.não i {
+    color: #dc2626;
+}
+
+td.autorizado.pendente i {
+    color: #eab308;
+}
+
+td.autorizado.solicitado i {
+    color: #2563eb;
+}
+
+td.autorizado.agendado i {
+    color: #00BEDD;
+}
+
+
+/* =========================================
+   RESPONSIVIDADE (Celular e Tablet)
+========================================= */
+
+@media (max-width: 768px) {
+    .table-container table {
+        font-size: 12px;
+    }
+
+    .card-edit-mass table {
+        font-size: 11px;
+    }
+
+    /* Ainda menor no tablet */
+    .table-container table th,
+    .table-container table td {
+        padding: 6px 4px;
+    }
+
+    .card,
+    .card-edit-mass {
+        width: 100%;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .table-container table {
+        min-width: 100%;
+    }
+
+    .button-send {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* SELECT com a mesma aparência dos inputs */
+select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: white;
+    font-size: 15px;
+    font-family: inherit;
+    height: 40px;
+    cursor: pointer;
+}
+
+/* Para manter o mesmo comportamento visual ao focar */
+select:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 1px #1a73e8;
+}
+
+/* =========================================
+   AUTOCOMPLETE (ESTILO GOOGLE)
+========================================= */
+.autocomplete-items {
+    position: absolute; /* É isso que faz ela flutuar por cima da tabela! */
+    z-index: 999;       /* Garante que fique acima de qualquer outro elemento */
+    top: 100%;          /* Cola exatamente embaixo do input */
+    left: 0;
+    right: 0;
+    max-height: 250px;  /* Altura máxima antes de criar rolagem */
+    overflow-y: auto;
+    background-color: #ffffff; /* Fundo branco para tapar a tabela */
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15); /* Sombra para dar o efeito flutuante */
+}
+
+/* Cada linha da lista */
+.autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 13px;
+    color: #333;
+}
+
+/* Quando passa o mouse por cima */
+.autocomplete-items div:hover {
+    background-color: #f1f5f9;
+    color: #00BEDD; /* Usando o azul do seu padrão */
+}

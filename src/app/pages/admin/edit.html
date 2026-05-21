@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edição Massiva - Acessos</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="menu" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <a href="/" class="menu-home" style="margin-left: 0;">Home</a>
+
+            {% if session.userId %}
+            <a href="/admin/edit" class="menu-home">Edição Massiva</a>
+            {% endif %}
+        </div>
+
+        <div style="margin-right: 30px; display: flex; align-items: center; gap: 15px;">
+            {% if session.userId %}
+            <span style="color: #00BEDD; font-weight: bold; font-size: 14px;">
+                <i class="fa-solid fa-user"></i> {{ session.userName }}
+            </span>
+
+            <form action="/logout" method="POST" style="margin: 0; padding: 0;">
+                <button type="submit"
+                    style="background: none; color: #e5e7eb; border: none; padding: 0; cursor: pointer; font-size: 14px; font-family: inherit; font-weight: 500;"
+                    onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#e5e7eb'">
+                    Sair <i class="fa-solid fa-right-from-bracket" style="font-size: 12px; margin-left: 4px;"></i>
+                </button>
+            </form>
+            {% else %}
+            <a href="/login" class="menu-home"><i class="fa-solid fa-lock"
+                    style="font-size: 12px; margin-right: 4px;"></i> Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- <nav class="menu">
+        <a href="/" class="menu-home">Home</a>
+        <a href="/admin/edit" class="menu-home">Edição Massiva</a>
+    </nav> -->
+
+    <div class="card">
+        <div class="header-page">
+            <h2>Edição Massiva de Acessos</h2>
+        </div>
+
+        <hr>
+
+        <div class="row" style="margin-bottom: 5px;">
+            <div class="field" style="flex: none;"> <label>Filtrar por Status na Tabela:</label>
+                <div class="radio" style="gap: 20px; flex-wrap: wrap; justify-content: flex-start; width: fit-content;">
+                    <label><input type="checkbox" class="status-filter" value="SIM" checked> SIM</label>
+                    <label><input type="checkbox" class="status-filter" value="NÃO" checked> NÃO</label>
+                    <label><input type="checkbox" class="status-filter" value="PENDENTE" checked> PENDENTE</label>
+                    <label><input type="checkbox" class="status-filter" value="SOLICITADO" checked> SOLICITADO</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="field data">
+                <label for="dataInicio">Data Início</label>
+                <input type="date" id="dataInicio" name="dataInicio" value="2026-04-01">
+            </div>
+
+            <div class="field data">
+                <label for="dataFim">Data Fim</label>
+                <input type="date" id="dataFim" name="dataFim" value="2026-07-30">
+            </div>
+
+            <div class="field" style="position: relative;">
+                <label for="buscaNome">Buscar por Nome</label>
+                <input type="text" id="buscaNome" name="buscaTermo" placeholder="Ex: Nome, CPF ou Ticket..."
+                    autocomplete="off" value="{{ buscaTermoAtual }}">
+
+                <div id="autocomplete-list" class="autocomplete-items"></div>
+            </div>
+
+            <div class="field" style="flex: none;">
+                <button type="button" class="button-send">Filtrar</button>
+            </div>
+        </div>
+
+        <div class="card-edit-mass">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;">
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th>TICKET</th>
+                            <th>NOME</th>
+                            <th>CPF</th>
+                            <th>EMPRESA</th>
+                            <th>DATA DO ACESSO</th>
+                            <th>DIAS</th>
+                            <th>DATA FINAL</th>
+                            <th>VEÍCULO?</th>
+                            <th>AUTORIZADO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for acesso in acessos %}
+                        <tr>
+                            <td style="text-align: center;">
+                                <input type="checkbox" class="row-checkbox" value="{{ acesso.ticket }}">
+                            </td>
+                            <td>{{ acesso.ticket }}</td>
+                            <td>{{ acesso.nome }}</td>
+                            <td>{{ acesso.numero_doc }}</td>
+                            <td>{{ acesso.empresa }}</td>
+                            <td>{{ acesso.data_do_acesso }}</td>
+                            <td>{{ acesso.qtd_dias }}</td>
+                            <td>{{ acesso.data_limite }}</td>
+                            <td>
+                                {% if acesso.com_veiculo %}
+                                Sim
+                                {% else %}
+                                Não
+                                {% endif %}
+                            </td>
+                            <td class="autorizado 
+                            {{ acesso.autorizado 
+                                | lower 
+                                | replace('ã','a') 
+                                | replace('á','a') 
+                                | replace('â','a') 
+                                | replace(' ', '-') 
+                            }}">
+                                {{ acesso.autorizado }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-actions">
+                <select name="autorizado" id="status_select">
+                    <option value="SIM" selected>SIM</option>
+                    <option value="NÃO">NÃO</option>
+                    <option value="PENDENTE">PENDENTE</option>
+                </select>
+
+                <button class="button-send" style="width: auto; padding: 12px 25px;"
+                    onclick="editarSelecionados()">Editar
+                    Selecionados</button>
+            </div>
+        </div>
+
+        <script src="/scripts/script.js"></script>
+</body>
+
+</html>
