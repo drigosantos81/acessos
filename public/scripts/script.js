@@ -144,38 +144,81 @@ document.addEventListener('DOMContentLoaded', function () {
     // -----------------------------
     if (form) {
         form.addEventListener('submit', function (event) {
-            // Corrige fuso horário da data
-            if (dataInput && dataInput.value.includes('/')) {
-                const parts = dataInput.value.split('/');
-                if (parts.length === 3) {
-                    dataInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                }
-            }
+            let temErroVazio = false;
+            let temErroInvalido = false;
+            let mensagemInvalida = "";
 
-            // Validação visual de campos vazios
+            // A) VALIDAÇÃO DE CAMPOS VAZIOS (Borda Vermelha)
             const camposObrigatorios = form.querySelectorAll('[required]');
-            let temErro = false;
-
+            
             camposObrigatorios.forEach(campo => {
                 if (campo.value.trim() === "") {
                     campo.classList.add('input-error');
-                    temErro = true;
+                    temErroVazio = true;
                 }
             });
 
-            if (temErro) {
-                event.preventDefault(); // Impede o envio do form
+            // B) VALIDAÇÃO DE TELEFONE (Borda Amarela) - Mínimo 10 dígitos
+            const inputTelefone = document.getElementById('telefone_input');
+            if (inputTelefone && inputTelefone.value.trim() !== "") {
+                const numTelefone = inputTelefone.value.replace(/\D/g, ''); // Tira a máscara
+                if (numTelefone.length < 10) {
+                    inputTelefone.classList.add('input-warning');
+                    temErroInvalido = true;
+                    mensagemInvalida = "O telefone deve ter pelo menos 10 dígitos com o DDD.";
+                }
+            }
+
+            // C) VALIDAÇÃO DE DATA (Borda Amarela) - Verifica o Ano
+            if (dataInput && dataInput.value.trim() !== "") {
+                const parts = dataInput.value.split('/');
+                if (parts.length === 3) {
+                    const ano = parseInt(parts[2], 10);
+                    if (ano < 2024 || ano > 2100) {
+                        dataInput.classList.add('input-warning');
+                        temErroInvalido = true;
+                        mensagemInvalida = "A data informada é inválida. Verifique o ano.";
+                    }
+                }
+            }
+
+            // D) SE HOUVER ERRO NO JS, GERA A FAIXA E IMPEDE O RECARREGAMENTO
+            if (temErroVazio || temErroInvalido) {
+                event.preventDefault(); // 🛑 TRAVA AQUI!
+
+                // Remove faixas antigas para não empilhar
+                const msgAntigas = document.querySelectorAll('.messages');
+                msgAntigas.forEach(m => m.remove());
+
+                const divMsg = document.createElement('div');
+                divMsg.classList.add('messages');
+
+                if (temErroVazio) {
+                    divMsg.classList.add('error');
+                    divMsg.textContent = "Existem campos obrigatórios vazios.";
+                } else if (temErroInvalido) {
+                    divMsg.classList.add('warning');
+                    divMsg.textContent = mensagemInvalida;
+                }
+
+                document.body.prepend(divMsg); // Joga a faixa na tela
+
+            } else {
+                // E) SE PASSAR TUDO NO JS, AJUSTA A DATA E MANDA PRO BACKEND
+                if (dataInput && dataInput.value.includes('/')) {
+                    const parts = dataInput.value.split('/');
+                    dataInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
             }
         });
 
-        // Remove borda vermelha ao digitar
+        // Limpa as bordas vermelhas e amarelas ao voltar a digitar
         const todosInputs = form.querySelectorAll('input, select');
         todosInputs.forEach(campo => {
-            campo.addEventListener('input', () => campo.classList.remove('input-error'));
-            campo.addEventListener('change', () => campo.classList.remove('input-error'));
+            campo.addEventListener('input', () => campo.classList.remove('input-error', 'input-warning'));
+            campo.addEventListener('change', () => campo.classList.remove('input-error', 'input-warning'));
         });
     }
-
     // ==========================================
     // LÓGICA DA PÁGINA INICIAL (Tabela Autorizados)
     // ==========================================

@@ -12,6 +12,10 @@
 </head>
 
 <body>
+	{% if success %}
+        <div class="messages success">{{ success }}</div>
+    {% endif %}
+	
 	<div class="menu" style="display: flex; justify-content: space-between; align-items: center;">
 		<div>
 			<a href="/" class="menu-home" style="margin-left: 0;">Home</a>

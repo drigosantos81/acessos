@@ -33,7 +33,7 @@
 
                 <div class="field grow">
                     <label>Nome *</label>
-                    <input type="text" name="nome" required>
+                    <input type="text" name="nome" value="{{ acesso.nome }}" required>
                 </div>
 
                 <div class="field documento">
@@ -57,6 +57,8 @@
                         autocomplete="off"
                         maxlength="20"
                         inputmode="text"
+                        value="{{ acesso.numero_doc }}"
+                        required
                     >
                 </div>
 
@@ -67,7 +69,7 @@
 
                 <div class="field empresa">
                     <label>Empresa</label>
-                    <input type="text" name="empresa">
+                    <input type="text" name="empresa" value="{{ acesso.empresa }}" required>
                 </div>
 
                 <div class="field data">
@@ -79,6 +81,8 @@
                         placeholder="00/00/0000"
                         maxlength="10"
                         inputmode="numeric"
+                        value="{{ acesso.data_do_acesso }}"
+                        required
                     >
                 </div>
 
@@ -89,6 +93,8 @@
                         name="qtd_dias"
                         id="qtd_dias_input"
                         maxlength="2"
+                        value="{{ acesso.qtd_dias }}"
+                        required
                     >
                 </div>
 

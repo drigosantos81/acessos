@@ -522,7 +522,16 @@ select:focus {
     background-color: #01b169;
 }
 
+.messages.warning { 
+    background-color: #f59e0b; /* Amarelo/Laranja padrão de Alerta */
+}
+
 /* Classe para pintar a borda de vermelho */
 .input-error {
     border: 2px solid #e83f5b !important;
+}
+
+/* Classe para pintar a borda de amarelo */
+.input-warning { 
+    border: 2px solid #f59e0b !important; 
 }
