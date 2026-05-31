@@ -139,22 +139,65 @@ export default {
         }
     },
 
-    // Adicione isto no arquivo model.ts
-    async getNextTicket(): Promise<number> {
+    async getNextTicket() {
         try {
-            const query = `SELECT MAX(CAST(ticket AS INTEGER)) as max_ticket FROM acesso`;
-            const result = await db.query(query);
+            // O bloqueio agora procura exatamente pela letra 'M-'
+            const query = `
+                SELECT MAX(CAST(ticket AS INTEGER)) as max_ticket 
+                FROM acesso 
+                WHERE ticket NOT LIKE 'M-%'
+            `;
 
-            // Se o banco estiver vazio, o MAX retorna nulo, então começamos com o ticket 1
-            const maxTicket = result.rows[0].max_ticket;
-            return maxTicket ? maxTicket + 1 : 1;
+            const results = await db.query(query);
+            const maxTicket = results?.rows[0]?.max_ticket || 0;
+
+            return Number(maxTicket) + 1;
         } catch (error) {
-            console.log('Erro ao buscar próximo ticket:', error);
-            // Em caso de erro grave, tentamos gerar um ticket baseado no timestamp 
-            // para não travar o sistema ou duplicar com um antigo
-            return Date.now();
+            console.error("Erro no getNextTicket:", error);
+            return 1;
         }
     },
+
+    // Busca no banco QUAIS datas específicas já estão cadastradas para um documento
+    async getExistingDates(numero_doc: string, datasSolicitadas: string[]) {
+        try {
+            if (datasSolicitadas.length === 0) return [];
+
+            // Cria as interrogações de forma dinâmica (ex: ?, ?, ?)
+            const placeholders = datasSolicitadas.map(() => '?').join(',');
+
+            const query = `
+                SELECT data_do_acesso 
+                FROM acesso 
+                WHERE numero_doc = ? AND data_do_acesso IN (${placeholders})
+            `;
+
+            // Junta o CPF com a lista de datas
+            const values = [numero_doc, ...datasSolicitadas];
+            const results = await db.query(query, values);
+
+            // Retorna um array só com as datas encontradas (ex: ['2026-06-04'])
+            return results?.rows.map((row: any) => row.data_do_acesso) || [];
+        } catch (error) {
+            console.error("Erro no getExistingDates:", error);
+            return [];
+        }
+    },
+    // async getNextTicket(): Promise<number> {
+    //     try {
+    //         const query = `SELECT MAX(CAST(ticket AS INTEGER)) as max_ticket FROM acesso`;
+    //         const result = await db.query(query);
+
+    //         // Se o banco estiver vazio, o MAX retorna nulo, então começamos com o ticket 1
+    //         const maxTicket = result.rows[0].max_ticket;
+    //         return maxTicket ? maxTicket + 1 : 1;
+    //     } catch (error) {
+    //         console.log('Erro ao buscar próximo ticket:', error);
+    //         // Em caso de erro grave, tentamos gerar um ticket baseado no timestamp 
+    //         // para não travar o sistema ou duplicar com um antigo
+    //         return Date.now();
+    //     }
+    // },
 
     // Comando POST para novo cadastro de solicitação de acesso
     post(data: Acesso, userId: number) {
@@ -207,5 +250,4 @@ export default {
             console.log('Erro no model Acessos.post:', error);
         }
     }
-
 }

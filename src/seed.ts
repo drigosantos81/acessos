@@ -14,8 +14,8 @@ async function createSuperAdmin() {
             VALUES (?, ?, ?, ?)
         `;
         const values = [
-            'Camile Jesus',
-            'camile.jesus@wilsonsons.com.br', // Você pode mudar o email que preferir
+            'Anderson Santos',
+            'anderson.santos@wilsonsons.com.br', // Você pode mudar o email que preferir
             passwordHash,
             0
         ];

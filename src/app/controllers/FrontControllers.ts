@@ -43,12 +43,23 @@ export default {
 				return acesso;
 			});
 
-			// Log para conferir se o primeiro registro está correto agora
+			// Log para conferir se o primeiro registro está correto
 			if (acessos.length > 0) {
 				console.log("Exemplo de acesso formatado:", acessos[0]);
 			}
 
-			return res.render('index', { acessos });
+			// ==========================================
+            // LER O SINAL DA URL PARA EXIBIR A MENSAGEM
+            // ==========================================
+            let successMsg = null;
+            if (req.query.success === '1') {
+                successMsg = "Acesso agendado com sucesso!";
+            } else if (req.query.success === '2') {
+                successMsg = "Agendado! Alguns dias já existentes foram ignorados.";
+            }
+
+            // Passa a mensagem de sucesso (se houver) para o Nunjucks
+            return res.render('index', { acessos, success: successMsg });
 
 		} catch (error) {
 			console.log("Erro no controller Acessos.index:", error);
@@ -112,10 +123,23 @@ export default {
 			const body = req.body as any;
 			console.log("Controller POST body ->", body);
 
+			// ==========================================
+			// REGRA 1: VALIDAÇÃO SERVER-SIDE (Faixa Vermelha)
+			// ==========================================
+			const camposObrigatorios = ["nome", "doc_nacional", "numero_doc", "data_do_acesso", "qtd_dias"];
+			for (const campo of camposObrigatorios) {
+				if (!body[campo] || String(body[campo]).trim() === "") {
+					return res.render("form", {
+						acesso: body,
+						error: "Por favor, preencha todos os campos obrigatórios principais."
+					});
+				}
+			}
+
 			// 1) Normalizações e validações
 			const doc = String(body.doc_nacional).trim().toUpperCase();
 			if (!["CPF", "PASSAPORTE", "RG"].includes(doc)) {
-				return res.status(400).json({ error: "Tipo de documento inválido." });
+				return res.render("form", { acesso: body, error: "Tipo de documento inválido." });
 			}
 			body.doc_nacional = doc;
 
@@ -123,7 +147,7 @@ export default {
 			if (doc === "CPF") {
 				const digits = numero.replace(/\D/g, "");
 				if (digits.length !== 11) {
-					return res.status(400).json({ error: "CPF inválido." });
+					return res.render("form", { acesso: body, error: "O CPF informado é inválido." });
 				}
 				body.numero_doc = digits;
 			} else {
@@ -145,15 +169,17 @@ export default {
 			}
 
 			const [ano, mes, dia] = inputDate.split('-').map(Number);
-			if (!ano || !mes || !dia) {
-				return res.status(400).json({ error: "Data do acesso inválida." });
+
+			// VERIFICA SE O ANO É VÁLIDO (Ex: 226 vai ser bloqueado)
+			if (!ano || !mes || !dia || ano < 2024 || ano > 2100) {
+				return res.render("form", {
+					acesso: body,
+					error: "Data de acesso inválida. Verifique o ano preenchido."
+				});
 			}
 
-			// Criamos a data cravada no MEIO-DIA (12:00). 
-			// Assim o Brasil (-3h) nunca vai empurrar pro dia anterior!
 			const dataBaseObj = new Date(ano, mes - 1, dia, 12, 0, 0);
 
-			// Função ajudante para devolver no formato AAAA-MM-DD
 			const formatYMD = (dateObj: Date) => {
 				const y = dateObj.getFullYear();
 				const m = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -161,31 +187,20 @@ export default {
 				return `${y}-${m}-${d}`;
 			};
 
-			body.data_do_acesso = formatYMD(dataBaseObj);
-
 			body.qtd_dias = Number(body.qtd_dias);
 			if (!Number.isInteger(body.qtd_dias) || body.qtd_dias < 1) {
-				return res.status(400).json({ error: "Quantidade de dias inválida." });
+				return res.render("form", { acesso: body, error: "Quantidade de dias inválida." });
 			}
 
-			// CÁLCULO DA DATA LIMITE (Data de Hoje + (Qtd Dias - 1))
 			const dataLimiteObj = new Date(dataBaseObj.getTime());
 			dataLimiteObj.setDate(dataLimiteObj.getDate() + (body.qtd_dias - 1));
 			const dataLimiteStr = formatYMD(dataLimiteObj);
-			// ==========================================
 
-			body.com_veiculo = ["sim", "true", "1", "s"].includes(
-				String(body.com_veiculo).toLowerCase()
-			);
-
-			if (body.tipo_veiculo) {
-				body.tipo_veiculo = String(body.tipo_veiculo).toUpperCase();
-			}
+			body.com_veiculo = ["sim", "true", "1", "s"].includes(String(body.com_veiculo).toLowerCase());
+			if (body.tipo_veiculo) body.tipo_veiculo = String(body.tipo_veiculo).toUpperCase();
 
 			let portoes = "2";
-			if (body.com_veiculo && body.tipo_veiculo?.includes("CARGA")) {
-				portoes = "3";
-			}
+			if (body.com_veiculo && body.tipo_veiculo?.includes("CARGA")) portoes = "3";
 			body.portoes = portoes;
 			body.visita_a = "TECON SALVADOR";
 
@@ -197,17 +212,15 @@ export default {
 			body.empresa_id = body.empresa_id ? Number(body.empresa_id) : null;
 			body.centro_custo_id = body.centro_custo_id ? Number(body.centro_custo_id) : null;
 
-			// Busca próximo ticket
 			const novoTicketId = await Acessos.getNextTicket();
 
-			// 2) Montar objeto base (agora possui data_limite)
-			const base: any = { // <-- Pode usar ': any' se der conflito na Interface original
+			// 2) Montar objeto base
+			const base: any = {
 				ticket: novoTicketId.toString(),
 				nome: body.nome,
 				doc_nacional: body.doc_nacional,
 				numero_doc: body.numero_doc,
 				empresa: body.empresa || null,
-				data_do_acesso: body.data_do_acesso,
 				qtd_dias: body.qtd_dias,
 				visita_a: body.visita_a,
 				com_veiculo: body.com_veiculo,
@@ -227,28 +240,45 @@ export default {
 				user_id: userId
 			};
 
-			// 3) INSERIR O PRIMEIRO REGISTRO
-			await Acessos.post(base, userId);
-
-			// 4) INSERIR OS DEMAIS REGISTROS (QTD_DIAS)
-			for (let i = 1; i < base.qtd_dias; i++) {
-				// Usando setDate para avançar dias (seguro contra fuso e ano bissexto)
+			// ==========================================
+			// REGRA 3: LÓGICA INTELIGENTE DE DATAS
+			// ==========================================
+			const datasPedidas: string[] = [];
+			for (let i = 0; i < body.qtd_dias; i++) {
 				const novaDataObj = new Date(dataBaseObj.getTime());
 				novaDataObj.setDate(novaDataObj.getDate() + i);
+				datasPedidas.push(formatYMD(novaDataObj));
+			}
 
+			const datasExistentes = await Acessos.getExistingDates(body.numero_doc, datasPedidas);
+			const datasParaInserir = datasPedidas.filter(data => !datasExistentes.includes(data));
+
+			if (datasParaInserir.length === 0) {
+				return res.render("form", {
+					acesso: body,
+					error: `Acesso negado: O documento ${body.numero_doc} já possui cadastro para todos os dias solicitados.`
+				});
+			}
+
+			for (const dataValida of datasParaInserir) {
 				const registro = {
 					...base,
-					data_do_acesso: formatYMD(novaDataObj) // Substitui a data do acesso, mas MANTÉM a data_limite igual
+					data_do_acesso: dataValida
 				};
-
 				await Acessos.post(registro, userId);
 			}
 
-			return res.redirect("/");
+			// REDIRECIONA PARA HOME ENVIANDO SINAL DE SUCESSO
+			let redirectUrl = "/?success=1";
+			if (datasParaInserir.length < datasPedidas.length) {
+				redirectUrl = "/?success=2";
+			}
+
+			return res.redirect(redirectUrl);
 
 		} catch (error) {
 			console.log("Erro no controller Acessos.post:", error);
-			return res.status(500).json({ error: "Erro ao salvar acesso." });
+			return res.render("form", { acesso: req.body, error: "Erro inesperado ao salvar acesso." });
 		}
 	},
 
@@ -281,6 +311,7 @@ export default {
 			});
 
 			return res.render('admin/edit', { acessos, buscaTermoAtual: buscaTermo || '' });
+			
 		} catch (error) {
 			console.log("Erro no showEdit:", error);
 		}
@@ -294,7 +325,9 @@ export default {
 
 			// Executa o searchGlobal (que aplica a ordenação Alfabética + Ticket)
 			const results = await Acessos.searchGlobal(termo);
+
 			return res.json(results?.rows || []);
+
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json([]);

@@ -49,9 +49,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const veiculoRadios = document.querySelectorAll('input[name="com_veiculo"]');
     const placaField = document.getElementById('placaField');
     const tipoField = document.getElementById('tipoField');
+    const inputPlaca = document.getElementById('placa'); // Garantir que ID seja "placa" no HTML
+    const radiosTipoVeiculo = document.querySelectorAll('input[name="tipo_veiculo"]');
 
     // -----------------------------
-    // 1. Mostrar/Ocultar Placa e Tipo
+    // 1. Mostrar/Ocultar Placa e Tipo + Limpeza (CORRIGIDO)
     // -----------------------------
     function toggleVeiculo() {
         const selecionado = document.querySelector('input[name="com_veiculo"]:checked');
@@ -63,6 +65,10 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             placaField.classList.add('hidden');
             tipoField.classList.add('hidden');
+            
+            // LIMPEZA DOS CAMPOS AO CLICAR EM "NÃO"
+            if (inputPlaca) inputPlaca.value = '';
+            radiosTipoVeiculo.forEach(r => r.checked = false);
         }
     }
 
@@ -114,9 +120,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // -----------------------------
-    // 4. Máscara de TELEFONE (CORRIGIDA)
+    // 4. Máscara de TELEFONE
     // -----------------------------
-    // Adicionada a máscara no telefone principal e no contato interno (se houver)
     [telefoneInput, contatoTeconInput].forEach(input => {
         if (input) {
             input.addEventListener('input', function () {
@@ -135,17 +140,39 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // -----------------------------
-    // 6. CORREÇÃO DA DATA AO ENVIAR O FORMULÁRIO
+    // 6. VALIDAÇÃO VISUAL AO ENVIAR O FORMULÁRIO (CORRIGIDO)
     // -----------------------------
-    if (form && dataInput) {
-        form.addEventListener('submit', function (e) {
-            // Antes de enviar, pega o "11/05/2026" e vira "2026-05-11" pro banco de dados não inverter.
-            if (dataInput.value.includes('/')) {
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            // Corrige fuso horário da data
+            if (dataInput && dataInput.value.includes('/')) {
                 const parts = dataInput.value.split('/');
                 if (parts.length === 3) {
                     dataInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
                 }
             }
+
+            // Validação visual de campos vazios
+            const camposObrigatorios = form.querySelectorAll('[required]');
+            let temErro = false;
+
+            camposObrigatorios.forEach(campo => {
+                if (campo.value.trim() === "") {
+                    campo.classList.add('input-error');
+                    temErro = true;
+                }
+            });
+
+            if (temErro) {
+                event.preventDefault(); // Impede o envio do form
+            }
+        });
+
+        // Remove borda vermelha ao digitar
+        const todosInputs = form.querySelectorAll('input, select');
+        todosInputs.forEach(campo => {
+            campo.addEventListener('input', () => campo.classList.remove('input-error'));
+            campo.addEventListener('change', () => campo.classList.remove('input-error'));
         });
     }
 
@@ -156,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     autorizados.forEach(td => {
         const valor = td.textContent.trim().toUpperCase();
-        td.classList.remove("sim", "nao", "não", "pendente", "solicitado" /*"agendado"*/);
+        td.classList.remove("sim", "nao", "não", "pendente", "solicitado");
 
         let icon = "";
 
@@ -181,8 +208,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// ... (seu código de máscaras e formatações acima) ...
-
 // ==========================================
 // SELECIONAR TODOS OS CHECKBOXES (Protegido)
 // ==========================================
@@ -190,7 +215,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectAllCheckbox = document.getElementById('selectAll');
     const rowCheckboxes = document.querySelectorAll('.row-checkbox');
 
-    // Só adiciona o evento se o checkbox "selectAll" existir na página atual
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', function () {
             rowCheckboxes.forEach(checkbox => {
@@ -209,7 +233,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const autocompleteList = document.getElementById('autocomplete-list');
     const tableRows = document.querySelectorAll('.table-container tbody tr');
 
-    // Filtro local rápido para os Checkboxes de Status
     function filtrarTabelaLocalmente() {
         if (tableRows.length === 0) return;
 
@@ -251,7 +274,6 @@ document.addEventListener('DOMContentLoaded', function () {
         checkbox.addEventListener('change', filtrarTabelaLocalmente);
     });
 
-    // Motor do Autocomplete
     if (buscaInput && autocompleteList) {
         buscaInput.addEventListener('input', async function () {
             const valorDigitado = this.value.trim();
@@ -268,7 +290,6 @@ document.addEventListener('DOMContentLoaded', function () {
             filtrarTabelaLocalmente();
 
             try {
-                // Busca na API (retorna ordenado por Nome Alfabético e Ticket)
                 const resposta = await fetch(`/api/admin/search-nomes?q=${encodeURIComponent(valorDigitado)}`);
                 const registros = await resposta.json();
 
@@ -287,10 +308,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     const textoNome = reg.nome.replace(regex, "<strong>$1</strong>");
                     const textoCPF = cpfFormatado.replace(regex, "<strong>$1</strong>");
 
-                    // Monta o item visual da lista suspensa
                     item.innerHTML = `<span style="color:#00BEDD; font-weight:bold;">[${textoTicket}]</span> ${textoNome} <span style="color:#888; font-size:11px;">(${textoCPF})</span>`;
 
-                    // Ao clicar, recarrega passando o Ticket. O backend vai ler o Ticket e ordenar a tela por Autorizado/Data/Ticket!
                     item.addEventListener('click', function () {
                         window.location.href = `/admin/edit?buscaTermo=${encodeURIComponent(reg.ticket)}`;
                     });
@@ -312,9 +331,8 @@ document.addEventListener('DOMContentLoaded', function () {
 // FUNÇÃO DE EDIÇÃO MASSIVA (Disponível globalmente)
 // ==========================================
 window.editarSelecionados = async function () {
-    console.log("O botão de Editar Selecionados foi clicado!"); // Teste de vida
+    console.log("O botão de Editar Selecionados foi clicado!");
 
-    // 1. Coleta os tickets marcados
     const rowCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selecionados = Array.from(rowCheckboxes).map(cb => cb.value);
 
@@ -323,7 +341,6 @@ window.editarSelecionados = async function () {
         return;
     }
 
-    // 2. Pega o status selecionado (SIM, NÃO, PENDENTE)
     const statusSelect = document.getElementById('status_select');
     if (!statusSelect) {
         alert('Erro: O campo de status não foi encontrado na tela.');
@@ -331,10 +348,8 @@ window.editarSelecionados = async function () {
     }
     const novoStatus = statusSelect.value;
 
-    // 3. Confirmação de segurança
     if (confirm(`Deseja alterar o status de ${selecionados.length} agendamento(s) para "${novoStatus}"?`)) {
         try {
-            // 4. Envia para o Backend
             const response = await fetch('/admin/edit', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -345,7 +360,7 @@ window.editarSelecionados = async function () {
             });
 
             if (response.ok) {
-                window.location.reload(); // Recarrega a página se der certo
+                window.location.reload();
             } else {
                 alert('Erro ao atualizar os registros no banco de dados.');
             }

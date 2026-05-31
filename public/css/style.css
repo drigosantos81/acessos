@@ -246,7 +246,7 @@ hr {
     justify-content: end;
     gap: 10px;
     margin-top: 25px;
-    padding: 0 10px 15px 0 ;
+    padding: 0 10px 15px 0;
 }
 
 .button-cancel {
@@ -444,18 +444,24 @@ select:focus {
    AUTOCOMPLETE (ESTILO GOOGLE)
 ========================================= */
 .autocomplete-items {
-    position: absolute; /* É isso que faz ela flutuar por cima da tabela! */
-    z-index: 999;       /* Garante que fique acima de qualquer outro elemento */
-    top: 100%;          /* Cola exatamente embaixo do input */
+    position: absolute;
+    /* É isso que faz ela flutuar por cima da tabela! */
+    z-index: 999;
+    /* Garante que fique acima de qualquer outro elemento */
+    top: 100%;
+    /* Cola exatamente embaixo do input */
     left: 0;
     right: 0;
-    max-height: 250px;  /* Altura máxima antes de criar rolagem */
+    max-height: 250px;
+    /* Altura máxima antes de criar rolagem */
     overflow-y: auto;
-    background-color: #ffffff; /* Fundo branco para tapar a tabela */
+    background-color: #ffffff;
+    /* Fundo branco para tapar a tabela */
     border: 1px solid #ddd;
     border-top: none;
     border-radius: 0 0 6px 6px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.15); /* Sombra para dar o efeito flutuante */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    /* Sombra para dar o efeito flutuante */
 }
 
 /* Cada linha da lista */
@@ -471,5 +477,52 @@ select:focus {
 /* Quando passa o mouse por cima */
 .autocomplete-items div:hover {
     background-color: #f1f5f9;
-    color: #00BEDD; /* Usando o azul do seu padrão */
+    color: #00BEDD;
+    /* Usando o azul do seu padrão */
+}
+
+/* =========================================
+   ALERTAS VISUAIS (Padrão Foodfy)
+========================================= */
+@keyframes messages {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.messages {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    position: fixed;
+    /* Fixed garante que fique no topo da tela */
+    width: 250px;
+    height: 75px;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%); /* Centraliza na tela */
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Sombra elegante */
+
+    z-index: 1000;
+    color: white;
+    font-weight: bold;
+    animation: messages 2.5s ease-in-out forwards;
+    animation-delay: 2.5s;
+    /* Some após 2.5 segundos */
+}
+
+.messages.error {
+    background-color: #e83f5b;
+}
+
+.messages.success {
+    background-color: #01b169;
+}
+
+/* Classe para pintar a borda de vermelho */
+.input-error {
+    border: 2px solid #e83f5b !important;
 }

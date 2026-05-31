@@ -10,6 +10,14 @@
 </head>
 
 <body>
+    {% if error %}
+        <div class="messages error">{{ error }}</div>
+    {% endif %}
+
+    {% if success %}
+        <div class="messages success">{{ success }}</div>
+    {% endif %}
+
     <div class="menu">
         <a href="/" class="menu-home">Home</a>
     </div>
@@ -18,7 +26,7 @@
 
         <h2>Cadastro de Acesso</h2>
 
-        <form id="meuForm" method="POST" action="/">
+        <form id="meuForm" method="POST" action="/" novalidate>
 
             <!-- linha 1 -->
             <div class="row-name">
@@ -105,15 +113,15 @@
                     <label>Com Veículo</label>
 
                     <div class="radio">
-                        <label><input type="radio" name="com_veiculo" value="sim"> SIM</label>
-                        <label><input type="radio" name="com_veiculo" value="nao" checked> NÃO</label>
+                        <label><input type="radio" name="com_veiculo" id="veiculo_sim" value="sim"> SIM</label>
+                        <label><input type="radio" name="com_veiculo" id="veiculo_nao" value="nao" checked> NÃO</label>
                     </div>
 
                 </div>
 
                 <div class="field placa hidden" id="placaField">
                     <label>Placa</label>
-                    <input type="text" name="placa">
+                    <input type="text" name="placa" id="placa">
                 </div>
 
                 <div class="field tipo hidden" id="tipoField">
