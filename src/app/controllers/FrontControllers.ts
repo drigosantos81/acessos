@@ -129,6 +129,20 @@ export default {
 			}
 
 			// ==========================================
+			// BACKEND CHECK 1.5: VEÍCULO OBRIGATÓRIO (COLE AQUI!)
+			// ==========================================
+			const temVeiculo = ["sim", "true", "1", "s"].includes(String(body.com_veiculo).toLowerCase());
+			if (temVeiculo) {
+				// Se marcou SIM, a placa e o tipo não podem estar vazios
+				if (!body.placa || String(body.placa).trim() === "" || !body.tipo_veiculo) {
+					return res.render("form", {
+						acesso: body,
+						error: "Erro no servidor: Placa e Tipo de Veículo são obrigatórios quando selecionado 'SIM'."
+					});
+				}
+			}
+
+			// ==========================================
 			// BACKEND CHECK 2: CPF INVÁLIDO
 			// ==========================================
 			const doc = String(body.doc_nacional).trim().toUpperCase();
@@ -228,27 +242,27 @@ export default {
 			// INSERÇÃO FINAL
 			const novoTicketId = await Acessos.getNextTicket();
 			const base: any = {
-				ticket: novoTicketId.toString(), 
-				nome: body.nome, 
+				ticket: novoTicketId.toString(),
+				nome: body.nome,
 				doc_nacional: body.doc_nacional,
-				numero_doc: body.numero_doc, 
-				empresa: body.empresa || null, 
+				numero_doc: body.numero_doc,
+				empresa: body.empresa || null,
 				qtd_dias: body.qtd_dias,
-				visita_a: body.visita_a, 
-				com_veiculo: body.com_veiculo, 
+				visita_a: body.visita_a,
+				com_veiculo: body.com_veiculo,
 				placa: body.placa || null,
-				tipo_veiculo: body.tipo_veiculo || null, 
-				justificativa: body.justificativa, 
+				tipo_veiculo: body.tipo_veiculo || null,
+				justificativa: body.justificativa,
 				portoes: body.portoes,
-				autorizado: body.autorizado || "SOLICITADO", 
+				autorizado: body.autorizado || "SOLICITADO",
 				empresa_id: body.empresa_id,
-				centro_custo_id: body.centro_custo_id, 
+				centro_custo_id: body.centro_custo_id,
 				data_solicitacao: body.data_solicitacao,
-				data_encerramento: body.data_encerramento, 
+				data_encerramento: body.data_encerramento,
 				updated_at: body.updated_at,
-				telefone: body.telefone || null, 
+				telefone: body.telefone || null,
 				tel_interno: body.tel_interno || null,
-				data_limite: dataLimiteStr, 
+				data_limite: dataLimiteStr,
 				user_id: userId
 			};
 

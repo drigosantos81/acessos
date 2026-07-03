@@ -46,35 +46,87 @@ document.addEventListener('DOMContentLoaded', function () {
     const telefoneInput = document.getElementById('telefone_input');
     const contatoTeconInput = document.getElementById('tel_interno_input');
 
+    // --- NOVOS CAMPOS EXCLUSIVOS DE VEÍCULO ---
     const veiculoRadios = document.querySelectorAll('input[name="com_veiculo"]');
     const placaField = document.getElementById('placaField');
     const tipoField = document.getElementById('tipoField');
-    const inputPlaca = document.getElementById('placa'); // Garantir que ID seja "placa" no HTML
+    const cnhField = document.getElementById('cnhField');
+    const catHabField = document.getElementById('catHabField');
+    const validadeCnhField = document.getElementById('validadeCnhField');
+
+    const inputPlaca = document.querySelector('input[name="placa"]');
     const radiosTipoVeiculo = document.querySelectorAll('input[name="tipo_veiculo"]');
+    const inputCnh = document.getElementById('cnh_input');
+    const inputCatHab = document.getElementById('cat_habilitacao_input');
+    const inputValidadeCnh = document.getElementById('validade_cnh_input');
 
     // -----------------------------
-    // 1. Mostrar/Ocultar Placa e Tipo + Limpeza (CORRIGIDO)
+    // 1. Mostrar/Ocultar Placa, Tipo e CNHs + Limpeza e Required Dinâmico
     // -----------------------------
     function toggleVeiculo() {
         const selecionado = document.querySelector('input[name="com_veiculo"]:checked');
-        if (!selecionado) return;
+
+        if (!selecionado || !placaField || !tipoField || !cnhField || !catHabField || !validadeCnhField) return;
 
         if (selecionado.value === 'sim') {
+            // EXIBE TODOS OS CAMPOS DE VEÍCULO NA MESMA LINHA
             placaField.classList.remove('hidden');
             tipoField.classList.remove('hidden');
+            cnhField.classList.remove('hidden');
+            catHabField.classList.remove('hidden');
+            validadeCnhField.classList.remove('hidden');
+
+            // ATIVA A OBRIGATORIEDADE EM NÍVEL FRONTEND
+            if (inputPlaca) inputPlaca.setAttribute('required', 'true');
+            if (inputCnh) inputCnh.setAttribute('required', 'true');
+            if (inputCatHab) inputCatHab.setAttribute('required', 'true');
+            if (inputValidadeCnh) inputValidadeCnh.setAttribute('required', 'true');
+            radiosTipoVeiculo.forEach(r => r.setAttribute('required', 'true'));
+
         } else {
+            // OCULTA TODOS OS CAMPOS
             placaField.classList.add('hidden');
             tipoField.classList.add('hidden');
-            
-            // LIMPEZA DOS CAMPOS AO CLICAR EM "NÃO"
-            if (inputPlaca) inputPlaca.value = '';
-            radiosTipoVeiculo.forEach(r => r.checked = false);
+            cnhField.classList.add('hidden');
+            catHabField.classList.add('hidden');
+            validadeCnhField.classList.add('hidden');
+
+            // LIMPA OS VALORES, CORES DE ERRO E REMOVE REQUISITOS
+            if (inputPlaca) { inputPlaca.value = ''; inputPlaca.removeAttribute('required'); inputPlaca.classList.remove('input-error', 'input-warning'); }
+            if (inputCnh) { inputCnh.value = ''; inputCnh.removeAttribute('required'); inputCnh.classList.remove('input-error', 'input-warning'); }
+            if (inputCatHab) { inputCatHab.value = ''; inputCatHab.removeAttribute('required'); inputCatHab.classList.remove('input-error', 'input-warning'); }
+            if (inputValidadeCnh) { inputValidadeCnh.value = ''; inputValidadeCnh.removeAttribute('required'); inputValidadeCnh.classList.remove('input-error', 'input-warning'); }
+
+            radiosTipoVeiculo.forEach(r => { r.checked = false; r.removeAttribute('required'); });
         }
     }
 
     if (veiculoRadios.length > 0) {
         toggleVeiculo();
-        veiculoRadios.forEach(r => r.addEventListener('change', toggleVeiculo));
+        veiculoRadios.forEach(radio => {
+            radio.addEventListener('change', toggleVeiculo);
+        });
+    }
+
+    // Forçar Letras Maiúsculas na categoria (A, B, AB, C, D, E)
+    if (inputCatHab) {
+        inputCatHab.addEventListener('input', function () {
+            this.value = this.value.toUpperCase().replace(/[^A-Z]/g, "");
+        });
+    }
+
+    // Aplicar máscara de data na validade da CNH
+    if (inputValidadeCnh) {
+        inputValidadeCnh.addEventListener('input', function () {
+            this.value = formatDate(this.value);
+        });
+    }
+
+    // Placa em maiúsculo com hífen automático
+    if (inputPlaca) {
+        inputPlaca.addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+        });
     }
 
     // -----------------------------
@@ -83,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function applyDocMask() {
         if (!docSelect || !numeroDocInput) return;
         const tipo = docSelect.value;
-        numeroDocInput.value = ""; // Limpa ao trocar
+        numeroDocInput.value = "";
 
         if (tipo === "CPF") {
             numeroDocInput.placeholder = "000.000.000-00";
@@ -140,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // -----------------------------
-    // 6. VALIDAÇÃO VISUAL AO ENVIAR O FORMULÁRIO (CORRIGIDO)
+    // 6. VALIDAÇÃO FRONTEND INTELIGENTE (SEM RECARREGAR)
     // -----------------------------
     if (form) {
         form.addEventListener('submit', function (event) {
@@ -148,9 +200,8 @@ document.addEventListener('DOMContentLoaded', function () {
             let temErroInvalido = false;
             let mensagemInvalida = "";
 
-            // A) VALIDAÇÃO DE CAMPOS VAZIOS (Borda Vermelha)
+            // A) VERIFICA CAMPOS VAZIOS (Required dinâmicos entram aqui automaticamente!)
             const camposObrigatorios = form.querySelectorAll('[required]');
-            
             camposObrigatorios.forEach(campo => {
                 if (campo.value.trim() === "") {
                     campo.classList.add('input-error');
@@ -158,18 +209,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            // B) VALIDAÇÃO DE TELEFONE (Borda Amarela) - Mínimo 10 dígitos
-            const inputTelefone = document.getElementById('telefone_input');
-            if (inputTelefone && inputTelefone.value.trim() !== "") {
-                const numTelefone = inputTelefone.value.replace(/\D/g, ''); // Tira a máscara
+            // B) VERIFICA TELEFONE INVÁLIDO
+            if (telefoneInput && telefoneInput.value.trim() !== "") {
+                const numTelefone = telefoneInput.value.replace(/\D/g, '');
                 if (numTelefone.length < 10) {
-                    inputTelefone.classList.add('input-warning');
+                    telefoneInput.classList.add('input-warning');
                     temErroInvalido = true;
                     mensagemInvalida = "O telefone deve ter pelo menos 10 dígitos com o DDD.";
                 }
             }
 
-            // C) VALIDAÇÃO DE DATA (Borda Amarela) - Verifica o Ano
+            // C) VERIFICA DATA DE ACESSO INVÁLIDA
             if (dataInput && dataInput.value.trim() !== "") {
                 const parts = dataInput.value.split('/');
                 if (parts.length === 3) {
@@ -182,11 +232,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            // D) SE HOUVER ERRO NO JS, GERA A FAIXA E IMPEDE O RECARREGAMENTO
-            if (temErroVazio || temErroInvalido) {
-                event.preventDefault(); // 🛑 TRAVA AQUI!
+            // D) VERIFICA DATA DE VALIDADE DA CNH INVÁLIDA
+            if (inputValidadeCnh && inputValidadeCnh.value.trim() !== "" && !validadeCnhField.classList.contains('hidden')) {
+                const parts = inputValidadeCnh.value.split('/');
+                if (parts.length === 3) {
+                    const ano = parseInt(parts[2], 10);
+                    if (ano < 2024 || ano > 2100) {
+                        inputValidadeCnh.classList.add('input-warning');
+                        temErroInvalido = true;
+                        mensagemInvalida = "A validade da CNH é inválida. Verifique o ano.";
+                    }
+                }
+            }
 
-                // Remove faixas antigas para não empilhar
+            // E) SE TEM ERRO, GERA FAIXA E TRAVA ENVIO
+            if (temErroVazio || temErroInvalido) {
+                event.preventDefault();
+
                 const msgAntigas = document.querySelectorAll('.messages');
                 msgAntigas.forEach(m => m.remove());
 
@@ -201,24 +263,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     divMsg.textContent = mensagemInvalida;
                 }
 
-                document.body.prepend(divMsg); // Joga a faixa na tela
+                document.body.prepend(divMsg);
 
             } else {
-                // E) SE PASSAR TUDO NO JS, AJUSTA A DATA E MANDA PRO BACKEND
+                // F) SE ESTIVER TUDO PERFEITO, AJUSTA AS DATAS PARA O PADRÃO SQL (AAAA-MM-DD)
                 if (dataInput && dataInput.value.includes('/')) {
                     const parts = dataInput.value.split('/');
                     dataInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
                 }
+                if (inputValidadeCnh && inputValidadeCnh.value.includes('/')) {
+                    const parts = inputValidadeCnh.value.split('/');
+                    inputValidadeCnh.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
             }
         });
 
-        // Limpa as bordas vermelhas e amarelas ao voltar a digitar
         const todosInputs = form.querySelectorAll('input, select');
         todosInputs.forEach(campo => {
             campo.addEventListener('input', () => campo.classList.remove('input-error', 'input-warning'));
             campo.addEventListener('change', () => campo.classList.remove('input-error', 'input-warning'));
         });
     }
+
     // ==========================================
     // LÓGICA DA PÁGINA INICIAL (Tabela Autorizados)
     // ==========================================
@@ -268,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ==========================================
-// AUTOCOMPLETE GLOBAL (ALFABÉTICO) E FILTROS DA TELA (PADRÃO)
+// AUTOCOMPLETE GLOBAL (ALFABÉTICO) E FILTROS DA TELA
 // ==========================================
 document.addEventListener('DOMContentLoaded', function () {
     const statusFilters = document.querySelectorAll('.status-filter');
@@ -374,8 +440,6 @@ document.addEventListener('DOMContentLoaded', function () {
 // FUNÇÃO DE EDIÇÃO MASSIVA (Disponível globalmente)
 // ==========================================
 window.editarSelecionados = async function () {
-    console.log("O botão de Editar Selecionados foi clicado!");
-
     const rowCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selecionados = Array.from(rowCheckboxes).map(cb => cb.value);
 

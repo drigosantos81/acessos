@@ -11,11 +11,11 @@
 
 <body>
     {% if error %}
-        <div class="messages error">{{ error }}</div>
+    <div class="messages error">{{ error }}</div>
     {% endif %}
 
     {% if success %}
-        <div class="messages success">{{ success }}</div>
+    <div class="messages success">{{ success }}</div>
     {% endif %}
 
     <div class="menu">
@@ -49,17 +49,8 @@
 
                 <div class="field docnumero">
                     <label>Nº do Documento</label>
-                    <input 
-                        type="text"
-                        id="numero_doc_input"
-                        name="numero_doc"
-                        placeholder="000.000.000-00"
-                        autocomplete="off"
-                        maxlength="20"
-                        inputmode="text"
-                        value="{{ acesso.numero_doc }}"
-                        required
-                    >
+                    <input type="text" id="numero_doc_input" name="numero_doc" placeholder="000.000.000-00"
+                        autocomplete="off" maxlength="20" inputmode="text" value="{{ acesso.numero_doc }}" required>
                 </div>
 
             </div>
@@ -74,45 +65,25 @@
 
                 <div class="field data">
                     <label>DATA</label>
-                    <input 
-                        type="text"
-                        name="data_do_acesso"
-                        id="data_input"
-                        placeholder="00/00/0000"
-                        maxlength="10"
-                        inputmode="numeric"
-                        value="{{ acesso.data_do_acesso }}"
-                        required
-                    >
+                    <input type="text" name="data_do_acesso" id="data_input" placeholder="00/00/0000" maxlength="10"
+                        inputmode="numeric" value="{{ acesso.data_do_acesso }}" required>
                 </div>
 
                 <div class="field dias">
                     <label>QTD. DIAS</label>
-                    <input 
-                        type="number"
-                        name="qtd_dias"
-                        id="qtd_dias_input"
-                        maxlength="2"
-                        value="{{ acesso.qtd_dias }}"
-                        required
-                    >
+                    <input type="number" name="qtd_dias" id="qtd_dias_input" maxlength="2" value="{{ acesso.qtd_dias }}"
+                        required>
                 </div>
 
             </div>
 
             <!-- linha 3 -->
-            <div class="row">
+            <div class="row-veiculo">
 
                 <div class="field telefone">
                     <label>Telefone</label>
-                    <input 
-                        type="text"
-                        id="telefone_input"
-                        name="telefone"
-                        placeholder="(00) 00000-0000"
-                        maxlength="15"
-                        inputmode="numeric"
-                    >
+                    <input type="text" id="telefone_input" name="telefone" placeholder="(00) 00000-0000" maxlength="15"
+                        inputmode="numeric">
                 </div>
 
                 <div class="field veiculo">
@@ -127,17 +98,37 @@
 
                 <div class="field placa hidden" id="placaField">
                     <label>Placa</label>
-                    <input type="text" name="placa" id="placa">
+                    <!-- <input type="text" name="placa" id="placa"> -->
+                    <input type="text" name="placa" id="placa" value="{{ acesso.placa }}" placeholder="XXX-0X00"
+                        maxlength="8">
                 </div>
 
                 <div class="field tipo hidden" id="tipoField">
                     <label>Tipo Veículo</label>
 
                     <div class="radio">
-                        <label><input type="radio" name="tipo_veiculo" value="CARGA"> CARGA</label>
+                        <label><input type="radio" name="tipo_veiculo" value="DE CARGA" checked> DE CARGA</label>
                         <label><input type="radio" name="tipo_veiculo" value="PASSEIO"> PASSEIO</label>
                     </div>
+                </div>
 
+                <div class="field cnh hidden" id="cnhField">
+                    <label>Nº CNH *</label>
+                    <input type="text" name="cnh" id="cnh_input" value="{{ acesso.cnh }}" placeholder="00000000000"
+                        maxlength="11" inputmode="numeric">
+                </div>
+
+                <div class="field cat_hab hidden" id="catHabField">
+                    <label>Cat. *</label>
+                    <input type="text" name="cat_habilitacao" id="cat_habilitacao_input"
+                        value="{{ acesso.cat_habilitacao }}" placeholder="AB" maxlength="2">
+                </div>
+
+                <div class="field validade_cnh hidden" id="validadeCnhField">
+                    <label>Validade *</label>
+                    <input type="text" name="data_validade_cnh" id="validade_cnh_input"
+                        value="{{ acesso.data_validade_cnh }}" placeholder="00/00/0000" maxlength="10"
+                        inputmode="numeric">
                 </div>
 
             </div>
@@ -154,14 +145,17 @@
                     <div class="grid-just">
 
                         <div>
-                            <label><input type="radio" name="justificativa" value="Execução de Serviço"> Execução de Serviço</label>
-                            <label><input type="radio" name="justificativa" value="Entrega de Material"> Entrega de Material</label>
+                            <label><input type="radio" name="justificativa" value="Execução de Serviço"> Execução de
+                                Serviço</label>
+                            <label><input type="radio" name="justificativa" value="Entrega de Material"> Entrega de
+                                Material</label>
                             <label><input type="radio" name="justificativa" value="Reunião"> Reunião</label>
                         </div>
 
                         <div>
                             <label><input type="radio" name="justificativa" value="Visitante"> Visitante</label>
-                            <label><input type="radio" name="justificativa" value="Processo Seletivo"> Processo Seletivo</label>
+                            <label><input type="radio" name="justificativa" value="Processo Seletivo"> Processo
+                                Seletivo</label>
                             <label><input type="radio" name="justificativa" value="Integração"> Integração</label>
                         </div>
 
@@ -178,14 +172,8 @@
 
                     <div class="field">
                         <label>Contato Tecon</label>
-                        <input 
-                            type="text"
-                            name="tel_interno"
-                            id="tel_interno_input"
-                            placeholder="(00) 12345-6789"
-                            maxlength="15"
-                            inputmode="numeric"
-                        >
+                        <input type="text" name="tel_interno" id="tel_interno_input" placeholder="(00) 12345-6789"
+                            maxlength="15" inputmode="numeric">
                     </div>
 
                     <!-- CAMPO AUTORIZADO CORRIGIDO -->
@@ -197,11 +185,7 @@
 
             <div class="form-actions">
 
-                <button 
-                    type="button"
-                    class="button-cancel"
-                    onclick="window.location.href='/'"
-                >
+                <button type="button" class="button-cancel" onclick="window.location.href='/'">
                     Cancelar
                 </button>
 

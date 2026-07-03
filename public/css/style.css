@@ -36,6 +36,14 @@ body {
     align-items: flex-end;
 }
 
+.row-veiculo {
+    display: grid;
+    grid-template-columns: 120px 110px 100px 155px 110px 45px 110px;
+    gap: 20px;
+    margin-bottom: 15px;
+    align-items: flex-end;
+}
+
 .field {
     display: flex;
     flex-direction: column;
@@ -534,4 +542,22 @@ select:focus {
 /* Classe para pintar a borda de amarelo */
 .input-warning { 
     border: 2px solid #f59e0b !important; 
+}
+
+/* =========================================
+   REGRA DE NEGÓCIO: LINHA DE VEÍCULOS ULTRA COMPACTA
+========================================= */
+.telefone { flex: 0 0 135px; }
+.veiculo { flex: 0 0 115px; }
+.placa { flex: 0 0 95px; }
+.tipo { flex: 0 0 145px; }
+.cnh { flex: 0 0 115px; }
+.cat_hab { flex: 0 0 55px; }
+.validade_cnh { flex: 0 0 100px; }
+
+/* Encolhe o tamanho interno das caixas de escolha (SIM/NÃO e CARGA/PASSEIO) */
+.veiculo .radio, .tipo .radio {
+    gap: 6px;
+    padding: 10px 4px;
+    font-size: 11px;
 }
