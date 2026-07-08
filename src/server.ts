@@ -63,15 +63,6 @@ app.use((req, res, next) => {
 // ==========================================
 app.use(routes);
 
-// app.get("/", (req, res) => {
-//     res.sendFile(
-//         path.join(process.cwd(), "src", "app", "pages", "index.html")
-//     );
-// });
-
-// teste rápido
-// app.get('/home-test', (req, res) => res.send('rota /home-test OK'));
-
 app.listen(port, () => {
     console.log(`Servidor ligado: http://localhost:${port}`);
 });

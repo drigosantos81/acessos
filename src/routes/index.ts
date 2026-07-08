@@ -10,7 +10,8 @@ const routes = Router();
 // ==========================================
 // ROTAS PÚBLICAS (Páginas)
 // ==========================================
-routes.get('/', FrontControllers.index);
+routes.get('/', onlyUsers, FrontControllers.index);
+
 routes.get('/form', onlyUsers, FrontControllers.createAcesso);
 routes.get('/login', SessionController.loginForm);  // Exibe o HTML do login
 routes.post('/login', SessionController.login);     // Recebe os dados do formulário e valida
@@ -26,9 +27,3 @@ routes.get('/admin/edit', isAdmin, FrontControllers.showEdit);
 routes.put('/admin/edit', isAdmin, FrontControllers.updateMassivo);
 
 export default routes;
-
-// routes.get("/", (req, res) => {
-//     res.sendFile(
-//         path.resolve("src/app/pages/index.html")
-//     )
-// })

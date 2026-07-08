@@ -120,13 +120,20 @@ export default {
 			// ==========================================
 			// BACKEND CHECK 1: CAMPOS VAZIOS
 			// ==========================================
-			const camposObrigatorios = ["nome", "doc_nacional", "numero_doc", "data_do_acesso", "qtd_dias", "telefone"];
-			for (const campo of camposObrigatorios) {
-				if (!body[campo] || String(body[campo]).trim() === "") {
-					// Devolve o formulário com erro e DADOS PREENCHIDOS
-					return res.render("form", { acesso: body, error: "Erro no servidor: Preencha todos os campos obrigatórios." });
-				}
-			}
+			const camposObrigatorios = ["nome", "doc_nacional", "numero_doc", "data_do_acesso", "qtd_dias", "justificativa"];
+            
+            for (const campo of camposObrigatorios) {
+                if (!body[campo] || String(body[campo]).trim() === "") {
+                    return res.render("form", { acesso: body, error: "Erro no servidor: Preencha todos os campos obrigatórios." });
+                }
+            }
+			// const camposObrigatorios = ["nome", "doc_nacional", "numero_doc", "data_do_acesso", "qtd_dias", "telefone"];
+			// for (const campo of camposObrigatorios) {
+			// 	if (!body[campo] || String(body[campo]).trim() === "") {
+			// 		// Devolve o formulário com erro e DADOS PREENCHIDOS
+			// 		return res.render("form", { acesso: body, error: "Erro no servidor: Preencha todos os campos obrigatórios." });
+			// 	}
+			// }
 
 			// ==========================================
 			// BACKEND CHECK 1.5: VEÍCULO OBRIGATÓRIO (COLE AQUI!)
@@ -165,13 +172,25 @@ export default {
 			// ==========================================
 			// BACKEND CHECK 3: TELEFONE E DATA INVÁLIDOS
 			// ==========================================
-			if (body.telefone) {
-				const telDigits = body.telefone.replace(/\D/g, "");
-				if (telDigits.length < 10) {
-					return res.render("form", { acesso: body, error: "O telefone deve ter pelo menos 10 dígitos." });
-				}
-				body.telefone = telDigits.slice(0, 11);
-			}
+			if (body.telefone && String(body.telefone).trim() !== "") {
+                const telDigits = String(body.telefone).replace(/\D/g, "");
+                // Só barra se a pessoa tentou digitar, mas digitou incompleto
+                if (telDigits.length < 10) {
+                    return res.render("form", { acesso: body, error: "O telefone informado deve ter pelo menos 10 dígitos." });
+                }
+                body.telefone = telDigits.slice(0, 11);
+            } else {
+                // Se a pessoa não digitou nada, enviamos null ou vazio para o banco
+                body.telefone = null; 
+            }
+
+			// if (body.telefone) {
+			// 	const telDigits = body.telefone.replace(/\D/g, "");
+			// 	if (telDigits.length < 10) {
+			// 		return res.render("form", { acesso: body, error: "O telefone deve ter pelo menos 10 dígitos." });
+			// 	}
+			// 	body.telefone = telDigits.slice(0, 11);
+			// }
 
 			let inputDate = String(body.data_do_acesso).trim();
 			if (inputDate.includes('/')) {

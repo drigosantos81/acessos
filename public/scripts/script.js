@@ -200,14 +200,39 @@ document.addEventListener('DOMContentLoaded', function () {
             let temErroInvalido = false;
             let mensagemInvalida = "";
 
-            // A) VERIFICA CAMPOS VAZIOS (Required dinâmicos entram aqui automaticamente!)
-            const camposObrigatorios = form.querySelectorAll('[required]');
+            // A) VERIFICA CAMPOS VAZIOS DE TEXTO
+            const camposObrigatorios = form.querySelectorAll('input[required]');
             camposObrigatorios.forEach(campo => {
-                if (campo.value.trim() === "") {
+                if (campo.type !== 'radio' && campo.value.trim() === "") {
                     campo.classList.add('input-error');
                     temErroVazio = true;
                 }
             });
+
+            // A.2) VERIFICA O RÁDIO DE JUSTIFICATIVA
+            const justificativaMarcada = document.querySelector('input[name="justificativa"]:checked');
+            const caixaJustificativa = document.getElementById('caixa_justificativa');
+
+            if (!justificativaMarcada) {
+                if (caixaJustificativa) {
+                    caixaJustificativa.classList.add('input-error'); // Pinta a caixa toda de vermelho
+                }
+                temErroVazio = true;
+            }
+
+            // A.3) VERIFICA O RÁDIO DE TIPO DE VEÍCULO (Condicional)
+            const radiosTipoVal = document.querySelectorAll('input[name="tipo_veiculo"]');
+            // Só valida se o campo ganhou o atributo "required" (ou seja, se clicou no SIM)
+            const isTipoVeiculoRequired = radiosTipoVal.length > 0 && radiosTipoVal[0].hasAttribute('required');
+            const tipoVeiculoMarcado = document.querySelector('input[name="tipo_veiculo"]:checked');
+            const caixaTipoVeiculo = document.getElementById('caixa_tipo_veiculo');
+
+            if (isTipoVeiculoRequired && !tipoVeiculoMarcado) {
+                if (caixaTipoVeiculo) {
+                    caixaTipoVeiculo.classList.add('input-error');
+                }
+                temErroVazio = true;
+            }
 
             // B) VERIFICA TELEFONE INVÁLIDO
             if (telefoneInput && telefoneInput.value.trim() !== "") {
@@ -276,6 +301,24 @@ document.addEventListener('DOMContentLoaded', function () {
                     inputValidadeCnh.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
                 }
             }
+        });
+
+        // Limpa a borda vermelha do Tipo Veículo assim que ele clicar em uma opção
+        const radiosTipo = form.querySelectorAll('input[name="tipo_veiculo"]');
+        radiosTipo.forEach(radio => {
+            radio.addEventListener('change', () => {
+                const caixaTipoVeiculo = document.getElementById('caixa_tipo_veiculo');
+                if (caixaTipoVeiculo) caixaTipoVeiculo.classList.remove('input-error');
+            });
+        });
+
+        // Limpa a borda vermelha da Justificativa assim que ele clicar em uma opção
+        const radiosJust = form.querySelectorAll('input[name="justificativa"]');
+        radiosJust.forEach(radio => {
+            radio.addEventListener('change', () => {
+                const caixaJustificativa = document.getElementById('caixa_justificativa');
+                if (caixaJustificativa) caixaJustificativa.classList.remove('input-error');
+            });
         });
 
         const todosInputs = form.querySelectorAll('input, select');
