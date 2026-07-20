@@ -1,7 +1,13 @@
 import sqlite3 from 'sqlite3';
+import dotenv from "dotenv";
 
-// Lembre-se de manter o SEU caminho completo aqui!
-const dbPath = 'G:/Meu Drive/Relatórios/INDICADORES/DataBases/acessos.sqlite'; 
+dotenv.config();
+
+const dbPath = process.env.DB_PATH;
+
+if (!dbPath) {
+    throw new Error("❌ Variável de ambiente DB_PATH não definida!");
+}
 
 const sqliteDb = new sqlite3.Database(dbPath, (err: any) => {
     if (err) {

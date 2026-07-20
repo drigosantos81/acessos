@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import db from './config/db.js'; // Confirme se esse é o caminho correto para o seu arquivo de banco!
+import db from './config/db.js'; // Caminho para o seu arquivo de banco!
 
 async function createSuperAdmin() {
     try {
@@ -14,8 +14,8 @@ async function createSuperAdmin() {
             VALUES (?, ?, ?, ?)
         `;
         const values = [
-            'Anderson Santos',
-            'anderson.santos@wilsonsons.com.br', // Você pode mudar o email que preferir
+            'Super Admin',
+            'admin@tecon.com.br', // Você pode mudar o email que preferir
             passwordHash,
             0
         ];
