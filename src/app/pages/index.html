@@ -2,125 +2,176 @@
 <html lang="pt-br">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Agendamentos</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamentos</title>
 
-	<link rel="stylesheet" href="/css/style.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
-	{% if success %}
-        <div class="messages success">{{ success }}</div>
+    {% if success %}
+    <div class="messages success">{{ success }}</div>
     {% endif %}
-	
-	<div class="menu" style="display: flex; justify-content: space-between; align-items: center;">
-		<div>
-			<a href="/" class="menu-home" style="margin-left: 0;">Home</a>
-			
-			{% if session.userId %}
-				<a href="/admin/edit" class="menu-home">Edição Massiva</a>
-			{% endif %}
-		</div>
 
-		<div style="margin-right: 30px; display: flex; align-items: center; gap: 15px;">
-			{% if session.userId %}
-				<span style="color: #00BEDD; font-weight: bold; font-size: 14px;">
-					<i class="fa-solid fa-user"></i> {{ session.userName }}
-				</span>
-				
-				<form action="/logout" method="POST" style="margin: 0; padding: 0;">
-					<button type="submit" style="background: none; color: #e5e7eb; border: none; padding: 0; cursor: pointer; font-size: 14px; font-family: inherit; font-weight: 500;" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#e5e7eb'">
-						Sair <i class="fa-solid fa-right-from-bracket" style="font-size: 12px; margin-left: 4px;"></i>
-					</button>
-				</form>
-			{% else %}
-				<a href="/login" class="menu-home"><i class="fa-solid fa-lock" style="font-size: 12px; margin-right: 4px;"></i> Login</a>
-			{% endif %}
-		</div>
-	</div>
+    <!-- ==========================================
+         1. SIDEBAR LATERAL ESTREITA
+    =========================================== -->
+    <div class="sidebar">
+        <!-- ÁREA DA LOGO (Ícone e Textos) -->
+        <div class="sidebar-logo">
+            <img src="/img/logo-ws.png" alt="Logo TECON"
+                style="width: 80px; height: 60px; margin: 0 auto 12px auto; display: block;">
 
-	<!-- <div class="menu">
-		<a href="/" class="menu-home">Home</a>
-		<a href="/admin/edit" class="menu-home">Edição Massiva</a>
-	</div> -->
+            <div style="font-size: 12px; font-weight: bold; line-height: 1.3; margin-bottom: 8px;">
+                PORTAL DE<br>ATENDIMENTO
+            </div>
 
-	<div class="card">
+            <div style="font-size: 11px; font-weight: normal; line-height: 1.3; color: #00BEDD;">
+                TECON<br>SALVADOR
+            </div>
+        </div>
 
-		<div class="header-page">
+        <!-- MENU DE SISTEMAS DA EMPRESA -->
+        <ul class="sidebar-menu">
+            <li><a href="/"><i class="fa-solid fa-address-card" style="margin-right: 10px; font-size: 14px;"></i>
+                    ACESSOS</a></li>
+            <li><a href="#"><i class="fa-solid fa-file-invoice-dollar" style="margin-right: 10px; font-size: 14px;"></i>
+                    PAGAMENTOS</a></li>
+            <li><a href="#"><i class="fa-solid fa-car-burst" style="margin-right: 10px; font-size: 14px;"></i>
+                    AVARIAS</a></li>
+        </ul>
 
-			<h2>Agendamentos</h2>
+        <!-- ÁREA DO USUÁRIO E LOGOUT NA BASE DA SIDEBAR -->
+        <div
+            style="position: absolute; bottom: 20px; width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
+            {% if session.userId %}
+            <div
+                style="color: #00BEDD; font-weight: bold; font-size: 12px; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <i class="fa-solid fa-user"></i> {{ session.userName }}
+            </div>
 
-			<input type="text" name="" id="" placeholder="Nome ou Ticket...">
+            <form action="/logout" method="POST" style="margin: 0; padding: 0;">
+                <button type="submit"
+                    style="background: none; color: #e5e7eb; border: none; padding: 0; cursor: pointer; font-size: 12px; font-family: inherit; font-weight: 500;"
+                    onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#e5e7eb'">
+                    Sair <i class="fa-solid fa-right-from-bracket" style="font-size: 11px; margin-left: 4px;"></i>
+                </button>
+            </form>
+            {% else %}
+            <a href="/login" style="color: white; text-decoration: none; font-size: 12px; font-weight: bold;">
+                <i class="fa-solid fa-lock" style="font-size: 11px; margin-right: 4px;"></i> Login
+            </a>
+            {% endif %}
+        </div>
+    </div>
 
-			<input type="date" name="" id="">
+    <!-- ==========================================
+         2. CONTEÚDO PRINCIPAL (MAIN-CONTENT)
+    =========================================== -->
+    <div class="main-content">
 
-			<button class="button-send" onclick="window.location.href='/form'">
-				Solicitar Acesso
-			</button>
+        <!-- ==========================================
+             MENU DO TOPO (Ponta a Ponta e Fixo)
+        =========================================== -->
+        <div class="menu" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 10px;">
+                <a href="/" class="menu-home" style="margin-left: 0;">
+                    <i class="fa-solid fa-folder-open" style="margin-right: 6px;"></i> Pedidos Abertos
+                </a>
 
-		</div>
+                {% if session.userId %}
+                <a href="/admin/edit" class="menu-home">
+                    <i class="fa-solid fa-pen-to-square" style="margin-right: 6px;"></i> Edição Massiva
+                </a>
+                {% endif %}
 
-		<div class="table-container">
+                <a href="/form" class="menu-home">
+                    <i class="fa-solid fa-check-double" style="margin-right: 6px;"></i> Pedidos Resolvidos
+                </a>
+            </div>
+        </div>
 
-			<table>
+        <!-- ==========================================
+             CARD DA PÁGINA
+        =========================================== -->
+        <div class="card">
+            <div class="header-page">
+                <h2>Agendamentos</h2>
+                <input type="text" name="" id="" placeholder="Nome ou Ticket...">
+                <input type="date" name="" id="">
+                <button class="button-send" onclick="window.location.href='/form'">
+                    Solicitar Acesso
+                </button>
+            </div>
 
-				<thead>
-					<tr>
-						<th>Nome</th>
-						<th>Empresa</th>
-						<th>Data do<br>Acesso</th>
-						<th>Data Final</th>
-						<th>Dias</th>
-						<th>Veículo</th>
-						<th>Justificativa</th>
-						<th>Autorizado</th>
-					</tr>
-				</thead>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Empresa</th>
+                            <th>Data do<br>Acesso</th>
+                            <th>Data Final</th>
+                            <th>Dias</th>
+                            <th>Veículo</th>
+                            <th>Prévia</th>
+                            <th>Autorizado</th>
+                        </tr>
+                    </thead>
 
-				<tbody>
-					{% for acesso in acessos %}
-					<tr>
-						<td>{{ acesso.nome }}</td>
-						<td>{{ acesso.empresa }}</td>
-						<td>{{ acesso.data_do_acesso }}</td>
-						<td>{{ acesso.data_limite }}</td>
-						<td>{{ acesso.qtd_dias }}</td>
+                    <tbody>
+                        {% for acesso in acessos %}
+                        <tr data-ticket="{{ acesso.ticket }}">
+                            <td>{{ acesso.nome }}</td>
+                            <td>{{ acesso.empresa }}</td>
+                            <td>{{ acesso.data_do_acesso }}</td>
+                            <td>{{ acesso.data_limite }}</td>
+                            <td>{{ acesso.qtd_dias }}</td>
 
-						<td>
-							{% if acesso.com_veiculo %}
-							Sim
-							{% else %}
-							Não
-							{% endif %}
-						</td>
+                            <td>
+                                {% if acesso.com_veiculo %} Sim {% else %} Não {% endif %}
+                            </td>
 
-						<td>{{ acesso.justificativa }}</td>
+                            <td class="td-previa" data-texto="{{ acesso.justificativa }}">
+                                <span>Ver Prévia</span>
+                            </td>
 
-						<td class="autorizado 
-                            {{ acesso.autorizado 
-                                | lower 
-                                | replace('ã','a') 
-                                | replace('á','a') 
-                                | replace('â','a') 
-                                | replace(' ', '-') 
-                            }}">
-							{{ acesso.autorizado }}
-						</td>
+                            <td class="autorizado 
+                                {{ acesso.autorizado 
+                                    | lower 
+                                    | replace('ã','a') 
+                                    | replace('á','a') 
+                                    | replace('â','a') 
+                                    | replace(' ', '-') 
+                                }}">
+                                {{ acesso.autorizado }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-					</tr>
-					{% endfor %}
-				</tbody>
+    <!-- ==========================================
+         3. MODAL DE PRÉVIA OCULTO
+    =========================================== -->
+    <div class="modal-overlay" id="modalPrevia">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Prévia da Justificativa</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBodyText">
+                <!-- O texto vai aparecer aqui via Javascript -->
+            </div>
+        </div>
+    </div>
 
-			</table>
-
-		</div>
-
-	</div>
-
-	<script src="/scripts/script.js"></script>
+    <script src="/scripts/script.js"></script>
 
 </body>
 

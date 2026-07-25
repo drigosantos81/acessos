@@ -31,7 +31,8 @@ body {
 
 #caixa_justificativa {
     padding: 10px;
-    border: 1px solid transparent; /* Borda invisível para não dar "pulo" na tela quando a borda vermelha aparecer */
+    border: 1px solid transparent;
+    /* Borda invisível para não dar "pulo" na tela quando a borda vermelha aparecer */
     border-radius: 6px;
 }
 
@@ -241,6 +242,7 @@ hr {
     padding: 12px 25px;
     box-sizing: border-box;
     margin: 0 0 20px 0;
+    border-radius: 6px;
     /* remove margens negativas */
 }
 
@@ -516,9 +518,11 @@ select:focus {
     height: 75px;
     top: 30px;
     left: 50%;
-    transform: translateX(-50%); /* Centraliza na tela */
+    transform: translateX(-50%);
+    /* Centraliza na tela */
     border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Sombra elegante */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    /* Sombra elegante */
 
     z-index: 1000;
     color: white;
@@ -536,8 +540,9 @@ select:focus {
     background-color: #01b169;
 }
 
-.messages.warning { 
-    background-color: #f59e0b; /* Amarelo/Laranja padrão de Alerta */
+.messages.warning {
+    background-color: #f59e0b;
+    /* Amarelo/Laranja padrão de Alerta */
 }
 
 /* Classe para pintar a borda de vermelho */
@@ -546,24 +551,329 @@ select:focus {
 }
 
 /* Classe para pintar a borda de amarelo */
-.input-warning { 
-    border: 2px solid #f59e0b !important; 
+.input-warning {
+    border: 2px solid #f59e0b !important;
 }
 
 /* =========================================
    REGRA DE NEGÓCIO: LINHA DE VEÍCULOS ULTRA COMPACTA
 ========================================= */
-.telefone { flex: 0 0 135px; }
-.veiculo { flex: 0 0 115px; }
-.placa { flex: 0 0 95px; }
-.tipo { flex: 0 0 145px; }
-.cnh { flex: 0 0 115px; }
-.cat_hab { flex: 0 0 55px; }
-.validade_cnh { flex: 0 0 100px; }
+.telefone {
+    flex: 0 0 135px;
+}
+
+.veiculo {
+    flex: 0 0 115px;
+}
+
+.placa {
+    flex: 0 0 95px;
+}
+
+.tipo {
+    flex: 0 0 145px;
+}
+
+.cnh {
+    flex: 0 0 115px;
+}
+
+.cat_hab {
+    flex: 0 0 55px;
+}
+
+.validade_cnh {
+    flex: 0 0 100px;
+}
 
 /* Encolhe o tamanho interno das caixas de escolha (SIM/NÃO e CARGA/PASSEIO) */
-.veiculo .radio, .tipo .radio {
+.veiculo .radio,
+.tipo .radio {
     gap: 6px;
     padding: 10px 4px;
     font-size: 11px;
+}
+
+
+
+/* =========================================
+
+=========================================
+   AJUSTES DE TELA: COMPRESSÃO (Sem Rolagem)
+========================================= */
+.card {
+    padding: 15px 25px 20px 25px;
+    /* Reduz o espaço interno no topo e na base do cartão branco */
+}
+
+h2 {
+    margin-bottom: 15px;
+    /* Aproxima o título dos campos */
+}
+
+.menu {
+    margin: 0 0 10px 0;
+    /* Reduz o espaço abaixo da barra azul escuro */
+}
+
+.row,
+.row-name,
+.row-empresa,
+.row-veiculo {
+    margin-bottom: 10px;
+    /* Reduz o espaço entre as linhas do formulário (antes era 15px) */
+}
+
+hr {
+    margin: 10px 0;
+    /* Achata as margens da linha divisória cinza */
+}
+
+.form-actions {
+    margin-top: 10px;
+    /* Aproxima os botões "Cancelar" e "Enviar" do formulário */
+}
+
+/* Afina levemente os campos de digitação e dropdowns */
+input {
+    padding: 8px 10px;
+}
+
+select {
+    height: 35px;
+    padding: 6px 10px;
+}
+
+.radio {
+    padding: 8px 10px;
+}
+
+/* =========================================
+   AJUSTES DE TELA: ALINHAMENTO DOS RADIOS
+========================================= */
+.radio label,
+#caixa_justificativa label {
+    display: flex !important;
+    align-items: center;
+    /* Mágica: Força a bolinha e o texto a ficarem exatamente no mesmo eixo horizontal */
+    margin-bottom: 0 !important;
+    /* Mata a margem antiga que jogava o texto para baixo */
+    gap: 6px;
+    /* Define um espacinho elegante entre a bolinha e a palavra */
+    cursor: pointer;
+}
+
+/* Devolve o espaço entre as opções da Justificativa para elas não grudarem umas nas outras verticalmente */
+#caixa_justificativa label {
+    margin-bottom: 8px !important;
+}
+
+/* Remove a margem "fantasma" que os navegadores (Chrome/Edge) colocam nas bolinhas */
+input[type="radio"] {
+    margin: 0 !important;
+}
+
+
+
+
+
+/* =========================================
+   ALINHAMENTO ESPECÍFICO DA JUSTIFICATIVA
+========================================= */
+/* Sobrescreve o flex-end para que as caixas da esquerda e da direita tenham a mesma altura */
+.row-justificativa {
+    align-items: stretch !important;
+}
+
+/* Coloca as duas colunas de opções de justificativa lado a lado perfeitamente alinhadas */
+.grid-just {
+    display: flex;
+    gap: 30px;
+}
+
+/* Garante que o Setor cole no topo e o Contato cole na base, alinhando com a caixa ao lado */
+.field-setor {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
+}
+
+/* Remove a margem extra, pois o justify-content: space-between já faz o espaçamento automático */
+.field-setor .field {
+    margin-bottom: 0 !important;
+}
+
+
+
+
+/* =========================================
+   NOVO LAYOUT: SIDEBAR ESTREITA E HEADER FIXO
+========================================= */
+body {
+    display: flex;
+    min-height: 100vh;
+    padding: 0;
+}
+
+/* 1 e 2. Barra Lateral mais fina (170px) */
+/* 1 e 2. Barra Lateral mais fina (170px) */
+.sidebar {
+    width: 170px;
+    background-color: #435773;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh; /* Garante que pegue exatamente a altura da janela */
+    padding-top: 25px;
+    box-sizing: border-box; /* A MÁGICA: impede que o padding-top empurre a barra para fora da tela */
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.sidebar-logo {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 0 10px;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.3s;
+    font-size: 12px;
+    /* Fonte levemente menor para caber bonito */
+}
+
+.sidebar-menu li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #00BEDD;
+    padding-left: 16px;
+}
+
+/* 1. Main Content sem padding para o menu colar nas bordas */
+.main-content {
+    margin-left: 170px;
+    width: calc(100% - 170px);
+    padding: 0;
+    /* Zerado para o menu bater nas quinas */
+    box-sizing: border-box;
+}
+
+/* 1. Menu grudado no topo, ponta a ponta */
+.menu {
+    background: #011C43;
+    width: 100%;
+    padding: 15px 25px;
+    box-sizing: border-box;
+    margin: 0;
+    border-radius: 0 !important;
+    /* Retira as bordas arredondadas */
+    position: sticky;
+    /* Cola no topo */
+    top: 0;
+    z-index: 900;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Descola o cartão principal do menu fixo */
+.card {
+    margin: 25px auto 15px auto;
+}
+
+/* =========================================
+   TABELA: LINHA CLICÁVEL E MODAL
+========================================= */
+.table-container tbody tr {
+    cursor: pointer;
+    /* Transforma o mouse em uma mãozinha indicando que é clicável */
+    transition: background 0.2s;
+}
+
+/* Efeito Hover na Tabela */
+.table-container tbody tr:hover {
+    background: #e2e8f0;
+    /* Cor de destaque ao passar o mouse na linha */
+}
+
+/* Botão/Link da Prévia na Tabela */
+.td-previa span {
+    color: #00BEDD;
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.td-previa span:hover {
+    color: #011C43;
+}
+
+/* Overlay Escuro do Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    /* Escondido por padrão */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/* Classe para ligar o modal via JS */
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    width: 450px;
+    max-width: 90%;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.modal-header h3 {
+    color: #333;
+    font-size: 16px;
+}
+
+.modal-close {
+    cursor: pointer;
+    font-size: 24px;
+    color: #999;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: #e83f5b;
+}
+
+.modal-body {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
 }
