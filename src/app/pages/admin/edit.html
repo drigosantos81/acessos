@@ -1,7 +1,7 @@
 {% extends '../layout.html' %}
 
 {% block head %}
-<title>Edição Massiva | Acessos</title>
+    <title>Edição Massiva | Acessos</title>
 {% endblock %}
 
 {% block content %}
@@ -70,7 +70,7 @@
                 </thead>
                 <tbody>
                     {% for acesso in acessos %}
-                    <tr>
+                    <tr data-ticket="{{ acesso.ticket }}">
                         <td class="text-center">
                             <input type="checkbox" class="row-checkbox" value="{{ acesso.ticket }}">
                         </td>

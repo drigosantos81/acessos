@@ -1,5 +1,5 @@
 // ==========================================
-// MÁSCARAS E FUNÇÕES AUXILIARES
+// === INÍCIO: MÁSCARAS E FUNÇÕES AUXILIARES ===
 // ==========================================
 
 function onlyDigits(str) {
@@ -32,13 +32,18 @@ function formatPhone(value) {
 }
 
 // ==========================================
-// INICIALIZAÇÃO DA PÁGINA (FORMULÁRIO E INDEX)
+// === FIM: MÁSCARAS E FUNÇÕES AUXILIARES ===
 // ==========================================
 
+
+
+// ==========================================
+// === INÍCIO: INICIALIZAÇÃO GERAL DA PÁGINA ===
+// ==========================================
 document.addEventListener('DOMContentLoaded', function () {
 
     // --- ELEMENTOS DO FORMULÁRIO ---
-    const form = document.getElementById('meuForm');
+    const form = document.getElementById('meuForm') || document.getElementById('editForm');
     const numeroDocInput = document.getElementById('numero_doc_input');
     const docSelect = document.getElementById('doc_nacional_select');
     const dataInput = document.getElementById('data_input');
@@ -46,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const telefoneInput = document.getElementById('telefone_input');
     const contatoTeconInput = document.getElementById('tel_interno_input');
 
-    // --- NOVOS CAMPOS EXCLUSIVOS DE VEÍCULO ---
     const veiculoRadios = document.querySelectorAll('input[name="com_veiculo"]');
     const placaField = document.getElementById('placaField');
     const tipoField = document.getElementById('tipoField');
@@ -61,37 +65,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputValidadeCnh = document.getElementById('validade_cnh_input');
 
     // -----------------------------
-    // 1. Mostrar/Ocultar Placa, Tipo e CNHs + Limpeza e Required Dinâmico
+    // --- INÍCIO: FUNÇÃO DE VEÍCULO ---
     // -----------------------------
     function toggleVeiculo() {
         const selecionado = document.querySelector('input[name="com_veiculo"]:checked');
-
         if (!selecionado || !placaField || !tipoField || !cnhField || !catHabField || !validadeCnhField) return;
 
         if (selecionado.value === 'sim') {
-            // EXIBE TODOS OS CAMPOS DE VEÍCULO NA MESMA LINHA
             placaField.classList.remove('hidden');
             tipoField.classList.remove('hidden');
             cnhField.classList.remove('hidden');
             catHabField.classList.remove('hidden');
             validadeCnhField.classList.remove('hidden');
 
-            // ATIVA A OBRIGATORIEDADE EM NÍVEL FRONTEND
             if (inputPlaca) inputPlaca.setAttribute('required', 'true');
             if (inputCnh) inputCnh.setAttribute('required', 'true');
             if (inputCatHab) inputCatHab.setAttribute('required', 'true');
             if (inputValidadeCnh) inputValidadeCnh.setAttribute('required', 'true');
             radiosTipoVeiculo.forEach(r => r.setAttribute('required', 'true'));
-
         } else {
-            // OCULTA TODOS OS CAMPOS
             placaField.classList.add('hidden');
             tipoField.classList.add('hidden');
             cnhField.classList.add('hidden');
             catHabField.classList.add('hidden');
             validadeCnhField.classList.add('hidden');
 
-            // LIMPA OS VALORES, CORES DE ERRO E REMOVE REQUISITOS
             if (inputPlaca) { inputPlaca.value = ''; inputPlaca.removeAttribute('required'); inputPlaca.classList.remove('input-error', 'input-warning'); }
             if (inputCnh) { inputCnh.value = ''; inputCnh.removeAttribute('required'); inputCnh.classList.remove('input-error', 'input-warning'); }
             if (inputCatHab) { inputCatHab.value = ''; inputCatHab.removeAttribute('required'); inputCatHab.classList.remove('input-error', 'input-warning'); }
@@ -103,44 +101,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (veiculoRadios.length > 0) {
         toggleVeiculo();
-        veiculoRadios.forEach(radio => {
-            radio.addEventListener('change', toggleVeiculo);
-        });
+        veiculoRadios.forEach(radio => radio.addEventListener('change', toggleVeiculo));
     }
-
-    // Forçar Letras Maiúsculas na categoria (A, B, AB, C, D, E)
-    if (inputCatHab) {
-        inputCatHab.addEventListener('input', function () {
-            this.value = this.value.toUpperCase().replace(/[^A-Z]/g, "");
-        });
-    }
-
-    // Aplicar máscara de data na validade da CNH
-    if (inputValidadeCnh) {
-        inputValidadeCnh.addEventListener('input', function () {
-            this.value = formatDate(this.value);
-        });
-    }
-
-    // Placa em maiúsculo com hífen automático
-    if (inputPlaca) {
-        inputPlaca.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();
-        });
-    }
-
     // -----------------------------
-    // 2. Máscara do Documento (CPF/Passaporte)
+    // --- FIM: FUNÇÃO DE VEÍCULO ---
     // -----------------------------
+
+
+    // Aplicação de máscaras automáticas nos campos
+    if (inputCatHab) inputCatHab.addEventListener('input', function () { this.value = this.value.toUpperCase().replace(/[^A-Z]/g, ""); });
+    if (inputValidadeCnh) inputValidadeCnh.addEventListener('input', function () { this.value = formatDate(this.value); });
+    if (inputPlaca) inputPlaca.addEventListener('input', function () { this.value = this.value.toUpperCase(); });
+
     function applyDocMask() {
         if (!docSelect || !numeroDocInput) return;
         const tipo = docSelect.value;
-        numeroDocInput.value = "";
-
         if (tipo === "CPF") {
             numeroDocInput.placeholder = "000.000.000-00";
             numeroDocInput.setAttribute("maxlength", "14");
             numeroDocInput.setAttribute("inputmode", "numeric");
+            numeroDocInput.value = formatCPF(numeroDocInput.value);
         } else {
             numeroDocInput.placeholder = tipo;
             numeroDocInput.setAttribute("maxlength", "20");
@@ -150,7 +130,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (docSelect) {
         applyDocMask();
-        docSelect.addEventListener("change", applyDocMask);
+        docSelect.addEventListener("change", () => {
+            numeroDocInput.value = "";
+            applyDocMask();
+        });
 
         numeroDocInput.addEventListener("input", () => {
             if (docSelect.value === "CPF") {
@@ -162,37 +145,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // -----------------------------
-    // 3. Máscara de DATA
-    // -----------------------------
-    if (dataInput) {
-        dataInput.addEventListener('input', function () {
-            dataInput.value = formatDate(dataInput.value);
-        });
-    }
-
-    // -----------------------------
-    // 4. Máscara de TELEFONE
-    // -----------------------------
+    if (dataInput) dataInput.addEventListener('input', function () { dataInput.value = formatDate(dataInput.value); });
     [telefoneInput, contatoTeconInput].forEach(input => {
-        if (input) {
-            input.addEventListener('input', function () {
-                input.value = formatPhone(input.value);
-            });
-        }
+        if (input) input.addEventListener('input', function () { input.value = formatPhone(input.value); });
     });
+    if (qtdDiasInput) qtdDiasInput.addEventListener('input', function () { qtdDiasInput.value = onlyDigits(qtdDiasInput.value).slice(0, 2); });
+
 
     // -----------------------------
-    // 5. Limitar QTD. DIAS
-    // -----------------------------
-    if (qtdDiasInput) {
-        qtdDiasInput.addEventListener('input', function () {
-            qtdDiasInput.value = onlyDigits(qtdDiasInput.value).slice(0, 2);
-        });
-    }
-
-    // -----------------------------
-    // 6. VALIDAÇÃO FRONTEND INTELIGENTE (SEM RECARREGAR)
+    // --- INÍCIO: VALIDAÇÃO DO FORMULÁRIO ---
     // -----------------------------
     if (form) {
         form.addEventListener('submit', function (event) {
@@ -200,41 +161,35 @@ document.addEventListener('DOMContentLoaded', function () {
             let temErroInvalido = false;
             let mensagemInvalida = "";
 
-            // A) VERIFICA CAMPOS VAZIOS DE TEXTO
             const camposObrigatorios = form.querySelectorAll('input[required]');
             camposObrigatorios.forEach(campo => {
+                if (campo.hasAttribute('readonly') || campo.hasAttribute('disabled')) return;
+
                 if (campo.type !== 'radio' && campo.value.trim() === "") {
                     campo.classList.add('input-error');
                     temErroVazio = true;
                 }
             });
 
-            // A.2) VERIFICA O RÁDIO DE JUSTIFICATIVA
             const justificativaMarcada = document.querySelector('input[name="justificativa"]:checked');
             const caixaJustificativa = document.getElementById('caixa_justificativa');
+            const isJustificativaHabilitada = caixaJustificativa && !caixaJustificativa.style.pointerEvents;
 
-            if (!justificativaMarcada) {
-                if (caixaJustificativa) {
-                    caixaJustificativa.classList.add('input-error'); // Pinta a caixa toda de vermelho
-                }
+            if (isJustificativaHabilitada && !justificativaMarcada) {
+                caixaJustificativa.classList.add('input-error');
                 temErroVazio = true;
             }
 
-            // A.3) VERIFICA O RÁDIO DE TIPO DE VEÍCULO (Condicional)
             const radiosTipoVal = document.querySelectorAll('input[name="tipo_veiculo"]');
-            // Só valida se o campo ganhou o atributo "required" (ou seja, se clicou no SIM)
             const isTipoVeiculoRequired = radiosTipoVal.length > 0 && radiosTipoVal[0].hasAttribute('required');
             const tipoVeiculoMarcado = document.querySelector('input[name="tipo_veiculo"]:checked');
             const caixaTipoVeiculo = document.getElementById('caixa_tipo_veiculo');
 
             if (isTipoVeiculoRequired && !tipoVeiculoMarcado) {
-                if (caixaTipoVeiculo) {
-                    caixaTipoVeiculo.classList.add('input-error');
-                }
+                if (caixaTipoVeiculo) caixaTipoVeiculo.classList.add('input-error');
                 temErroVazio = true;
             }
 
-            // B) VERIFICA TELEFONE INVÁLIDO
             if (telefoneInput && telefoneInput.value.trim() !== "") {
                 const numTelefone = telefoneInput.value.replace(/\D/g, '');
                 if (numTelefone.length < 10) {
@@ -244,42 +199,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            // C) VERIFICA DATA DE ACESSO INVÁLIDA
-            if (dataInput && dataInput.value.trim() !== "") {
-                const parts = dataInput.value.split('/');
-                if (parts.length === 3) {
-                    const ano = parseInt(parts[2], 10);
-                    if (ano < 2024 || ano > 2100) {
-                        dataInput.classList.add('input-warning');
-                        temErroInvalido = true;
-                        mensagemInvalida = "A data informada é inválida. Verifique o ano.";
-                    }
-                }
-            }
-
-            // D) VERIFICA DATA DE VALIDADE DA CNH INVÁLIDA
-            if (inputValidadeCnh && inputValidadeCnh.value.trim() !== "" && !validadeCnhField.classList.contains('hidden')) {
-                const parts = inputValidadeCnh.value.split('/');
-                if (parts.length === 3) {
-                    const ano = parseInt(parts[2], 10);
-                    if (ano < 2024 || ano > 2100) {
-                        inputValidadeCnh.classList.add('input-warning');
-                        temErroInvalido = true;
-                        mensagemInvalida = "A validade da CNH é inválida. Verifique o ano.";
-                    }
-                }
-            }
-
-            // E) SE TEM ERRO, GERA FAIXA E TRAVA ENVIO
             if (temErroVazio || temErroInvalido) {
                 event.preventDefault();
-
                 const msgAntigas = document.querySelectorAll('.messages');
                 msgAntigas.forEach(m => m.remove());
-
                 const divMsg = document.createElement('div');
                 divMsg.classList.add('messages');
-
                 if (temErroVazio) {
                     divMsg.classList.add('error');
                     divMsg.textContent = "Existem campos obrigatórios vazios.";
@@ -287,11 +212,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     divMsg.classList.add('warning');
                     divMsg.textContent = mensagemInvalida;
                 }
-
                 document.body.prepend(divMsg);
-
             } else {
-                // F) SE ESTIVER TUDO PERFEITO, AJUSTA AS DATAS PARA O PADRÃO SQL (AAAA-MM-DD)
                 if (dataInput && dataInput.value.includes('/')) {
                     const parts = dataInput.value.split('/');
                     dataInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -302,82 +224,178 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
-
-        // Limpa a borda vermelha do Tipo Veículo assim que ele clicar em uma opção
-        const radiosTipo = form.querySelectorAll('input[name="tipo_veiculo"]');
-        radiosTipo.forEach(radio => {
-            radio.addEventListener('change', () => {
-                const caixaTipoVeiculo = document.getElementById('caixa_tipo_veiculo');
-                if (caixaTipoVeiculo) caixaTipoVeiculo.classList.remove('input-error');
-            });
-        });
-
-        // Limpa a borda vermelha da Justificativa assim que ele clicar em uma opção
-        const radiosJust = form.querySelectorAll('input[name="justificativa"]');
-        radiosJust.forEach(radio => {
-            radio.addEventListener('change', () => {
-                const caixaJustificativa = document.getElementById('caixa_justificativa');
-                if (caixaJustificativa) caixaJustificativa.classList.remove('input-error');
-            });
-        });
-
-        const todosInputs = form.querySelectorAll('input, select');
-        todosInputs.forEach(campo => {
-            campo.addEventListener('input', () => campo.classList.remove('input-error', 'input-warning'));
-            campo.addEventListener('change', () => campo.classList.remove('input-error', 'input-warning'));
-        });
     }
+    // -----------------------------
+    // --- FIM: VALIDAÇÃO DO FORMULÁRIO ---
+    // -----------------------------
 
-    // ==========================================
-    // LÓGICA DA PÁGINA INICIAL (Tabela Autorizados)
-    // ==========================================
+
+    // -----------------------------
+    // --- INÍCIO: ESTILIZAÇÃO DA TABELA (Cores Status) ---
+    // -----------------------------
     const autorizados = document.querySelectorAll("td.autorizado");
-
     autorizados.forEach(td => {
         const valor = td.textContent.trim().toUpperCase();
         td.classList.remove("sim", "nao", "não", "pendente", "solicitado");
-
         let icon = "";
-
-        if (valor === "SIM") {
-            td.classList.add("sim");
-            icon = '<i class="fa-solid fa-circle-check"></i>';
-        }
-        else if (valor === "NÃO" || valor === "NAO") {
-            td.classList.add("nao");
-            icon = '<i class="fa-solid fa-circle-xmark"></i>';
-        }
-        else if (valor === "PENDENTE") {
-            td.classList.add("pendente");
-            icon = '<i class="fa-solid fa-circle-exclamation"></i>';
-        }
-        else if (valor === "SOLICITADO") {
-            td.classList.add("solicitado");
-            icon = '<i class="fa-solid fa-circle-pause"></i>';
-        }
-
+        if (valor === "SIM") { td.classList.add("sim"); icon = '<i class="fa-solid fa-circle-check"></i>'; }
+        else if (valor === "NÃO" || valor === "NAO") { td.classList.add("nao"); icon = '<i class="fa-solid fa-circle-xmark"></i>'; }
+        else if (valor === "PENDENTE") { td.classList.add("pendente"); icon = '<i class="fa-solid fa-circle-exclamation"></i>'; }
+        else if (valor === "SOLICITADO") { td.classList.add("solicitado"); icon = '<i class="fa-solid fa-circle-pause"></i>'; }
         td.innerHTML = icon + " " + valor;
     });
+    // -----------------------------
+    // --- FIM: ESTILIZAÇÃO DA TABELA ---
+    // -----------------------------
+
+
+    // -----------------------------
+    // --- INÍCIO: LÓGICA DO MODAL (DETALHES DO ACESSO VIA API) ---
+    // -----------------------------
+    const modal = document.getElementById('modalPrevia');
+    const modalBody = document.getElementById('modalBodyText');
+    const closeBtn = document.querySelector('.modal-close');
+    const previaLinks = document.querySelectorAll('.td-previa span');
+
+    previaLinks.forEach(link => {
+        link.addEventListener('click', async (evento) => {
+            evento.stopPropagation();
+            const td = link.closest('td');
+            const ticket = td.getAttribute('data-ticket');
+
+            if (!ticket) return;
+
+            // 1. Abre o modal com mensagem de carregamento
+            modalBody.innerHTML = '<div style="text-align:center; padding:30px; color:#666;">Buscando dados seguros...</div>';
+            if (modal) modal.classList.add('active');
+
+            try {
+                // 2. Busca os dados no servidor
+                const response = await fetch(`/api/modal/${ticket}`);
+                if (!response.ok) throw new Error('Falha ao buscar dados');
+
+                const data = await response.json();
+
+                // Função auxiliar para tratar dados vazios
+                const getValue = (val) => {
+                    return (val && String(val).trim() !== '' && val !== 'null' && val !== 'undefined') ? val : '-';
+                };
+
+                // Formatar Data para o Padrão Brasil (DD/MM/AAAA)
+                const formatBRDate = (dateStr) => {
+                    if (!dateStr || dateStr === '-' || dateStr === 'null') return '-';
+                    const onlyDate = String(dateStr).split(' ')[0]; // Garante que pega só a data, sem as horas se houver
+                    if (onlyDate.includes('-')) {
+                        const parts = onlyDate.split('-');
+                        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    }
+                    return dateStr;
+                };
+
+                // Lógicas condicionais
+                const veiculoFormatado = (data.com_veiculo === 'sim' || data.com_veiculo === 1) ? 'SIM' : 'NÃO';
+                const dataSolicitacaoRaw = getValue(data.data_solicitacao) !== '-' ? getValue(data.data_solicitacao) : getValue(data.created_at);
+
+                // 3. Monta a tabela exata com os nomes e formatações solicitadas
+                const htmlConteudo = `
+                    <table class="modal-table">
+                        <tbody>
+                            <tr><td class="col-label">TICKET</td><td>${getValue(data.ticket)}</td></tr>
+                            <tr><td class="col-label">NOME COMPLETO</td><td>${getValue(data.nome)}</td></tr>
+                            <tr><td class="col-label">DOCUMENTO</td><td>${getValue(data.doc_nacional)}</td></tr>
+                            <tr><td class="col-label">Nº DOCUMENTO</td><td>${getValue(data.numero_doc)}</td></tr>
+                            
+                            <tr><td class="col-label">EMPRESA</td><td>${getValue(data.empresa)}</td></tr>
+                            
+                            <tr><td class="col-label">DATA DO ACESSO</td><td>${formatBRDate(data.data_do_acesso)}</td></tr>
+                            <tr><td class="col-label">QTD. DE DIAS</td><td>${getValue(data.qtd_dias)}</td></tr>
+                            <tr><td class="col-label">DATA LIMITE</td><td>${formatBRDate(data.data_limite)}</td></tr>
+                            
+                            <tr><td class="col-label">COM VEÍCULO?</td><td>${veiculoFormatado}</td></tr>
+                            <tr><td class="col-label">PLACA</td><td>${getValue(data.placa)}</td></tr>
+                            <tr><td class="col-label">TIPO VEÍCULO</td><td>${getValue(data.tipo_veiculo)}</td></tr>
+                            
+                            <tr><td class="col-label">JUSTIFICATIVA</td><td>${getValue(data.justificativa)}</td></tr>
+                            <tr><td class="col-label">PORTÃO</td><td>${getValue(data.portoes)}</td></tr>
+                            <tr><td class="col-label">SETOR DA VISITA</td><td>${getValue(data.setor_nome)}</td></tr>
+                            
+                            <tr><td class="col-label">SOLICITANTE</td><td>${getValue(data.user_name)}</td></tr>
+                            
+                            <tr><td class="col-label">DATA DA SOLICITAÇÃO</td><td>${formatBRDate(dataSolicitacaoRaw)}</td></tr>
+                            <tr><td class="col-label">DATA DE ENCERRAMENTO</td><td>${formatBRDate(data.data_encerramento)}</td></tr>
+                            <tr><td class="col-label">ÚLTIMA ATUALIZAÇÃO</td><td>${formatBRDate(data.updated_at)}</td></tr>
+                        </tbody>
+                    </table>
+                `;
+
+                modalBody.innerHTML = htmlConteudo;
+
+            } catch (error) {
+                console.error(error);
+                modalBody.innerHTML = '<div style="text-align:center; padding:30px; color:red;">Erro ao carregar os dados.</div>';
+            }
+        });
+    });
+
+    if (closeBtn && modal) {
+        closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    }
+
+    window.addEventListener('click', (evento) => {
+        if (evento.target === modal) modal.classList.remove('active');
+    });
+    // -----------------------------
+    // --- FIM: LÓGICA DO MODAL ---
+    // -----------------------------
+
+
+    // -----------------------------
+    // --- INÍCIO: REDIRECIONAMENTO DE LINHA (CLICAR NA TABELA) ---
+    // -----------------------------
+    const tableRows = document.querySelectorAll('.table-container tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('click', (evento) => {
+            // Ignora o clique se foi no checkbox/radio button ou num botão
+            if (evento.target.tagName === 'INPUT' && (evento.target.type === 'checkbox' || evento.target.type === 'radio')) return;
+            if (evento.target.tagName === 'BUTTON') return;
+
+            const ticket = row.getAttribute('data-ticket');
+            if (ticket) {
+                window.location.href = `/visualizar/${ticket}`;
+            }
+        });
+    });
+    // -----------------------------
+    // --- FIM: REDIRECIONAMENTO DE LINHA ---
+    // -----------------------------
+
 });
+// ==========================================
+// === FIM: INICIALIZAÇÃO GERAL DA PÁGINA ===
+// ==========================================
+
+
 
 // ==========================================
-// SELECIONAR TODOS OS CHECKBOXES (Protegido)
+// === INÍCIO: SELECIONAR TODOS OS CHECKBOXES ===
 // ==========================================
 document.addEventListener('DOMContentLoaded', function () {
     const selectAllCheckbox = document.getElementById('selectAll');
     const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', function () {
-            rowCheckboxes.forEach(checkbox => {
-                checkbox.checked = selectAllCheckbox.checked;
-            });
+            rowCheckboxes.forEach(checkbox => checkbox.checked = selectAllCheckbox.checked);
         });
     }
 });
+// ==========================================
+// === FIM: SELECIONAR TODOS OS CHECKBOXES ===
+// ==========================================
+
+
 
 // ==========================================
-// AUTOCOMPLETE GLOBAL (ALFABÉTICO) E FILTROS DA TELA
+// === INÍCIO: AUTOCOMPLETE GLOBAL E FILTROS DA TELA ===
 // ==========================================
 document.addEventListener('DOMContentLoaded', function () {
     const statusFilters = document.querySelectorAll('.status-filter');
@@ -387,16 +405,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function filtrarTabelaLocalmente() {
         if (tableRows.length === 0) return;
-
-        const statusPermitidos = Array.from(document.querySelectorAll('.status-filter:checked'))
-            .map(cb => cb.value.toUpperCase());
-
+        const statusPermitidos = Array.from(document.querySelectorAll('.status-filter:checked')).map(cb => cb.value.toUpperCase());
         const termo = buscaInput ? buscaInput.value.trim().toLowerCase() : '';
         const termoLimpo = termo.replace(/\D/g, '');
 
         tableRows.forEach(row => {
             const celulaAutorizado = row.querySelector('.autorizado');
             const colunas = row.querySelectorAll('td');
+            if (!celulaAutorizado || colunas.length < 4) return;
 
             const celulaTicket = colunas[1];
             const celulaNome = colunas[2];
@@ -410,11 +426,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const cpfLimpo = cpfDaLinha.replace(/\D/g, '');
 
                 const passouNoStatus = statusPermitidos.includes(statusDaLinha);
-
-                const passouNoTermo = ticketDaLinha.includes(termo) ||
-                    nomeDaLinha.includes(termo) ||
-                    cpfDaLinha.includes(termo) ||
-                    (termoLimpo && cpfLimpo.includes(termoLimpo));
+                const passouNoTermo = ticketDaLinha.includes(termo) || nomeDaLinha.includes(termo) || cpfDaLinha.includes(termo) || (termoLimpo && cpfLimpo.includes(termoLimpo));
 
                 if (passouNoStatus && passouNoTermo) row.style.display = '';
                 else row.style.display = 'none';
@@ -422,101 +434,75 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    statusFilters.forEach(checkbox => {
-        checkbox.addEventListener('change', filtrarTabelaLocalmente);
-    });
+    statusFilters.forEach(checkbox => checkbox.addEventListener('change', filtrarTabelaLocalmente));
 
     if (buscaInput && autocompleteList) {
         buscaInput.addEventListener('input', async function () {
             const valorDigitado = this.value.trim();
             autocompleteList.innerHTML = '';
-
             if (!valorDigitado) {
                 filtrarTabelaLocalmente();
-                if (window.location.search.includes('buscaTermo')) {
-                    window.location.href = '/admin/edit';
-                }
                 return;
             }
-
             filtrarTabelaLocalmente();
-
             try {
                 const resposta = await fetch(`/api/admin/search-nomes?q=${encodeURIComponent(valorDigitado)}`);
                 const registros = await resposta.json();
-
                 if (registros.length === 0) return;
 
                 registros.forEach(reg => {
                     const item = document.createElement('div');
-
                     let cpfFormatado = reg.numero_doc;
                     if (reg.doc_nacional === 'CPF' && cpfFormatado && cpfFormatado.length === 11) {
                         cpfFormatado = cpfFormatado.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
                     }
-
                     const regex = new RegExp(`(${valorDigitado})`, "gi");
                     const textoTicket = `TKT: ${reg.ticket}`.replace(regex, "<strong>$1</strong>");
                     const textoNome = reg.nome.replace(regex, "<strong>$1</strong>");
                     const textoCPF = cpfFormatado.replace(regex, "<strong>$1</strong>");
 
                     item.innerHTML = `<span style="color:#00BEDD; font-weight:bold;">[${textoTicket}]</span> ${textoNome} <span style="color:#888; font-size:11px;">(${textoCPF})</span>`;
-
                     item.addEventListener('click', function () {
-                        window.location.href = `/admin/edit?buscaTermo=${encodeURIComponent(reg.ticket)}`;
+                        window.location.href = `/visualizar/${encodeURIComponent(reg.ticket)}`;
                     });
-
                     autocompleteList.appendChild(item);
                 });
-            } catch (error) {
-                console.error("Erro no autocomplete global:", error);
-            }
+            } catch (error) { console.error("Erro no autocomplete:", error); }
         });
-
-        document.addEventListener('click', function (e) {
-            if (e.target !== buscaInput) autocompleteList.innerHTML = '';
-        });
+        document.addEventListener('click', function (e) { if (e.target !== buscaInput) autocompleteList.innerHTML = ''; });
     }
 });
+// ==========================================
+// === FIM: AUTOCOMPLETE GLOBAL E FILTROS DA TELA ===
+// ==========================================
+
+
 
 // ==========================================
-// FUNÇÃO DE EDIÇÃO MASSIVA (Disponível globalmente)
+// === INÍCIO: FUNÇÃO DE EDIÇÃO MASSIVA ===
 // ==========================================
 window.editarSelecionados = async function () {
     const rowCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selecionados = Array.from(rowCheckboxes).map(cb => cb.value);
 
-    if (selecionados.length === 0) {
-        alert('Por favor, selecione pelo menos um registro para editar.');
-        return;
-    }
+    if (selecionados.length === 0) { alert('Por favor, selecione pelo menos um registro para editar.'); return; }
 
     const statusSelect = document.getElementById('status_select');
-    if (!statusSelect) {
-        alert('Erro: O campo de status não foi encontrado na tela.');
-        return;
-    }
-    const novoStatus = statusSelect.value;
+    if (!statusSelect) return;
 
+    const novoStatus = statusSelect.value;
     if (confirm(`Deseja alterar o status de ${selecionados.length} agendamento(s) para "${novoStatus}"?`)) {
         try {
             const response = await fetch('/admin/edit', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    tickets: selecionados,
-                    status: novoStatus
-                })
+                body: JSON.stringify({ tickets: selecionados, status: novoStatus })
             });
-
-            if (response.ok) {
-                window.location.reload();
-            } else {
-                alert('Erro ao atualizar os registros no banco de dados.');
-            }
-        } catch (error) {
-            console.error("Erro na requisição:", error);
-            alert('Erro de conexão ao tentar atualizar.');
-        }
+            if (response.ok) window.location.reload();
+            else alert('Erro ao atualizar os registros.');
+        } catch (error) { alert('Erro de conexão.'); }
     }
 };
+// ==========================================
+// === FIM: FUNÇÃO DE EDIÇÃO MASSIVA ===
+// ==========================================

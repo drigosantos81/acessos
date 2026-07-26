@@ -1,13 +1,13 @@
 {% extends 'layout.html' %}
 
 {% block head %}
-<title>Solicitações Registradas</title>
+    <title>Solicitações Registradas</title>
 {% endblock %}
 
 {% block content %}
 
 {% if success %}
-<div class="messages success">{{ success }}</div>
+    <div class="messages success">{{ success }}</div>
 {% endif %}
 
 <div class="card">
@@ -48,8 +48,11 @@
                         {% if acesso.com_veiculo %} Sim {% else %} Não {% endif %}
                     </td>
 
-                    <td class="td-previa" data-texto="{{ acesso.justificativa }}">
-                        <span>Ver Prévia</span>
+                    <td class="td-previa" data-ticket="{{ acesso.ticket }}">
+                        
+                        <span style="color: #00BEDD; cursor: pointer; text-decoration: underline; font-weight: 500;">
+                            Ver Prévia
+                        </span>
                     </td>
 
                     <td class="autorizado 
@@ -66,17 +69,6 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
-</div>
-
-<!-- MODAL DE PRÉVIA -->
-<div class="modal-overlay" id="modalPrevia">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Prévia da Justificativa</h3>
-            <span class="modal-close">&times;</span>
-        </div>
-        <div class="modal-body" id="modalBodyText"></div>
     </div>
 </div>
 

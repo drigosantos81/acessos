@@ -1,0 +1,113 @@
+/* ==========================================
+   BASE DO MODAL (Fundo escuro e visibilidade)
+========================================== */
+.modal-overlay {
+    display: none; /* Escondido por padrão, o JS muda isso */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Quando o Javascript adiciona a classe 'active', ele aparece */
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+/* ==========================================
+   ESTILIZAÇÃO DO MODAL DE DETALHES
+========================================== */
+.modal-content.modal-detalhes {
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh; /* Evita que o modal passe da tela em monitores pequenos */
+    overflow-y: auto; /* Cria barra de rolagem se os dados forem muito grandes */
+}
+
+/* Cabeçalho do Modal */
+.modal-detalhes .modal-header {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    padding: 10px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-detalhes .modal-header h3 {
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 22px;
+    margin: 0;
+    width: 100%;
+    color: #333;
+}
+
+/* Botão de Fechar (X) */
+.modal-detalhes .modal-close {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 28px;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.2s;
+}
+
+.modal-detalhes .modal-close:hover {
+    color: #ef4444; /* Fica vermelho ao passar o mouse */
+}
+
+/* Corpo do Modal */
+.modal-detalhes .modal-body {
+    padding: 10px 20px 20px 20px;
+}
+
+/* ==========================================
+   TABELA INTERNA DE DETALHES DO ACESSO
+========================================== */
+.modal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    color: #444;
+    text-align: left;
+}
+
+.modal-table td {
+    padding: 4px 8px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Remove a linha de baixo do último item da tabela */
+.modal-table tr:last-child td {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* Coluna dos Títulos (Ticket, Nome, etc) */
+.modal-table td.col-label {
+    width: 45%;
+    font-weight: bold;
+    color: #555;
+}
+
+/* Destaque especial para a linha de Status */
+.modal-table td.col-status-label {
+    color: #111;
+}
+
+.modal-table td.col-status-value {
+    font-weight: bold;
+    font-size: 15px;
+}

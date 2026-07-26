@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import session from 'express-session'
 import connectSqlite3 from 'connect-sqlite3';
 import routes from './routes/index.js';
+import methodOverride from 'method-override';
 
 dotenv.config();
 
@@ -17,6 +18,8 @@ app.use(express.static("public"));
 app.use(express.static("img"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 
 app.use((req, res, next) => {
     res.set("Cache-Control", "no-store")

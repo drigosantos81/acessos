@@ -2,15 +2,15 @@ import db from "../../config/db.js";
 import { Acesso } from "../interfaces/AcessosTable.js";
 
 export default {
-    // Retorna a lista dos acessos solicitados
+    // Retorna a lista dos acessos solicitados (Para Admins)
     all() {
         try {
             return db.query(`
                 SELECT
-                    nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
+                    ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
                     com_veiculo, justificativa, autorizado
                 FROM 
-                    ACESSO
+                    acesso
                 WHERE 
                     data_do_acesso >= DATE('now')
                 GROUP BY 
@@ -28,14 +28,15 @@ export default {
         }
     },
 
+    // Retorna a lista dos acessos solicitados (Para Usuário Comum)
     findByUser(userId: number) {
         try {
             return db.query(`
                 SELECT
-                    nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
+                    ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
                     com_veiculo, justificativa, autorizado
                 FROM 
-                    ACESSO
+                    acesso
                 WHERE
                     user_id = ? AND
                     data_do_acesso >= DATE('now')
@@ -183,21 +184,6 @@ export default {
             return [];
         }
     },
-    // async getNextTicket(): Promise<number> {
-    //     try {
-    //         const query = `SELECT MAX(CAST(ticket AS INTEGER)) as max_ticket FROM acesso`;
-    //         const result = await db.query(query);
-
-    //         // Se o banco estiver vazio, o MAX retorna nulo, então começamos com o ticket 1
-    //         const maxTicket = result.rows[0].max_ticket;
-    //         return maxTicket ? maxTicket + 1 : 1;
-    //     } catch (error) {
-    //         console.log('Erro ao buscar próximo ticket:', error);
-    //         // Em caso de erro grave, tentamos gerar um ticket baseado no timestamp 
-    //         // para não travar o sistema ou duplicar com um antigo
-    //         return Date.now();
-    //     }
-    // },
 
     // Comando POST para novo cadastro de solicitação de acesso
     post(data: Acesso, userId: number) {
@@ -248,6 +234,104 @@ export default {
 
         } catch (error) {
             console.log('Erro no model Acessos.post:', error);
+        }
+    },
+    // ==========================================
+    // BUSCAR REGISTRO ÚNICO PELO TICKET
+    // ==========================================
+    async findByTicket(ticket: string) {
+        try {
+            const query = `
+                SELECT a.*, u.name as user_name 
+                FROM acesso a
+                LEFT JOIN users u ON a.user_id = u.id
+                WHERE a.ticket = ?
+            `;
+            const results = await db.query(query, [ticket]);
+            return results;
+        } catch (error) {
+            console.error("Erro no model findByTicket:", error);
+            throw error;
+        }
+    },
+
+    // ==========================================
+    // ATUALIZAR REGISTRO INDIVIDUAL
+    // ==========================================
+    async update(ticket: string, data: any) {
+        try {
+            const query = `
+                UPDATE acesso SET 
+                    nome = ?, 
+                    doc_nacional = ?, 
+                    numero_doc = ?, 
+                    empresa = ?, 
+                    data_do_acesso = ?, 
+                    qtd_dias = ?, 
+                    telefone = ?, 
+                    com_veiculo = ?, 
+                    placa = ?, 
+                    tipo_veiculo = ?, 
+                    cnh = ?, 
+                    cat_habilitacao = ?, 
+                    data_validade_cnh = ?, 
+                    justificativa = ?, 
+                    visita_a = ?, 
+                    tel_interno = ?, 
+                    autorizado = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE ticket = ?
+            `;
+
+            const values = [
+                data.nome, data.doc_nacional, data.numero_doc, data.empresa,
+                data.data_do_acesso, data.qtd_dias, data.telefone, data.com_veiculo,
+                data.placa || null, data.tipo_veiculo || null, data.cnh || null,
+                data.cat_habilitacao || null, data.data_validade_cnh || null,
+                data.justificativa, data.visita_a, data.tel_interno, data.autorizado,
+                ticket
+            ];
+
+            await db.query(query, values);
+            return true;
+        } catch (error) {
+            console.error("Erro no model update:", error);
+            throw error;
+        }
+    },
+
+    // ==========================================
+    // DELETAR REGISTRO (Opcional)
+    // ==========================================
+    async delete(ticket: string) {
+        try {
+            const query = `DELETE FROM acesso WHERE ticket = ?`;
+            await db.query(query, [ticket]);
+            return true;
+        } catch (error) {
+            console.error("Erro no model delete:", error);
+            throw error;
+        }
+    },
+
+    // ==========================================
+    // BUSCAR DADOS EXCLUSIVOS PARA O MODAL
+    // ==========================================
+    async findForModal(ticket: string) {
+        try {
+            // Traz os dados do acesso + nome do usuário + nome do centro de custo (Setor)
+            const query = `
+                SELECT a.*, u.name as user_name, c.nome as setor_nome
+                FROM acesso a
+                LEFT JOIN users u ON a.user_id = u.id
+                LEFT JOIN centro_custo c ON a.centro_custo_id = c.id
+                WHERE a.ticket = ?
+            `;
+            const results = await db.query(query, [ticket]);
+            return results;
+        } catch (error) {
+            console.error("Erro no model findForModal:", error);
+            throw error;
         }
     }
 }
