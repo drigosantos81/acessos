@@ -21,7 +21,15 @@ export default {
 				results = await Acessos.findByUser(req.session.userId!); // O "!" garante ao TS que o userId existe (pois passou pelo middleware)
 			}
 
-			let acessos = results?.rows || [];
+			let acessos = results.rows || [];
+
+			// ==========================================
+			// NOVO FILTRO: Remove tudo que for "SIM"
+			// ==========================================
+			acessos = acessos.filter((acesso: any) => {
+				// Compara em maiúsculo para evitar erro se estiver "Sim" ou "sim"
+				return String(acesso.autorizado).toUpperCase() !== 'SIM';
+			});
 
 			// Mapeamos os resultados para ajustar a exibição da data
 			acessos = acessos.map((acesso: any) => {
@@ -121,12 +129,12 @@ export default {
 			// BACKEND CHECK 1: CAMPOS VAZIOS
 			// ==========================================
 			const camposObrigatorios = ["nome", "doc_nacional", "numero_doc", "data_do_acesso", "qtd_dias", "justificativa"];
-            
-            for (const campo of camposObrigatorios) {
-                if (!body[campo] || String(body[campo]).trim() === "") {
-                    return res.render("form", { acesso: body, error: "Erro no servidor: Preencha todos os campos obrigatórios." });
-                }
-            }
+
+			for (const campo of camposObrigatorios) {
+				if (!body[campo] || String(body[campo]).trim() === "") {
+					return res.render("form", { acesso: body, error: "Erro no servidor: Preencha todos os campos obrigatórios." });
+				}
+			}
 			// const camposObrigatorios = ["nome", "doc_nacional", "numero_doc", "data_do_acesso", "qtd_dias", "telefone"];
 			// for (const campo of camposObrigatorios) {
 			// 	if (!body[campo] || String(body[campo]).trim() === "") {
@@ -173,16 +181,16 @@ export default {
 			// BACKEND CHECK 3: TELEFONE E DATA INVÁLIDOS
 			// ==========================================
 			if (body.telefone && String(body.telefone).trim() !== "") {
-                const telDigits = String(body.telefone).replace(/\D/g, "");
-                // Só barra se a pessoa tentou digitar, mas digitou incompleto
-                if (telDigits.length < 10) {
-                    return res.render("form", { acesso: body, error: "O telefone informado deve ter pelo menos 10 dígitos." });
-                }
-                body.telefone = telDigits.slice(0, 11);
-            } else {
-                // Se a pessoa não digitou nada, enviamos null ou vazio para o banco
-                body.telefone = null; 
-            }
+				const telDigits = String(body.telefone).replace(/\D/g, "");
+				// Só barra se a pessoa tentou digitar, mas digitou incompleto
+				if (telDigits.length < 10) {
+					return res.render("form", { acesso: body, error: "O telefone informado deve ter pelo menos 10 dígitos." });
+				}
+				body.telefone = telDigits.slice(0, 11);
+			} else {
+				// Se a pessoa não digitou nada, enviamos null ou vazio para o banco
+				body.telefone = null;
+			}
 
 			// if (body.telefone) {
 			// 	const telDigits = body.telefone.replace(/\D/g, "");
@@ -483,7 +491,10 @@ export default {
 
 			// Executa o editAll (que já aplica a ordenação padrão por pesos de Autorizado)
 			let results = await Acessos.editAll(buscaTermo);
-			let acessos = results?.rows || [];
+
+			// CORREÇÃO 1: Removido o ".rows", pois o SQLite retorna o array diretamente!
+			let acessos = Array.isArray(results) ? results : (results?.rows || []);
+			// let acessos = results || [];
 
 			acessos = acessos.map((acesso: any) => {
 				const dataFormatada = formatDate(acesso.data_do_acesso).format;
@@ -504,10 +515,13 @@ export default {
 				};
 			});
 
+			// CORREÇÃO 2: Alterado de 'admin/edit' para 'edit' para o Nunjucks achar o arquivo
 			return res.render('admin/edit', { acessos, buscaTermoAtual: buscaTermo || '' });
 
 		} catch (error) {
 			console.log("Erro no showEdit:", error);
+			// CORREÇÃO 3: Adicionado um retorno caso dê erro no template ou no banco
+			return res.status(500).send("Ocorreu um erro ao tentar carregar a página de Edição Massiva. Verifique o console do VSCode.");
 		}
 	},
 

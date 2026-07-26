@@ -6,16 +6,14 @@
 body {
     background: #f5f7fa;
     font-family: Arial, Helvetica, sans-serif;
-    /* display: flex;
-    justify-content: center; */
-    padding: 0 0 0 0;
+    padding: 0;
 }
 
 .card {
     background: white;
     width: 920px;
-    padding: 0 25px 25px 25px;
-    margin: 0 auto 15px auto;
+    padding: 15px 25px 20px 25px;
+    margin: 25px auto 15px auto;
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -23,7 +21,6 @@ body {
 .card-edit-mass {
     background: white;
     width: 920px;
-    /* padding: 1px 25px 25px 25px; */
     margin: 0 auto 15px auto;
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -32,14 +29,13 @@ body {
 #caixa_justificativa {
     padding: 10px;
     border: 1px solid transparent;
-    /* Borda invisível para não dar "pulo" na tela quando a borda vermelha aparecer */
     border-radius: 6px;
 }
 
 .row {
     display: flex;
     gap: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     align-items: flex-end;
 }
 
@@ -47,7 +43,7 @@ body {
     display: grid;
     grid-template-columns: 120px 110px 100px 180px 110px 45px 110px;
     gap: 20px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     align-items: flex-end;
 }
 
@@ -61,503 +57,26 @@ body {
     flex: 2;
 }
 
-/* #buscaNome {
-    width: 400px;
-} */
-
-/* documento maior */
 .documento {
     flex: 0 0 220px;
 }
 
-/* cpf largura exata */
 .docnumero {
     flex: 0 0 150px;
 }
 
-/* empresa maior */
 .empresa {
     flex: 3;
 }
 
-/* data menor */
 .data {
     flex: 0 0 130px;
 }
 
-/* 2 digitos */
 .dias {
     flex: 0 0 55px;
 }
 
-/* telefone fixo */
-.telefone {
-    flex: 0 0 170px;
-}
-
-.veiculo {
-    flex: 0 0 200px;
-}
-
-.placa {
-    flex: 0 0 140px;
-}
-
-.tipo {
-    flex: 0 0 200px;
-}
-
-label {
-    font-size: 13px;
-    margin-bottom: 5px;
-}
-
-input {
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-}
-
-/* radio alinhado na mesma linha */
-.radio {
-    display: flex;
-    gap: 15px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: #f7f7f7;
-    align-items: center;
-}
-
-/* justificativa vertical */
-.justificativa {
-    flex: 2;
-}
-
-.justificativa label {
-    display: block;
-    margin-bottom: 6px;
-}
-
-/* lado direito */
-.side {
-    flex: 1;
-    align-items: stretch;
-}
-
-.actions {
-    text-align: right;
-    margin-top: 20px;
-}
-
-button {
-    background: #1a73e8;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 20px;
-    cursor: pointer;
-}
-
-.hidden {
-    display: none;
-}
-
-hr {
-    margin: 20px 0;
-    border: none;
-    border-top: 1px solid #eee;
-}
-
-/* RODRIGO */
-
-.row-name {
-    display: grid;
-    grid-template-columns: 1fr 170px 130px;
-    gap: 15px;
-    margin-bottom: 15px;
-    align-items: flex-end;
-}
-
-.input-cpf {
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-    font-size: 15px;
-    font-weight: bold;
-}
-
-.row-empresa {
-    display: grid;
-    grid-template-columns: 1fr 90px 75px;
-    gap: 15px;
-    margin-bottom: 15px;
-    align-items: flex-end;
-}
-
-.field-setor {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    justify-content: space-between;
-}
-
-.field-setor .field {
-    margin-bottom: 10px;
-}
-
-.actions-setor {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
-}
-
-.button-send {
-    background: #00BEDD;
-    color: white;
-    border: none;
-    width: 110px;
-    padding: 15px 5px 15px 5px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.button-send:hover {
-    transition: 400ms;
-    background-color: dodgerblue;
-    /* azul atual */
-}
-
-
-/* NOVOS BOTÕES - CANCELAR */
-/* .menu {
-    background: #011C43;
-    margin: 0 -25px 20px -25px;
-    padding: 12px 25px;
-} */
-
-.menu {
-    background: #011C43;
-    width: 100%;
-    padding: 12px 25px;
-    box-sizing: border-box;
-    margin: 0 0 20px 0;
-    border-radius: 6px;
-    /* remove margens negativas */
-}
-
-.menu-home {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    margin: 0 0 0 30px;
-}
-
-.menu-home:hover {
-    opacity: 0.8;
-}
-
-.form-actions {
-    display: flex;
-    justify-content: end;
-    gap: 10px;
-    margin-top: 25px;
-    padding: 0 10px 15px 0;
-}
-
-.button-cancel {
-    background: #e5e7eb;
-    color: #333;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 6px;
-    cursor: pointer;
-    width: 100px;
-}
-
-.button-cancel:hover {
-    background: #d1d5db;
-    transition: 300ms;
-}
-
-/* =========================================
-   ESTILIZAÇÃO GERAL DE TABELAS (Home e Edição)
-========================================= */
-
-.header-page {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0;
-    padding: 15px 0 0 0;
-}
-
-.table-container {
-    overflow-x: auto;
-    margin: 15px 0 0 0;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11px;
-    /* Tamanho padrão da Home */
-}
-
-/* Redução de fonte ESPECÍFICA para a página de Edição Massiva */
-.card-edit-mass table {
-    font-size: 10px;
-    /* Fonte menor para quebrar em 2 linhas */
-}
-
-thead {
-    background: #f1f5f9;
-}
-
-/* Bordas horizontais e verticais */
-.table-container table th,
-.table-container table td {
-    padding: 8px 6px;
-    border-bottom: 1px solid #e5e7eb;
-    /* Divisória horizontal */
-    border-right: 1px solid #e5e7eb;
-    /* Divisória vertical interna */
-    vertical-align: middle;
-    text-align: center;
-}
-
-/* Remove a linha vertical da última coluna (extremidade direita) */
-.table-container table th:last-child,
-.table-container table td:last-child {
-    border-right: none;
-}
-
-tbody tr:hover {
-    background: #f8fafc;
-}
-
-/* =========================================
-   LARGURAS DAS COLUNAS E AJUSTES FINOS
-========================================= */
-
-/* Centraliza os campos curtos (Datas, Dias, Veículo) */
-.table-container table th:nth-child(3),
-.table-container table td:nth-child(3),
-.table-container table th:nth-child(4),
-.table-container table td:nth-child(4),
-.table-container table th:nth-child(5),
-.table-container table td:nth-child(5),
-.table-container table th:nth-child(6),
-.table-container table td:nth-child(6) {
-    text-align: center;
-}
-
-/* =========================================
-   ESTILIZAÇÃO DA COLUNA AUTORIZADO
-========================================= */
-
-td.autorizado {
-    font-weight: normal;
-    background: none !important;
-
-    /* GANTE QUE A LINHA NÃO QUEBRE (Substitui o flexbox) */
-    display: table-cell !important;
-    text-align: left !important;
-    white-space: nowrap;
-    /* Impede o status de quebrar em duas linhas */
-}
-
-/* Espaçamento do ícone */
-td.autorizado i {
-    font-size: 14px;
-    margin-right: 6px;
-}
-
-/* Cores dos Status */
-td.autorizado.sim i {
-    color: #16a34a;
-}
-
-td.autorizado.nao i,
-td.autorizado.não i {
-    color: #dc2626;
-}
-
-td.autorizado.pendente i {
-    color: #eab308;
-}
-
-td.autorizado.solicitado i {
-    color: #2563eb;
-}
-
-td.autorizado.agendado i {
-    color: #00BEDD;
-}
-
-
-/* =========================================
-   RESPONSIVIDADE (Celular e Tablet)
-========================================= */
-
-@media (max-width: 768px) {
-    .table-container table {
-        font-size: 12px;
-    }
-
-    .card-edit-mass table {
-        font-size: 11px;
-    }
-
-    /* Ainda menor no tablet */
-    .table-container table th,
-    .table-container table td {
-        padding: 6px 4px;
-    }
-
-    .card,
-    .card-edit-mass {
-        width: 100%;
-        margin: 0 auto;
-    }
-}
-
-@media (max-width: 480px) {
-    .table-container {
-        overflow-x: auto;
-    }
-
-    .table-container table {
-        min-width: 100%;
-    }
-
-    .button-send {
-        width: 100%;
-        text-align: center;
-    }
-}
-
-/* SELECT com a mesma aparência dos inputs */
-select {
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-    background: white;
-    font-size: 15px;
-    font-family: inherit;
-    height: 40px;
-    cursor: pointer;
-}
-
-/* Para manter o mesmo comportamento visual ao focar */
-select:focus {
-    outline: none;
-    border-color: #1a73e8;
-    box-shadow: 0 0 0 1px #1a73e8;
-}
-
-/* =========================================
-   AUTOCOMPLETE (ESTILO GOOGLE)
-========================================= */
-.autocomplete-items {
-    position: absolute;
-    /* É isso que faz ela flutuar por cima da tabela! */
-    z-index: 999;
-    /* Garante que fique acima de qualquer outro elemento */
-    top: 100%;
-    /* Cola exatamente embaixo do input */
-    left: 0;
-    right: 0;
-    max-height: 250px;
-    /* Altura máxima antes de criar rolagem */
-    overflow-y: auto;
-    background-color: #ffffff;
-    /* Fundo branco para tapar a tabela */
-    border: 1px solid #ddd;
-    border-top: none;
-    border-radius: 0 0 6px 6px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-    /* Sombra para dar o efeito flutuante */
-}
-
-/* Cada linha da lista */
-.autocomplete-items div {
-    padding: 10px;
-    cursor: pointer;
-    background-color: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 13px;
-    color: #333;
-}
-
-/* Quando passa o mouse por cima */
-.autocomplete-items div:hover {
-    background-color: #f1f5f9;
-    color: #00BEDD;
-    /* Usando o azul do seu padrão */
-}
-
-/* =========================================
-   ALERTAS VISUAIS (Padrão Foodfy)
-========================================= */
-@keyframes messages {
-    to {
-        opacity: 0;
-        visibility: hidden;
-    }
-}
-
-.messages {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 16px;
-    position: fixed;
-    /* Fixed garante que fique no topo da tela */
-    width: 250px;
-    height: 75px;
-    top: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    /* Centraliza na tela */
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    /* Sombra elegante */
-
-    z-index: 1000;
-    color: white;
-    font-weight: bold;
-    animation: messages 2.5s ease-in-out forwards;
-    animation-delay: 2.5s;
-    /* Some após 2.5 segundos */
-}
-
-.messages.error {
-    background-color: #e83f5b;
-}
-
-.messages.success {
-    background-color: #01b169;
-}
-
-.messages.warning {
-    background-color: #f59e0b;
-    /* Amarelo/Laranja padrão de Alerta */
-}
-
-/* Classe para pintar a borda de vermelho */
-.input-error {
-    border: 2px solid #e83f5b !important;
-}
-
-/* Classe para pintar a borda de amarelo */
-.input-warning {
-    border: 2px solid #f59e0b !important;
-}
-
-/* =========================================
-   REGRA DE NEGÓCIO: LINHA DE VEÍCULOS ULTRA COMPACTA
-========================================= */
 .telefone {
     flex: 0 0 135px;
 }
@@ -586,112 +105,93 @@ select:focus {
     flex: 0 0 100px;
 }
 
-/* Encolhe o tamanho interno das caixas de escolha (SIM/NÃO e CARGA/PASSEIO) */
-.veiculo .radio,
-.tipo .radio {
-    gap: 6px;
-    padding: 10px 4px;
-    font-size: 11px;
+label {
+    font-size: 13px;
+    margin-bottom: 5px;
 }
 
+input {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
 
+.radio {
+    display: flex;
+    gap: 15px;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f7f7f7;
+    align-items: center;
+}
 
-/* =========================================
+.justificativa {
+    flex: 2;
+}
 
-=========================================
-   AJUSTES DE TELA: COMPRESSÃO (Sem Rolagem)
-========================================= */
-.card {
-    padding: 15px 25px 20px 25px;
-    /* Reduz o espaço interno no topo e na base do cartão branco */
+.justificativa label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.side {
+    flex: 1;
+    align-items: stretch;
+}
+
+.actions {
+    text-align: right;
+    margin-top: 20px;
+}
+
+button {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
 }
 
 h2 {
     margin-bottom: 15px;
-    /* Aproxima o título dos campos */
-}
-
-.menu {
-    margin: 0 0 10px 0;
-    /* Reduz o espaço abaixo da barra azul escuro */
-}
-
-.row,
-.row-name,
-.row-empresa,
-.row-veiculo {
-    margin-bottom: 10px;
-    /* Reduz o espaço entre as linhas do formulário (antes era 15px) */
 }
 
 hr {
     margin: 10px 0;
-    /* Achata as margens da linha divisória cinza */
+    border: none;
+    border-top: 1px solid #eee;
 }
 
-.form-actions {
-    margin-top: 10px;
-    /* Aproxima os botões "Cancelar" e "Enviar" do formulário */
+.row-name {
+    display: grid;
+    grid-template-columns: 1fr 170px 130px;
+    gap: 15px;
+    margin-bottom: 10px;
+    align-items: flex-end;
 }
 
-/* Afina levemente os campos de digitação e dropdowns */
-input {
-    padding: 8px 10px;
+.input-cpf {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+    font-weight: bold;
 }
 
-select {
-    height: 35px;
-    padding: 6px 10px;
+.row-empresa {
+    display: grid;
+    grid-template-columns: 1fr 90px 75px;
+    gap: 15px;
+    margin-bottom: 10px;
+    align-items: flex-end;
 }
 
-.radio {
-    padding: 8px 10px;
-}
-
-/* =========================================
-   AJUSTES DE TELA: ALINHAMENTO DOS RADIOS
-========================================= */
-.radio label,
-#caixa_justificativa label {
-    display: flex !important;
-    align-items: center;
-    /* Mágica: Força a bolinha e o texto a ficarem exatamente no mesmo eixo horizontal */
-    margin-bottom: 0 !important;
-    /* Mata a margem antiga que jogava o texto para baixo */
-    gap: 6px;
-    /* Define um espacinho elegante entre a bolinha e a palavra */
-    cursor: pointer;
-}
-
-/* Devolve o espaço entre as opções da Justificativa para elas não grudarem umas nas outras verticalmente */
-#caixa_justificativa label {
-    margin-bottom: 8px !important;
-}
-
-/* Remove a margem "fantasma" que os navegadores (Chrome/Edge) colocam nas bolinhas */
-input[type="radio"] {
-    margin: 0 !important;
-}
-
-
-
-
-
-/* =========================================
-   ALINHAMENTO ESPECÍFICO DA JUSTIFICATIVA
-========================================= */
-/* Sobrescreve o flex-end para que as caixas da esquerda e da direita tenham a mesma altura */
-.row-justificativa {
-    align-items: stretch !important;
-}
-
-/* Coloca as duas colunas de opções de justificativa lado a lado perfeitamente alinhadas */
-.grid-just {
-    display: flex;
-    gap: 30px;
-}
-
-/* Garante que o Setor cole no topo e o Contato cole na base, alinhando com a caixa ao lado */
 .field-setor {
     display: flex;
     flex-direction: column;
@@ -699,25 +199,309 @@ input[type="radio"] {
     justify-content: space-between;
 }
 
-/* Remove a margem extra, pois o justify-content: space-between já faz o espaçamento automático */
 .field-setor .field {
     margin-bottom: 0 !important;
 }
 
+.actions-setor {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
 
+.button-send {
+    background: #00BEDD;
+    color: white;
+    border: none;
+    width: 110px;
+    padding: 15px 5px;
+    border-radius: 6px;
+    cursor: pointer;
+}
 
+.button-send:hover {
+    transition: 400ms;
+    background-color: dodgerblue;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: end;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 0 10px 15px 0;
+}
+
+.button-cancel {
+    background: #e5e7eb;
+    color: #333;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100px;
+}
+
+.button-cancel:hover {
+    background: #d1d5db;
+    transition: 300ms;
+}
+
+.header-page {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    padding: 15px 0 0 0;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin: 15px 0 0 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+
+.card-edit-mass table {
+    font-size: 10px;
+}
+
+thead {
+    background: #f1f5f9;
+}
+
+.table-container table th,
+.table-container table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.table-container table th:last-child,
+.table-container table td:last-child {
+    border-right: none;
+}
+
+tbody tr:hover {
+    background: #f8fafc;
+}
+
+.table-container table th:nth-child(3),
+.table-container table td:nth-child(3),
+.table-container table th:nth-child(4),
+.table-container table td:nth-child(4),
+.table-container table th:nth-child(5),
+.table-container table td:nth-child(5),
+.table-container table th:nth-child(6),
+.table-container table td:nth-child(6) {
+    text-align: center;
+}
+
+td.autorizado {
+    font-weight: normal;
+    background: none !important;
+    display: table-cell !important;
+    text-align: left !important;
+    white-space: nowrap;
+}
+
+td.autorizado i {
+    font-size: 14px;
+    margin-right: 6px;
+}
+
+td.autorizado.sim i {
+    color: #16a34a;
+}
+
+td.autorizado.nao i,
+td.autorizado.não i {
+    color: #dc2626;
+}
+
+td.autorizado.pendente i {
+    color: #eab308;
+}
+
+td.autorizado.solicitado i {
+    color: #2563eb;
+}
+
+td.autorizado.agendado i {
+    color: #00BEDD;
+}
+
+@media (max-width: 768px) {
+    .table-container table {
+        font-size: 12px;
+    }
+
+    .card-edit-mass table {
+        font-size: 11px;
+    }
+
+    .table-container table th,
+    .table-container table td {
+        padding: 6px 4px;
+    }
+
+    .card,
+    .card-edit-mass {
+        width: 100%;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .table-container table {
+        min-width: 100%;
+    }
+
+    .button-send {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+select {
+    height: 35px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: white;
+    font-size: 15px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 1px #1a73e8;
+}
+
+.autocomplete-items {
+    position: absolute;
+    z-index: 999;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 13px;
+    color: #333;
+}
+
+.autocomplete-items div:hover {
+    background-color: #f1f5f9;
+    color: #00BEDD;
+}
+
+@keyframes messages {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.messages {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    position: fixed;
+    width: 250px;
+    height: 75px;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    color: white;
+    font-weight: bold;
+    animation: messages 2.5s ease-in-out forwards;
+    animation-delay: 2.5s;
+}
+
+.messages.error {
+    background-color: #e83f5b;
+}
+
+.messages.success {
+    background-color: #01b169;
+}
+
+.messages.warning {
+    background-color: #f59e0b;
+}
+
+.input-error {
+    border: 2px solid #e83f5b !important;
+}
+
+.input-warning {
+    border: 2px solid #f59e0b !important;
+}
+
+.veiculo .radio,
+.tipo .radio {
+    gap: 6px;
+    padding: 10px 4px;
+    font-size: 11px;
+}
+
+.radio label,
+#caixa_justificativa label {
+    display: flex !important;
+    align-items: center;
+    margin-bottom: 0 !important;
+    gap: 6px;
+    cursor: pointer;
+}
+
+#caixa_justificativa label {
+    margin-bottom: 8px !important;
+}
+
+input[type="radio"] {
+    margin: 0 !important;
+}
+
+.row-justificativa {
+    align-items: stretch !important;
+}
+
+.grid-just {
+    display: flex;
+    gap: 30px;
+}
 
 /* =========================================
    NOVO LAYOUT: SIDEBAR ESTREITA E HEADER FIXO
 ========================================= */
-body {
-    display: flex;
-    min-height: 100vh;
-    padding: 0;
-}
-
-/* 1 e 2. Barra Lateral mais fina (170px) */
-/* 1 e 2. Barra Lateral mais fina (170px) */
 .sidebar {
     width: 170px;
     background-color: #435773;
@@ -725,10 +509,10 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100vh; /* Garante que pegue exatamente a altura da janela */
+    height: 100vh;
     padding-top: 25px;
-    box-sizing: border-box; /* A MÁGICA: impede que o padding-top empurre a barra para fora da tela */
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
 }
 
@@ -736,6 +520,27 @@ body {
     text-align: center;
     margin-bottom: 30px;
     padding: 0 10px;
+}
+
+.sidebar-logo img {
+    width: 80px;
+    height: 60px;
+    margin: 0 auto 12px auto;
+    display: block;
+}
+
+.sidebar-title {
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+
+.sidebar-subtitle {
+    font-size: 11px;
+    font-weight: normal;
+    line-height: 1.3;
+    color: #00BEDD;
 }
 
 .sidebar-menu {
@@ -752,7 +557,11 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     transition: background 0.3s;
     font-size: 12px;
-    /* Fonte levemente menor para caber bonito */
+}
+
+.sidebar-menu li a i {
+    margin-right: 10px;
+    font-size: 14px;
 }
 
 .sidebar-menu li a:hover {
@@ -761,16 +570,70 @@ body {
     padding-left: 16px;
 }
 
-/* 1. Main Content sem padding para o menu colar nas bordas */
+.sidebar-footer {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    padding: 0 15px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.sidebar-user {
+    color: #00BEDD;
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-logout-form {
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-logout-btn {
+    background: none;
+    color: #e5e7eb;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.sidebar-logout-btn:hover {
+    color: #dc2626;
+}
+
+.sidebar-logout-btn i {
+    font-size: 11px;
+    margin-left: 4px;
+}
+
+.sidebar-login {
+    color: white;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.sidebar-login i {
+    font-size: 11px;
+    margin-right: 4px;
+}
+
 .main-content {
     margin-left: 170px;
     width: calc(100% - 170px);
     padding: 0;
-    /* Zerado para o menu bater nas quinas */
     box-sizing: border-box;
 }
 
-/* 1. Menu grudado no topo, ponta a ponta */
 .menu {
     background: #011C43;
     width: 100%;
@@ -778,35 +641,65 @@ body {
     box-sizing: border-box;
     margin: 0;
     border-radius: 0 !important;
-    /* Retira as bordas arredondadas */
     position: sticky;
-    /* Cola no topo */
     top: 0;
     z-index: 900;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-/* Descola o cartão principal do menu fixo */
-.card {
-    margin: 25px auto 15px auto;
+.menu-links {
+    display: flex;
+    gap: 10px;
 }
 
-/* =========================================
-   TABELA: LINHA CLICÁVEL E MODAL
-========================================= */
+
+.menu-home {
+    color: #ffffff !important;
+    /* Força a cor branca */
+    text-decoration: none !important;
+    /* Remove o sublinhado */
+    font-weight: 500;
+    margin-left: 0;
+    transition: opacity 0.2s;
+}
+
+/* Garante que mesmo após clicado (visitado), ele continue branco */
+.menu-home:visited {
+    color: #ffffff !important;
+}
+
+/* Efeito ao passar o mouse */
+.menu-home:hover {
+    opacity: 0.8;
+}
+
+.menu-home i {
+    margin-right: 6px;
+}
+
+
+
+
+/* .menu-home {
+    margin-left: 0;
+} */
+
+.menu-home i {
+    margin-right: 6px;
+}
+
 .table-container tbody tr {
     cursor: pointer;
-    /* Transforma o mouse em uma mãozinha indicando que é clicável */
     transition: background 0.2s;
 }
 
-/* Efeito Hover na Tabela */
 .table-container tbody tr:hover {
     background: #e2e8f0;
-    /* Cor de destaque ao passar o mouse na linha */
 }
 
-/* Botão/Link da Prévia na Tabela */
 .td-previa span {
     color: #00BEDD;
     font-weight: bold;
@@ -818,7 +711,9 @@ body {
     color: #011C43;
 }
 
-/* Overlay Escuro do Modal */
+/* =========================================
+   MODAL DE PRÉVIA
+========================================= */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -827,13 +722,11 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.6);
     display: none;
-    /* Escondido por padrão */
     justify-content: center;
     align-items: center;
     z-index: 2000;
 }
 
-/* Classe para ligar o modal via JS */
 .modal-overlay.active {
     display: flex;
 }
@@ -876,4 +769,42 @@ body {
     font-size: 14px;
     color: #555;
     line-height: 1.5;
+}
+
+/* =========================================
+   CLASSES UTILITÁRIAS E COMPONENTES ESPECÍFICOS
+========================================= */
+.mb-5 {
+    margin-bottom: 5px !important;
+}
+
+.flex-none {
+    flex: none !important;
+}
+
+.field-relative {
+    position: relative;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.col-checkbox {
+    width: 40px;
+    text-align: center;
+}
+
+.btn-auto {
+    width: auto !important;
+    padding: 12px 25px !important;
+}
+
+.checkbox-group {
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: fit-content;
+    display: flex;
+    align-items: center;
 }

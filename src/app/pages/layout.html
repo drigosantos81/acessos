@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% block head %}
+    <title>Portal de Atendimento</title>
+    {% endblock %}
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="/img/logo-ws.png" alt="Logo TECON">
+            <div class="sidebar-title">PORTAL DE<br>ATENDIMENTO</div>
+            <div class="sidebar-subtitle">TECON SALVADOR</div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li><a href="/"><i class="fa-solid fa-address-card"></i> ACESSOS</a></li>
+            <li><a href="#"><i class="fa-solid fa-file-invoice-dollar"></i> PAGAMENTOS</a></li>
+            <li><a href="#"><i class="fa-solid fa-car-burst"></i> AVARIAS</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            {% if session.userId %}
+            <div class="sidebar-user">
+                <i class="fa-solid fa-user"></i> {{ session.userName }}
+            </div>
+            <form action="/logout" method="POST" class="sidebar-logout-form">
+                <button type="submit" class="sidebar-logout-btn">
+                    Sair <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </form>
+            {% else %}
+            <a href="/login" class="sidebar-login">
+                <i class="fa-solid fa-lock"></i> Login
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="menu">
+            <div class="menu-links">
+                <a href="/" class="menu-home">
+                    <i class="fa-solid fa-folder-open"></i> Pedidos Abertos
+                </a>
+
+                {% if session.userId %}
+                <a href="/admin/edit" class="menu-home">
+                    <i class="fa-solid fa-pen-to-square"></i> Edição Massiva
+                </a>
+                {% endif %}
+
+                <a href="#" class="menu-home">
+                    <i class="fa-solid fa-check-double"></i> Pedidos Resolvidos
+                </a>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO DA PÁGINA (MIOLO) -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="/scripts/script.js"></script>
+</body>
+
+</html>

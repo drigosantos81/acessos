@@ -1,200 +1,170 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+{% extends 'layout.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Acesso</title>
+{% block head %}
+<title>Cadastro de Acesso</title>
+{% endblock %}
 
-    <link rel="stylesheet" href="/css/style.css">
-</head>
+{% block content %}
 
-<body>
-    {% if error %}
-    <div class="messages error">{{ error }}</div>
-    {% endif %}
+{% if error %}
+<div class="messages error">{{ error }}</div>
+{% endif %}
 
-    {% if success %}
-    <div class="messages success">{{ success }}</div>
-    {% endif %}
+{% if success %}
+<div class="messages success">{{ success }}</div>
+{% endif %}
 
-    <div class="menu">
-        <a href="/" class="menu-home">Home</a>
-    </div>
+<div class="card">
 
-    <div class="card">
+    <h2>Cadastro de Acesso</h2>
 
-        <h2>Cadastro de Acesso</h2>
+    <form id="meuForm" method="POST" action="/" novalidate>
 
-        <form id="meuForm" method="POST" action="/" novalidate>
-
-            <!-- linha 1 -->
-            <div class="row-name">
-
-                <div class="field grow">
-                    <label>Nome *</label>
-                    <input type="text" name="nome" value="{{ acesso.nome }}" required>
-                </div>
-
-                <div class="field documento">
-                    <label>Documento</label>
-
-                    <!-- DROPDOWN NOVO -->
-                    <select name="doc_nacional" id="doc_nacional_select">
-                        <option value="CPF" selected>CPF</option>
-                        <option value="PASSAPORTE">PASSAPORTE</option>
-                        <option value="RG">RG</option>
-                    </select>
-                </div>
-
-                <div class="field docnumero">
-                    <label>Nº do Documento</label>
-                    <input type="text" id="numero_doc_input" name="numero_doc" placeholder="000.000.000-00"
-                        autocomplete="off" maxlength="20" inputmode="text" value="{{ acesso.numero_doc }}" required>
-                </div>
-
+        <div class="row-name">
+            <div class="field grow">
+                <label>Nome *</label>
+                <input type="text" name="nome" value="{{ acesso.nome }}" required>
             </div>
 
-            <!-- linha 2 -->
-            <div class="row-empresa">
-
-                <div class="field empresa">
-                    <label>Empresa</label>
-                    <input type="text" name="empresa" value="{{ acesso.empresa }}" required>
-                </div>
-
-                <div class="field data">
-                    <label>DATA</label>
-                    <input type="text" name="data_do_acesso" id="data_input" placeholder="00/00/0000" maxlength="10"
-                        inputmode="numeric" value="{{ acesso.data_do_acesso }}" required>
-                </div>
-
-                <div class="field dias">
-                    <label>QTD. DIAS</label>
-                    <input type="number" name="qtd_dias" id="qtd_dias_input" maxlength="2" value="{{ acesso.qtd_dias }}"
-                        required>
-                </div>
-
+            <div class="field documento">
+                <label>Documento</label>
+                <select name="doc_nacional" id="doc_nacional_select">
+                    <option value="CPF" selected>CPF</option>
+                    <option value="PASSAPORTE">PASSAPORTE</option>
+                    <option value="RG">RG</option>
+                </select>
             </div>
 
-            <!-- Veículo -->
-            <div class="row-veiculo">
+            <div class="field docnumero">
+                <label>Nº do Documento</label>
+                <input type="text" id="numero_doc_input" name="numero_doc" placeholder="000.000.000-00"
+                    autocomplete="off" maxlength="20" inputmode="text" value="{{ acesso.numero_doc }}" required>
+            </div>
+        </div>
 
-                <div class="field telefone">
-                    <label>Telefone</label>
-                    <input type="text" id="telefone_input" name="telefone" placeholder="(00) 00000-0000" maxlength="15"
-                        inputmode="numeric">
-                </div>
-
-                <div class="field veiculo">
-                    <label>Com Veículo</label>
-
-                    <div class="radio">
-                        <label><input type="radio" name="com_veiculo" id="veiculo_sim" value="sim"> SIM</label>
-                        <label><input type="radio" name="com_veiculo" id="veiculo_nao" value="nao" checked> NÃO</label>
-                    </div>
-
-                </div>
-
-                <div class="field placa hidden" id="placaField">
-                    <label>Placa</label>
-                    <!-- <input type="text" name="placa" id="placa"> -->
-                    <input type="text" name="placa" id="placa" value="{{ acesso.placa }}" placeholder="XXX-0X00"
-                        maxlength="8">
-                </div>
-
-                <div class="field tipo hidden" id="tipoField">
-                    <label>Tipo Veículo</label>
-
-                    <div class="radio" id="caixa_tipo_veiculo">
-                        <label><input type="radio" name="tipo_veiculo" value="DE CARGA"> DE CARGA</label>
-                        <label><input type="radio" name="tipo_veiculo" value="PASSEIO"> PASSEIO</label>
-                    </div>
-                </div>
-
-                <div class="field cnh hidden" id="cnhField">
-                    <label>Nº CNH *</label>
-                    <input type="text" name="cnh" id="cnh_input" value="{{ acesso.cnh }}" placeholder="00000000000"
-                        maxlength="11" inputmode="numeric">
-                </div>
-
-                <div class="field cat_hab hidden" id="catHabField">
-                    <label>Cat. *</label>
-                    <input type="text" name="cat_habilitacao" id="cat_habilitacao_input"
-                        value="{{ acesso.cat_habilitacao }}" placeholder="AB" maxlength="2">
-                </div>
-
-                <div class="field validade_cnh hidden" id="validadeCnhField">
-                    <label>Validade *</label>
-                    <input type="text" name="data_validade_cnh" id="validade_cnh_input"
-                        value="{{ acesso.data_validade_cnh }}" placeholder="00/00/0000" maxlength="10"
-                        inputmode="numeric">
-                </div>
-
+        <div class="row-empresa">
+            <div class="field empresa">
+                <label>Empresa</label>
+                <input type="text" name="empresa" value="{{ acesso.empresa }}" required>
             </div>
 
-            <hr>
-
-            <!-- justificativa -->
-            <div class="row row-justificativa">
-
-                <div class="field justificativa">
-                    <label>Justificativa</label>
-
-                    <div class="grid-just" id="caixa_justificativa">
-                        <div>
-                            <label><input type="radio" name="justificativa" value="Execução de Serviço" {% if acesso.justificativa == 'Execução de Serviço' %}checked{% endif %}> Execução de Serviço</label>
-                            <label><input type="radio" name="justificativa" value="Entrega de Material" {% if acesso.justificativa == 'Entrega de Material' %}checked{% endif %}> Entrega de Material</label>
-                            <label><input type="radio" name="justificativa" value="Reunião" {% if acesso.justificativa == 'Reunião' %}checked{% endif %}> Reunião</label>
-                        </div>
-
-                        <div>
-                            <label><input type="radio" name="justificativa" value="Visitante" {% if acesso.justificativa == 'Visitante' %}checked{% endif %}> Visitante</label>
-                            <label><input type="radio" name="justificativa" value="Processo Seletivo" {% if acesso.justificativa == 'Processo Seletivo' %}checked{% endif %}> Processo Seletivo</label>
-                            <label><input type="radio" name="justificativa" value="Integração" {% if acesso.justificativa == 'Integração' %}checked{% endif %}> Integração</label>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="field-setor">
-
-                    <div class="field">
-                        <label>Setor da Visita</label>
-                        <input type="text" name="visita_a">
-                    </div>
-
-                    <div class="field">
-                        <label>Contato Tecon</label>
-                        <input type="text" name="tel_interno" id="tel_interno_input" placeholder="(00) 12345-6789"
-                            maxlength="15" inputmode="numeric">
-                    </div>
-
-                    <!-- CAMPO AUTORIZADO CORRIGIDO -->
-                    <input type="hidden" id="autorizado" name="autorizado" value="SOLICITADO">
-
-                </div>
-
+            <div class="field data">
+                <label>DATA</label>
+                <input type="text" name="data_do_acesso" id="data_input" placeholder="00/00/0000" maxlength="10"
+                    inputmode="numeric" value="{{ acesso.data_do_acesso }}" required>
             </div>
 
-            <div class="form-actions">
+            <div class="field dias">
+                <label>QTD. DIAS</label>
+                <input type="number" name="qtd_dias" id="qtd_dias_input" maxlength="2" value="{{ acesso.qtd_dias }}"
+                    required>
+            </div>
+        </div>
 
-                <button type="button" class="button-cancel" onclick="window.location.href='/'">
-                    Cancelar
-                </button>
-
-                <button type="submit" class="button-send">
-                    Enviar
-                </button>
-
+        <div class="row-veiculo">
+            <div class="field telefone">
+                <label>Telefone</label>
+                <input type="text" id="telefone_input" name="telefone" placeholder="(00) 00000-0000" maxlength="15"
+                    inputmode="numeric">
             </div>
 
-        </form>
+            <div class="field veiculo">
+                <label>Com Veículo</label>
+                <div class="radio">
+                    <label><input type="radio" name="com_veiculo" id="veiculo_sim" value="sim"> SIM</label>
+                    <label><input type="radio" name="com_veiculo" id="veiculo_nao" value="nao" checked> NÃO</label>
+                </div>
+            </div>
 
-    </div>
+            <div class="field placa hidden" id="placaField">
+                <label>Placa</label>
+                <input type="text" name="placa" id="placa" value="{{ acesso.placa }}" placeholder="XXX-0X00"
+                    maxlength="8">
+            </div>
 
-    <script src="/scripts/script.js"></script>
+            <div class="field tipo hidden" id="tipoField">
+                <label>Tipo Veículo</label>
+                <div class="radio" id="caixa_tipo_veiculo">
+                    <label><input type="radio" name="tipo_veiculo" value="DE CARGA"> DE CARGA</label>
+                    <label><input type="radio" name="tipo_veiculo" value="PASSEIO"> PASSEIO</label>
+                </div>
+            </div>
 
-</body>
+            <div class="field cnh hidden" id="cnhField">
+                <label>Nº CNH *</label>
+                <input type="text" name="cnh" id="cnh_input" value="{{ acesso.cnh }}" placeholder="00000000000"
+                    maxlength="11" inputmode="numeric">
+            </div>
 
-</html>
+            <div class="field cat_hab hidden" id="catHabField">
+                <label>Cat. *</label>
+                <input type="text" name="cat_habilitacao" id="cat_habilitacao_input"
+                    value="{{ acesso.cat_habilitacao }}" placeholder="AB" maxlength="2">
+            </div>
+
+            <div class="field validade_cnh hidden" id="validadeCnhField">
+                <label>Validade *</label>
+                <input type="text" name="data_validade_cnh" id="validade_cnh_input"
+                    value="{{ acesso.data_validade_cnh }}" placeholder="00/00/0000" maxlength="10" inputmode="numeric">
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row row-justificativa">
+            <div class="field justificativa">
+                <label>Justificativa</label>
+
+                <div class="grid-just" id="caixa_justificativa">
+                    <div>
+                        <label><input type="radio" name="justificativa" value="Execução de Serviço" {% if
+                                acesso.justificativa=='Execução de Serviço' %}checked{% endif %}> Execução de
+                            Serviço</label>
+                        <label><input type="radio" name="justificativa" value="Entrega de Material" {% if
+                                acesso.justificativa=='Entrega de Material' %}checked{% endif %}> Entrega de
+                            Material</label>
+                        <label><input type="radio" name="justificativa" value="Reunião" {% if
+                                acesso.justificativa=='Reunião' %}checked{% endif %}> Reunião</label>
+                    </div>
+
+                    <div>
+                        <label><input type="radio" name="justificativa" value="Visitante" {% if
+                                acesso.justificativa=='Visitante' %}checked{% endif %}> Visitante</label>
+                        <label><input type="radio" name="justificativa" value="Processo Seletivo" {% if
+                                acesso.justificativa=='Processo Seletivo' %}checked{% endif %}> Processo
+                            Seletivo</label>
+                        <label><input type="radio" name="justificativa" value="Integração" {% if
+                                acesso.justificativa=='Integração' %}checked{% endif %}> Integração</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field-setor">
+                <div class="field">
+                    <label>Setor da Visita</label>
+                    <input type="text" name="visita_a">
+                </div>
+
+                <div class="field">
+                    <label>Contato Tecon</label>
+                    <input type="text" name="tel_interno" id="tel_interno_input" placeholder="(00) 12345-6789"
+                        maxlength="15" inputmode="numeric">
+                </div>
+
+                <input type="hidden" id="autorizado" name="autorizado" value="SOLICITADO">
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="button-cancel" onclick="window.location.href='/'">
+                Cancelar
+            </button>
+
+            <button type="submit" class="button-send">
+                Enviar
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
