@@ -506,3 +506,60 @@ window.editarSelecionados = async function () {
 // ==========================================
 // === FIM: FUNÇÃO DE EDIÇÃO MASSIVA ===
 // ==========================================
+
+// ==========================================
+// === INÍCIO: FILTRO DE DATAS DA PÁGINA INICIAL ===
+// ==========================================
+document.addEventListener('DOMContentLoaded', function () {
+    // Verifica se estamos na página index (que possui o input de data específico)
+    const dateInput = document.querySelector('.header-page input[type="date"]');
+
+    // Se o input não existir na página atual, aborta o script para não gerar erros
+    if (!dateInput) return;
+
+    const tableRows = document.querySelectorAll('.table-container tbody tr');
+
+    // 1. Preencher com a data de hoje por padrão ao carregar
+    if (!dateInput.value) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    // 2. Função para filtrar a tabela visualmente
+    function filterTableByDate() {
+        const filterDateVal = dateInput.value;
+        if (!filterDateVal) return;
+
+        // Cria a data de filtro (forçando 00:00:00 para evitar erro de fuso horário)
+        const filterDate = new Date(filterDateVal + 'T00:00:00');
+
+        tableRows.forEach(row => {
+            const cols = row.querySelectorAll('td');
+            // Garante que a linha tem colunas suficientes antes de processar
+            if (cols.length < 8) return;
+
+            const dataFinalStr = cols[3].innerText.trim(); // Coluna Data Final
+
+            // Converter a 'Data Final' (DD/MM/AAAA) da tabela para objeto Date do JS
+            const [diaF, mesF, anoF] = dataFinalStr.split('/');
+            const dataFinal = new Date(`${anoF}-${mesF}-${diaF}T00:00:00`);
+
+            // Se a data pesquisada for menor ou igual à data limite do pedido, exibe a linha
+            if (filterDate <= dataFinal) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none'; // Esconde se já passou do prazo
+            }
+        });
+    }
+
+    // Executa a validação imediatamente e toda vez que a data for alterada
+    filterTableByDate();
+    dateInput.addEventListener('change', filterTableByDate);
+});
+// ==========================================
+// === FIM: FILTRO DE DATAS DA PÁGINA INICIAL ===
+// ==========================================

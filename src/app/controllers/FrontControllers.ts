@@ -74,43 +74,6 @@ export default {
 			return res.status(500).send("Erro ao carregar os agendamentos.");
 		}
 	},
-	// async index(req: Request, res: Response) {
-	// 	try {
-	// 		let results = await Acessos.all();
-	// 		let acessos = results?.rows || [];
-
-	// 		// Mapeamos os resultados para ajustar a exibição da data
-	// 		acessos = acessos.map((acesso: any) => {
-	// 			if (acesso.data_do_acesso) {
-	// 				// SEGURANÇA TOTAL: Em vez de usar formatDate (que pode usar fuso horário),
-	// 				// quebramos a string '2026-05-12' diretamente por causa do traço.
-	// 				const [ano, mes, dia] = acesso.data_do_acesso.split('-');
-
-	// 				// Remontamos no padrão brasileiro manualmente
-	// 				acesso.data_do_acesso = `${dia}/${mes}/${ano}`;
-	// 			}
-
-	// 			// 2. Arruma a data limite no mesmo acesso
-	// 			if (acesso.data_limite) {
-	// 				const [ano, mes, dia] = acesso.data_limite.split('-');
-	// 				acesso.data_limite = `${dia}/${mes}/${ano}`;
-	// 			}
-
-	// 			return acesso;
-	// 		});
-
-	// 		// Log para conferir se o primeiro registro está correto agora
-	// 		if (acessos.length > 0) {
-	// 			console.log("Exemplo de acesso formatado:", acessos[0]);
-	// 		}
-
-	// 		return res.render('index', { acessos });
-
-	// 	} catch (error) {
-	// 		console.log("Erro no controller Acessos.index:", error);
-	// 		return res.status(500).send("Erro ao carregar os agendamentos.");
-	// 	}
-	// },
 
 	async createAcesso(req: Request, res: Response) {
 
@@ -556,5 +519,91 @@ export default {
 			console.log("Erro no getModalData:", error);
 			return res.status(500).json({ error: "Erro interno do servidor." });
 		}
+	},
+
+	// Controller para a tela resolved.html
+	async showResolved(req: Request, res: Response) {
+		try {
+			let results;
+			// REGRA DE NEGÓCIO: Admin vê todos resolvidas, usuário comum vê as próprias
+
+			if (req.session.isAdmin) {
+
+				results = await Acessos.allResolved();
+			} else {
+				results = await
+
+					Acessos.findResolvedByUser(req.session.userId!);
+			}
+
+			// Normaliza o retorno do banco de dados (SQLite)
+			let acessos = Array.isArray(results) ? results :
+
+				(results?.rows || []);
+
+			// Mapeia e formata datas
+			acessos = acessos.map((acesso: any) => {
+				if (acesso.data_do_acesso &&
+					acesso.data_do_acesso.includes('-')) {
+					const [ano, mes, dia] =
+
+						acesso.data_do_acesso.split('-');
+
+					acesso.data_do_acesso = `${dia}/${mes}/${ano}`;
+				}
+				if (acesso.data_limite &&
+					acesso.data_limite.includes('-')) {
+
+					const [ano, mes, dia] =
+
+						acesso.data_limite.split('-');
+
+					acesso.data_limite = `${dia}/${mes}/${ano}`;
+				}
+				return acesso;
+			});
+			return res.render('resolved', { acessos });
+		} catch (error) {
+			console.log("Erro no showResolved:", error);
+			return res.status(500).send("Erro ao carregar os pedidos esolvidos.");
+		}
+	},
+
+	// Controller para a tela pending.html (Todos trasados/ esquecidos)
+	async showPending(req: Request, res: Response) {
+		try {
+			let results;
+			if (req.session.isAdmin) {
+				results = await Acessos.allPending();
+			} else {
+				results = await
+					Acessos.findPendingByUser(req.session.userId!);
+			}
+
+			let acessos = Array.isArray(results) ? results : (results?.rows || []);
+
+			acessos = acessos.map((acesso: any) => {
+				if (acesso.data_do_acesso &&
+					acesso.data_do_acesso.includes('-')) {
+					const [ano, mes, dia] = acesso.data_do_acesso.split('-');
+
+					acesso.data_do_acesso = `${dia}/${mes}/${ano}`;
+				}
+				if (acesso.data_limite &&
+					acesso.data_limite.includes('-')) {
+
+					const [ano, mes, dia] = acesso.data_limite.split('-');
+
+					acesso.data_limite = `${dia}/${mes}/${ano}`;
+				}
+				return acesso;
+			});
+		
+			return res.render('pending', { acessos });
+		} catch (error) {
+			console.log("Erro no showPending:", error);
+			return res.status(500).send("Erro ao carregar os pedidos pendentes.");
+		}
 	}
+	
 }

@@ -236,6 +236,7 @@ export default {
             console.log('Erro no model Acessos.post:', error);
         }
     },
+
     // ==========================================
     // BUSCAR REGISTRO ÚNICO PELO TICKET
     // ==========================================
@@ -331,6 +332,100 @@ export default {
             return results;
         } catch (error) {
             console.error("Erro no model findForModal:", error);
+            throw error;
+        }
+    },
+
+    // ==========================================
+    // NOVAS CONSULTAS DEDICADAS (SEGURANÇA)
+    // ==========================================
+    
+    // Busca apenas pedidos RESOLVIDOS (SIM ou NÃO)
+    async allResolved() {
+        try {
+            return await db.query(`
+                SELECT
+                    ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
+                    com_veiculo, justificativa, autorizado
+                FROM acesso
+                WHERE
+                    UPPER(autorizado) IN ('SIM', 'NÃO', 'NAO')
+                GROUP BY
+                    ticket
+                ORDER BY
+                    data_do_acesso DESC;
+                `
+                );
+        } catch (error) {
+            console.log("Erro no allResolved:", error);
+            throw error;
+        }
+    },
+
+    // Busca pedidos RESOLVIDOS (Por Usuário)
+    async findResolvedByUser(userId: number) {
+        try {
+            return await db.query(`
+            SELECT
+                ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
+                com_veiculo, justificativa, autorizado
+            FROM  acesso
+            WHERE
+                user_id = ?
+            AND PPER(autorizado) IN ('SIM', 'NÃO', 'NAO')
+            GROUP BY
+                ticket
+            ORDER BY
+                data_do_acesso DESC;
+
+            `, [userId]);
+        } catch (error) {
+            console.log("Erro no findResolvedByUser:", error);
+            throw error;
+        }
+    },
+
+    // Busca APENAS pendentes gerais, sem filtro de data (Para pending.html)
+    async allPending() {
+        try {
+            return await db.query(`
+                SELECT
+                    ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
+                    com_veiculo, justificativa, autorizado
+                FROM acesso
+                WHERE
+                    UPPER(autorizado) IN ('SOLICITADO', 'PENDENTE')
+                GROUP BY
+                    ticket
+                ORDER BY
+                    data_do_acesso ASC;
+            `
+            );
+        } catch (error) {
+            console.log("Erro no allPending:", error);
+            throw error;
+        }
+    },
+
+    // Busca APENAS pendentes gerais (Por Usuário)
+    async findPendingByUser(userId: number) {
+        try {
+            return await db.query(`
+                SELECT
+                    ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso,
+                    data_limite, qtd_dias, com_veiculo, justificativa, autorizado
+                FROM acesso
+                WHERE
+                    user_id = ?
+                    AND PPER(autorizado) IN ('SOLICITADO', 'PENDENTE')
+                GROUP BY
+                    ticket
+                ORDER BY
+                    data_do_acesso ASC;
+
+                `, [userId]);
+        } catch (error) {
+            console.log("Erro no findPendingByUser:", error);
             throw error;
         }
     }

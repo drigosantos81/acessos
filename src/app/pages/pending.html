@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <title>Solicitações Pendentes</title>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="header-page">
+        <h2>Solicitações Pendentes e Atrasadas</h2>
+        <input type="text" id="buscaNome" placeholder="Nome ou Ticket...">
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Empresa</th>
+                    <th>Data do Acesso</th>
+                    <th>Data Final</th>
+                    <th>Dias</th>
+                    <th>Veículo</th>
+                    <th>Prévia</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acesso in acessos %}
+                <tr data-ticket="{{ acesso.ticket }}">
+                    <td>{{ acesso.nome }}</td>
+                    <td>{{ acesso.empresa }}</td>
+                    <td>{{ acesso.data_do_acesso }}</td>
+                    <td>{{ acesso.data_limite }}</td>
+                    <td>{{ acesso.qtd_dias }}</td>
+                    <td>{% if acesso.com_veiculo %} Sim {% else %} Não {% endif %}</td>
+                    <td class="td-previa" data-ticket="{{ acesso.ticket }}">
+                        <span style="color: #00BEDD; cursor: pointer; text-decoration: underline; font-weight: 500;">
+                            Ver Prévia
+                        </span>
+                    </td>
+                    <td class="autorizado {{ acesso.autorizado | lower | replace('ã','a') | replace(' ','-') }}">
+                        {{ acesso.autorizado }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
