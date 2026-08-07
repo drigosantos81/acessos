@@ -199,6 +199,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
+            // Validação de CPF (Front-end)
+            const docSelect = document.getElementById('doc_nacional_select');
+            const numeroDocInput = document.getElementById('numero_doc_input');
+
+            if (docSelect && docSelect.value === 'CPF' && numeroDocInput) {
+                const cpfDigits = numeroDocInput.value.replace(/\D/g, '');
+                // Só barra se ele digitou algo, mas não completou os 11 dígitos
+                if (cpfDigits.length > 0 && cpfDigits.length < 11) {
+                    numeroDocInput.classList.add('input-warning'); // Borda amarela/vermelha
+                    temErroInvalido = true;
+                    mensagemInvalida = "O CPF informado deve conter exatamente 11 dígitos.";
+                }
+            }
+
             if (temErroVazio || temErroInvalido) {
                 event.preventDefault();
                 const msgAntigas = document.querySelectorAll('.messages');
@@ -563,3 +577,34 @@ document.addEventListener('DOMContentLoaded', function () {
 // ==========================================
 // === FIM: FILTRO DE DATAS DA PÁGINA INICIAL ===
 // ==========================================
+
+
+
+// ==========================================
+// FILTRO COM TECLA ENTER (PÁGINA INICIAL)
+// ==========================================
+document.addEventListener('DOMContentLoaded', function () {
+    const buscaIndex = document.getElementById('buscaIndex');
+
+    if (buscaIndex) {
+        buscaIndex.addEventListener('keypress', function (evento) {
+            // Se a tecla pressionada for Enter
+            if (evento.key === 'Enter') {
+                evento.preventDefault(); // Evita recarregar a tela
+
+                const termo = this.value.trim().toLowerCase();
+                const linhasDaTabela = document.querySelectorAll('.table-container tbody tr');
+
+                linhasDaTabela.forEach(linha => {
+                    const textoDaLinha = linha.innerText.toLowerCase();
+                    // Se o texto da linha contiver o termo digitado, exibe, senão, oculta
+                    if (textoDaLinha.includes(termo)) {
+                        linha.style.display = '';
+                    } else {
+                        linha.style.display = 'none';
+                    }
+                });
+            }
+        });
+    }
+});

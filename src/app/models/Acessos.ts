@@ -186,17 +186,17 @@ export default {
     },
 
     // Comando POST para novo cadastro de solicitação de acesso
-    post(data: Acesso, userId: number) {
+    post(data: any, userId: number) {
         try {
             const query = `
                 INSERT INTO acesso (
                     ticket, nome, doc_nacional, numero_doc, empresa, data_do_acesso, qtd_dias, visita_a,
-                    com_veiculo, placa, tipo_veiculo, justificativa, portoes, autorizado, empresa_id,
-                    centro_custo_id, data_solicitacao, data_encerramento, updated_at,
-                    telefone, tel_interno, data_limite, user_id
+                    com_veiculo, placa, tipo_veiculo, cnh, cat_habilitacao, validade_cnh, 
+                    justificativa, portoes, autorizado, empresa_id, centro_custo_id, data_solicitacao, 
+                    data_encerramento, updated_at, telefone, tel_interno, data_limite, user_id
                 ) 
                 VALUES (
-                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
+                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26
                 )
                 RETURNING id
             `;
@@ -213,6 +213,9 @@ export default {
                 data.com_veiculo,
                 data.placa,
                 data.tipo_veiculo,
+                data.cnh,
+                data.cat_habilitacao,
+                data.validade_cnh,
                 data.justificativa,
                 data.portoes,
                 data.autorizado,
@@ -227,10 +230,9 @@ export default {
                 userId
             ];
 
-            // AQUI ESTÁ A CORREÇÃO
             return db
                 .query(query, value)
-                .then(result => result.rows[0].id);
+                .then((result: any) => result.rows[0].id);
 
         } catch (error) {
             console.log('Erro no model Acessos.post:', error);
@@ -275,7 +277,7 @@ export default {
                     tipo_veiculo = ?, 
                     cnh = ?, 
                     cat_habilitacao = ?, 
-                    data_validade_cnh = ?, 
+                    validade_cnh = ?, 
                     justificativa = ?, 
                     visita_a = ?, 
                     tel_interno = ?, 
@@ -288,7 +290,7 @@ export default {
                 data.nome, data.doc_nacional, data.numero_doc, data.empresa,
                 data.data_do_acesso, data.qtd_dias, data.telefone, data.com_veiculo,
                 data.placa || null, data.tipo_veiculo || null, data.cnh || null,
-                data.cat_habilitacao || null, data.data_validade_cnh || null,
+                data.cat_habilitacao || null, data.validade_cnh || null,
                 data.justificativa, data.visita_a, data.tel_interno, data.autorizado,
                 ticket
             ];
@@ -339,7 +341,7 @@ export default {
     // ==========================================
     // NOVAS CONSULTAS DEDICADAS (SEGURANÇA)
     // ==========================================
-    
+
     // Busca apenas pedidos RESOLVIDOS (SIM ou NÃO)
     async allResolved() {
         try {
@@ -355,7 +357,7 @@ export default {
                 ORDER BY
                     data_do_acesso DESC;
                 `
-                );
+            );
         } catch (error) {
             console.log("Erro no allResolved:", error);
             throw error;
@@ -428,5 +430,112 @@ export default {
             console.log("Erro no findPendingByUser:", error);
             throw error;
         }
-    }
+    },
+
+    // ==========================================
+    // EXPORTAÇÃO PARA CSV (TRAZ TODAS AS COLUNAS)
+    // ==========================================
+    async getForCSV(userId?: number) {
+        try {
+            // Busca tudo que for diferente de SIM, NÃO e NAO
+            let query = `
+                SELECT 
+                    ticket, nome, doc_nacional, numero_doc, empresa, data_do_acesso, 
+                    qtd_dias, data_limite, com_veiculo, placa, tipo_veiculo, 
+                    cnh, cat_habilitacao, validade_cnh, justificativa, portoes, 
+                    visita_a, telefone, tel_interno, autorizado, data_solicitacao 
+                FROM acesso 
+                WHERE UPPER(autorizado) NOT IN ('SIM', 'NÃO', 'NAO')
+            `;
+            let values: any[] = [];
+
+            // Se for usuário comum, filtra apenas os dele
+            if (userId) {
+                query += ` AND user_id = ?`;
+                values.push(userId);
+            }
+
+            query += ` ORDER BY data_do_acesso ASC;`;
+
+            return await db.query(query, values);
+        } catch (error) {
+            console.log("Erro no getForCSV:", error);
+            throw error;
+        }
+    },
+
+    // ==========================================
+    // CONTADORES PARA O MENU GLOBAL
+    // ==========================================
+    async getMenuCounts(userId: number, isAdmin: boolean) {
+        try {
+            // Se for admin vê o total da empresa, se não, vê só os dele
+            let filterUser = isAdmin ? "" : `AND user_id = ${userId}`;
+
+            // 1. Abertos (SOLICITADO)
+            const qAbertos = await db.query(`SELECT COUNT(DISTINCT ticket) as count FROM acesso WHERE UPPER(autorizado) = 'SOLICITADO' ${filterUser}`);
+
+            // 2. Pendentes (PENDENTE)
+            const qPendentes = await db.query(`SELECT COUNT(DISTINCT ticket) as count FROM acesso WHERE UPPER(autorizado) = 'PENDENTE' ${filterUser}`);
+
+            // 3. Resolvidos HOJE (SIM ou NÃO)
+            const qResolvidos = await db.query(`SELECT COUNT(DISTINCT ticket) as count FROM acesso WHERE UPPER(autorizado) IN ('SIM', 'NÃO', 'NAO') AND updated_at = date('now', 'localtime') ${filterUser}`);
+
+            return {
+                abertos: Array.isArray(qAbertos) ? qAbertos[0]?.count : (qAbertos?.rows?.[0]?.count || 0),
+                pendentes: Array.isArray(qPendentes) ? qPendentes[0]?.count : (qPendentes?.rows?.[0]?.count || 0),
+                resolvidos: Array.isArray(qResolvidos) ? qResolvidos[0]?.count : (qResolvidos?.rows?.[0]?.count || 0)
+            };
+        } catch (error) {
+            console.error("Erro no getMenuCounts:", error);
+            return { abertos: 0, pendentes: 0, resolvidos: 0 };
+        }
+    },
+
+    // ==========================================
+    // NOVA CONSULTA DA PÁGINA INICIAL (COM REGRAS DE DATA)
+    // ==========================================
+    async getIndexTable(dataSelecionada: string, userId?: number) {
+        try {
+            const today = new Date().toISOString().slice(0, 10);
+            let whereClause = "";
+            let values: any[] = [];
+
+            // Regra de Data e Status
+            if (dataSelecionada === today || !dataSelecionada) {
+                // Hoje: Apenas diferentes de SIM e NÃO
+                whereClause = "WHERE data_do_acesso >= ? AND UPPER(autorizado) NOT IN ('SIM', 'NÃO', 'NAO')";
+                values.push(today);
+            } else if (dataSelecionada < today) {
+                // Passado: Tudo a partir dessa data até hoje (Independente de status)
+                whereClause = "WHERE data_do_acesso >= ? AND data_do_acesso <= ?";
+                values.push(dataSelecionada, today);
+            } else {
+                // Futuro: Tudo a partir dessa data (Independente de status)
+                whereClause = "WHERE data_do_acesso >= ?";
+                values.push(dataSelecionada);
+            }
+
+            // Regra de Permissão (Usuário Comum só vê os dele)
+            if (userId) {
+                whereClause += " AND user_id = ?";
+                values.push(userId);
+            }
+
+            const query = `
+                SELECT
+                    ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
+                    com_veiculo, justificativa, autorizado
+                FROM acesso
+                ${whereClause}
+                GROUP BY ticket
+                ORDER BY data_do_acesso DESC, CAST(ticket AS INTEGER) DESC;
+            `;
+
+            return await db.query(query, values);
+        } catch (error) {
+            console.log("Erro no getIndexTable:", error);
+            throw error;
+        }
+    },
 }

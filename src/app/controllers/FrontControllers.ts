@@ -11,63 +11,47 @@ function onlyDigits(v: string | null | undefined) {
 export default {
 	async index(req: Request, res: Response) {
 		try {
-			let results;
+			// Pega a data da URL (se existir), ou usa a de hoje
+			const dataQuery = req.query.data as string;
+			const dataFiltro = dataQuery || new Date().toISOString().slice(0, 10);
 
-			// REGRA DE NEGÓCIO NO CONTROLLER:
-			// Se for admin, o Model busca tudo. Se não for, o Model busca só os dele.
+			let results;
 			if (req.session.isAdmin) {
-				results = await Acessos.all();
+				// Manda sem userId (Admin vê tudo)
+				results = await Acessos.getIndexTable(dataFiltro);
 			} else {
-				results = await Acessos.findByUser(req.session.userId!); // O "!" garante ao TS que o userId existe (pois passou pelo middleware)
+				// Manda com userId (Usuário vê apenas os dele)
+				results = await Acessos.getIndexTable(dataFiltro, req.session.userId!); 
 			}
 
-			let acessos = results.rows || [];
+			// Normaliza o retorno do banco (SQLite)
+			let acessos = Array.isArray(results) ? results : (results?.rows || []);
 
-			// ==========================================
-			// NOVO FILTRO: Remove tudo que for "SIM"
-			// ==========================================
-			acessos = acessos.filter((acesso: any) => {
-				// Compara em maiúsculo para evitar erro se estiver "Sim" ou "sim"
-				return String(acesso.autorizado).toUpperCase() !== 'SIM';
-			});
-
-			// Mapeamos os resultados para ajustar a exibição da data
+			// Formata as datas para o padrão brasileiro DD/MM/AAAA
 			acessos = acessos.map((acesso: any) => {
-				if (acesso.data_do_acesso) {
-					// SEGURANÇA TOTAL: Em vez de usar formatDate (que pode usar fuso horário),
-					// quebramos a string '2026-05-12' diretamente por causa do traço.
+				if (acesso.data_do_acesso && acesso.data_do_acesso.includes('-')) {
 					const [ano, mes, dia] = acesso.data_do_acesso.split('-');
-
-					// Remontamos no padrão brasileiro manualmente
 					acesso.data_do_acesso = `${dia}/${mes}/${ano}`;
 				}
-
-				// 2. Arruma a data limite no mesmo acesso
-				if (acesso.data_limite) {
+				if (acesso.data_limite && acesso.data_limite.includes('-')) {
 					const [ano, mes, dia] = acesso.data_limite.split('-');
 					acesso.data_limite = `${dia}/${mes}/${ano}`;
 				}
-
 				return acesso;
 			});
 
-			// Log para conferir se o primeiro registro está correto
-			if (acessos.length > 0) {
-				console.log("Exemplo de acesso formatado:", acessos[0]);
-			}
-
-			// ==========================================
-			// LER O SINAL DA URL PARA EXIBIR A MENSAGEM
-			// ==========================================
+			// Captura mensagens de sucesso na URL
 			let successMsg = null;
-			if (req.query.success === '1') {
-				successMsg = "Acesso agendado com sucesso!";
-			} else if (req.query.success === '2') {
-				successMsg = "Agendado! Alguns dias já existentes foram ignorados.";
-			}
+			if (req.query.success === '1') successMsg = "Acesso agendado com sucesso!";
+			else if (req.query.success === '2') successMsg = "Agendado! Alguns dias já existentes foram ignorados.";
 
-			// Passa a mensagem de sucesso (se houver) para o Nunjucks
-			return res.render('index', { acessos, success: successMsg });
+			// Envia a dataFiltro de volta pro Nunjucks preencher o <input type="date"> na tela
+			return res.render('index', { 
+				acessos, 
+				success: successMsg, 
+				activeMenu: 'abertos',
+				dataAtual: dataFiltro // <-- Para manter a data visível e atualizada no HTML
+			});
 
 		} catch (error) {
 			console.log("Erro no controller Acessos.index:", error);
@@ -98,26 +82,33 @@ export default {
 					return res.render("form", { acesso: body, error: "Erro no servidor: Preencha todos os campos obrigatórios." });
 				}
 			}
-			// const camposObrigatorios = ["nome", "doc_nacional", "numero_doc", "data_do_acesso", "qtd_dias", "telefone"];
-			// for (const campo of camposObrigatorios) {
-			// 	if (!body[campo] || String(body[campo]).trim() === "") {
-			// 		// Devolve o formulário com erro e DADOS PREENCHIDOS
-			// 		return res.render("form", { acesso: body, error: "Erro no servidor: Preencha todos os campos obrigatórios." });
-			// 	}
-			// }
 
 			// ==========================================
-			// BACKEND CHECK 1.5: VEÍCULO OBRIGATÓRIO (COLE AQUI!)
+			// BACKEND CHECK 1.5: VEÍCULO E CNH OBRIGATÓRIOS
 			// ==========================================
 			const temVeiculo = ["sim", "true", "1", "s"].includes(String(body.com_veiculo).toLowerCase());
 			if (temVeiculo) {
-				// Se marcou SIM, a placa e o tipo não podem estar vazios
-				if (!body.placa || String(body.placa).trim() === "" || !body.tipo_veiculo) {
+				// Se marcou SIM, nenhum dos 5 campos pode estar vazio
+				if (!body.placa || !body.tipo_veiculo || !body.cnh || !body.cat_habilitacao || !body.validade_cnh) {
 					return res.render("form", {
 						acesso: body,
-						error: "Erro no servidor: Placa e Tipo de Veículo são obrigatórios quando selecionado 'SIM'."
+						error: "Erro no servidor: Placa, Tipo, CNH, Categoria e Validade são obrigatórios quando selecionado 'SIM'."
 					});
 				}
+
+				// Formatar data da validade da CNH para o formato de banco (YYYY-MM-DD)
+				let validadeInput = String(body.validade_cnh).trim();
+				if (validadeInput.includes('/')) {
+					const parts = validadeInput.split('/');
+					body.validade_cnh = `${parts[2]}-${parts[1]}-${parts[0]}`;
+				}
+			} else {
+				// Limpa lixo residual se veículo for não
+				body.placa = null;
+				body.tipo_veiculo = null;
+				body.cnh = null;
+				body.cat_habilitacao = null;
+				body.validade_cnh = null;
 			}
 
 			// ==========================================
@@ -145,23 +136,13 @@ export default {
 			// ==========================================
 			if (body.telefone && String(body.telefone).trim() !== "") {
 				const telDigits = String(body.telefone).replace(/\D/g, "");
-				// Só barra se a pessoa tentou digitar, mas digitou incompleto
 				if (telDigits.length < 10) {
 					return res.render("form", { acesso: body, error: "O telefone informado deve ter pelo menos 10 dígitos." });
 				}
 				body.telefone = telDigits.slice(0, 11);
 			} else {
-				// Se a pessoa não digitou nada, enviamos null ou vazio para o banco
 				body.telefone = null;
 			}
-
-			// if (body.telefone) {
-			// 	const telDigits = body.telefone.replace(/\D/g, "");
-			// 	if (telDigits.length < 10) {
-			// 		return res.render("form", { acesso: body, error: "O telefone deve ter pelo menos 10 dígitos." });
-			// 	}
-			// 	body.telefone = telDigits.slice(0, 11);
-			// }
 
 			let inputDate = String(body.data_do_acesso).trim();
 			if (inputDate.includes('/')) {
@@ -174,7 +155,6 @@ export default {
 				return res.render("form", { acesso: body, error: "Data de acesso inválida bloqueada pelo servidor." });
 			}
 
-			// PREPARA OS DADOS DE DATA
 			const dataBaseObj = new Date(ano, mes - 1, dia, 12, 0, 0);
 			const formatYMD = (dateObj: Date) => {
 				const y = dateObj.getFullYear();
@@ -192,9 +172,9 @@ export default {
 			dataLimiteObj.setDate(dataLimiteObj.getDate() + (body.qtd_dias - 1));
 			const dataLimiteStr = formatYMD(dataLimiteObj);
 
-			// FORMATAÇÕES FINAIS (Veículos, portões, etc)
 			body.com_veiculo = ["sim", "true", "1", "s"].includes(String(body.com_veiculo).toLowerCase());
 			if (body.tipo_veiculo) body.tipo_veiculo = String(body.tipo_veiculo).toUpperCase();
+			if (body.cat_habilitacao) body.cat_habilitacao = String(body.cat_habilitacao).toUpperCase();
 
 			let portoes = "2";
 			if (body.com_veiculo && body.tipo_veiculo?.includes("CARGA")) portoes = "3";
@@ -222,14 +202,12 @@ export default {
 			const datasParaInserir = datasPedidas.filter(data => !datasExistentes.includes(data));
 
 			if (datasParaInserir.length === 0) {
-				// Aqui o backend recarrega a página mostrando a mensagem vermelha e MANTENDO OS DADOS
 				return res.render("form", {
 					acesso: body,
 					error: `Acesso negado: O documento ${body.numero_doc} já possui cadastro para os dias solicitados.`
 				});
 			}
 
-			// INSERÇÃO FINAL
 			const novoTicketId = await Acessos.getNextTicket();
 			const base: any = {
 				ticket: novoTicketId.toString(),
@@ -242,6 +220,9 @@ export default {
 				com_veiculo: body.com_veiculo,
 				placa: body.placa || null,
 				tipo_veiculo: body.tipo_veiculo || null,
+				cnh: body.cnh || null,
+				cat_habilitacao: body.cat_habilitacao || null,
+				validade_cnh: body.validade_cnh || null,
 				justificativa: body.justificativa,
 				portoes: body.portoes,
 				autorizado: body.autorizado || "SOLICITADO",
@@ -261,7 +242,6 @@ export default {
 				await Acessos.post(registro, userId);
 			}
 
-			// REDIRECIONA PARA HOME ENVIANDO SINAL DE SUCESSO
 			let redirectUrl = "/?success=1";
 			if (datasParaInserir.length < datasPedidas.length) {
 				redirectUrl = "/?success=2";
@@ -306,7 +286,7 @@ export default {
 			});
 
 			// CORREÇÃO 2: Alterado de 'admin/edit' para 'edit' para o Nunjucks achar o arquivo
-			return res.render('admin/edit', { acessos, buscaTermoAtual: buscaTermo || '' });
+			return res.render('admin/edit', { acessos, activeMenu: 'edit', buscaTermoAtual: buscaTermo || '' });
 
 		} catch (error) {
 			console.log("Erro no showEdit:", error);
@@ -322,37 +302,31 @@ export default {
 		try {
 			const ticket = req.params.ticket as string;
 
-			// 1. Busca o acesso pelo ticket no banco de dados
 			const results = await Acessos.findByTicket(ticket);
-
-			// Ajuste blindado para o SQLite (pega o primeiro item do array)
 			const acesso = Array.isArray(results) ? results[0] : (results?.rows ? results.rows[0] : results);
 
 			if (!acesso) {
 				return res.status(404).send("Acesso não encontrado.");
 			}
 
-			// 2. SEGURANÇA: Se não for admin, só pode ver o próprio acesso
 			if (!req.session.isAdmin && acesso.user_id !== req.session.userId) {
 				return res.redirect('/');
 			}
 
-			// 3. Formatação das datas para o padrão brasileiro DD/MM/AAAA para exibir bonito na tela
+			// Formatação das datas para o padrão brasileiro DD/MM/AAAA para exibir bonito na tela
 			if (acesso.data_do_acesso && acesso.data_do_acesso.includes('-')) {
 				const [ano, mes, dia] = acesso.data_do_acesso.split('-');
 				acesso.data_do_acesso = `${dia}/${mes}/${ano}`;
 			}
-			if (acesso.data_validade_cnh && acesso.data_validade_cnh.includes('-')) {
-				const [ano, mes, dia] = acesso.data_validade_cnh.split('-');
-				acesso.data_validade_cnh = `${dia}/${mes}/${ano}`;
+			// CORREÇÃO AQUI para usar validade_cnh
+			if (acesso.validade_cnh && acesso.validade_cnh.includes('-')) {
+				const [ano, mes, dia] = acesso.validade_cnh.split('-');
+				acesso.validade_cnh = `${dia}/${mes}/${ano}`;
 			}
 
-			// ==========================================
-			// NOVO: Formatação das datas de Rastreamento (Rodapé)
-			// ==========================================
 			const formatTrackDate = (d: string) => {
 				if (!d || d === 'null' || d === '-') return '-';
-				const onlyDate = d.split(' ')[0]; // Pega só a data caso venha com horas
+				const onlyDate = d.split(' ')[0];
 				if (onlyDate.includes('-')) {
 					const parts = onlyDate.split('-');
 					if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
@@ -364,7 +338,6 @@ export default {
 			acesso.data_solicitacao = formatTrackDate(dataSol);
 			acesso.updated_at = formatTrackDate(acesso.updated_at);
 
-			// Como o arquivo edit-one.html está na raiz da pasta pages, renderizamos direto
 			return res.render('edit-one', { acesso });
 		} catch (error) {
 			console.log("Erro no showEditOne:", error);
@@ -379,7 +352,6 @@ export default {
 		try {
 			const ticket = req.params.ticket as string;
 
-			// 1. Busca o registro atual no banco para checar as regras de negócio
 			const results = await Acessos.findByTicket(ticket);
 			const acessoAtual = Array.isArray(results) ? results[0] : (results?.rows ? results.rows[0] : results);
 
@@ -387,31 +359,26 @@ export default {
 				return res.status(404).send("Acesso não encontrado.");
 			}
 
-			// 2. SEGURANÇA: Usuário comum não pode editar registro de outro usuário
 			if (!req.session.isAdmin && acessoAtual.user_id !== req.session.userId) {
 				return res.redirect('/');
 			}
 
-			// 3. SEGURANÇA: Usuário comum não pode editar se o status já for "SIM"
 			if (!req.session.isAdmin && String(acessoAtual.autorizado).toUpperCase() === 'SIM') {
 				return res.status(403).send("Acesso negado: Este registro já foi aprovado e não pode ser alterado.");
 			}
 
-			// 4. Prepara os dados para atualizar (pega do formulário)
 			const data = req.body;
 
-			// Lógica do Status (Autorizado): 
-			// Se o admin mandou um status novo, usa ele. Se for usuário comum, mantém o status que já estava no banco.
 			if (req.session.isAdmin && req.body.autorizado) {
 				data.autorizado = req.body.autorizado;
 			} else {
 				data.autorizado = acessoAtual.autorizado;
 			}
 
-			// 5. Salva no banco de dados
+			// Como as variáveis do form.html (validade_cnh) agora possuem o nome correto,
+			// req.body já carrega os nomes perfeitos para serem despachados pro Acessos.ts
 			await Acessos.update(ticket, data);
 
-			// Redireciona para a página inicial com o sinal de sucesso na URL
 			return res.redirect('/?success=1');
 
 		} catch (error) {
@@ -562,7 +529,7 @@ export default {
 				}
 				return acesso;
 			});
-			return res.render('resolved', { acessos });
+			return res.render('resolved', { acessos, activeMenu: 'resolvidos' });
 		} catch (error) {
 			console.log("Erro no showResolved:", error);
 			return res.status(500).send("Erro ao carregar os pedidos esolvidos.");
@@ -598,12 +565,103 @@ export default {
 				}
 				return acesso;
 			});
-		
-			return res.render('pending', { acessos });
+
+			return res.render('pending', { acessos, activeMenu: 'pendentes' });
 		} catch (error) {
 			console.log("Erro no showPending:", error);
 			return res.status(500).send("Erro ao carregar os pedidos pendentes.");
 		}
+	},
+
+	// ==========================================
+	// GERAR DOWNLOAD DO ARQUIVO CSV
+	// ==========================================
+	async downloadCSV(req: Request, res: Response) {
+		try {
+			const isAdmin = req.session.isAdmin;
+			const userId = req.session.userId;
+
+			// 1. Busca os dados no Model
+			let results;
+			if (isAdmin) {
+				results = await Acessos.getForCSV();
+			} else {
+				results = await Acessos.getForCSV(userId!);
+			}
+
+			const acessos = Array.isArray(results) ? results : (results?.rows || []);
+
+			if (acessos.length === 0) {
+				return res.status(404).send("Nenhum dado pendente encontrado para exportação.");
+			}
+
+			// 2. Definir o cabeçalho das colunas do arquivo Excel
+			const cabecalho = [
+				"Ticket", "Status", "Nome", "Documento", "Nº Documento", "Empresa",
+				"Data Acesso", "Qtd Dias", "Data Limite", "Veiculo", "Placa",
+				"Tipo Veiculo", "CNH", "Cat", "Validade CNH", "Justificativa",
+				"Portões", "Visita A", "Telefone", "Tel Interno", "Data Solicitação"
+			];
+
+			// Função para escapar textos (evita que vírgulas ou quebras de linha quebrem o Excel)
+			const escapeCSV = (str: any) => {
+				if (str === null || str === undefined) return '""';
+				const text = String(str).replace(/"/g, '""'); // Escapa aspas duplas
+				return `"${text}"`; // Coloca entre aspas
+			};
+
+			// Função para converter data YYYY-MM-DD para o padrão Brasileiro DD/MM/AAAA
+			const formataData = (dataStr: string) => {
+				if (!dataStr || !dataStr.includes('-')) return dataStr;
+				const [ano, mes, dia] = dataStr.split('-');
+				return `${dia}/${mes}/${ano}`;
+			};
+
+			// 3. Inicia a string do CSV juntando o cabeçalho com ponto e vírgula
+			let csvString = cabecalho.join(";") + "\n";
+
+			// 4. Monta linha a linha
+			acessos.forEach((a: any) => {
+				const linha = [
+					a.ticket,
+					a.autorizado,
+					a.nome,
+					a.doc_nacional,
+					a.numero_doc,
+					a.empresa,
+					formataData(a.data_do_acesso),
+					a.qtd_dias,
+					formataData(a.data_limite),
+					(a.com_veiculo === 1 || String(a.com_veiculo).toLowerCase() === 'sim') ? 'SIM' : 'NÃO',
+					a.placa,
+					a.tipo_veiculo,
+					a.cnh,
+					a.cat_habilitacao,
+					formataData(a.validade_cnh),
+					a.justificativa,
+					a.portoes,
+					a.visita_a,
+					a.telefone,
+					a.tel_interno,
+					formataData(a.data_solicitacao)
+				].map(escapeCSV); // Aplica a formatação em todos os campos
+
+				csvString += linha.join(";") + "\n";
+			});
+
+			// 5. Adiciona o BOM (Byte Order Mark) para forçar o Excel a ler em UTF-8 (acentos corretos)
+			const bom = "\uFEFF";
+
+			// 6. Configura a resposta do servidor para forçar o Download do arquivo
+			res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+			res.setHeader('Content-Disposition', 'attachment; filename="solicitacoes_pendentes.csv"');
+
+			return res.send(bom + csvString);
+
+		} catch (error) {
+			console.log("Erro no downloadCSV:", error);
+			return res.status(500).send("Erro ao gerar o CSV.");
+		}
 	}
-	
+
 }

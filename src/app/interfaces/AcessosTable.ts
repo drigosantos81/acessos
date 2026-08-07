@@ -22,7 +22,7 @@ export interface Acesso {
     // Dados de CNH (Adicionados com base no HTML)
     cnh?: string | null;
     cat_habilitacao?: string | null;
-    data_validade_cnh?: string | null;
+    validade_cnh?: string | null;
 
     // Justificativa e Local
     justificativa: string;

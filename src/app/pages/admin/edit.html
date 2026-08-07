@@ -15,7 +15,16 @@
 
     <div class="row mb-5">
         <div class="field flex-none">
-            <label>Filtrar por Status na Tabela:</label>
+
+            <div class="filter-header-row">
+                <span style="font-weight: bold;">Filtrar por Status na Tabela:</span>
+                
+                <button type="button" class="btn-download-csv" onclick="window.location.href='/download-csv'">
+                    <i class="fa-solid fa-download"></i> Download CSV
+                </button>
+            </div>
+
+            <!-- <label>Filtrar por Status na Tabela:</label> -->
             <div class="checkbox-group">
                 <label><input type="checkbox" class="status-filter" value="SIM" checked> SIM</label>
                 <label><input type="checkbox" class="status-filter" value="NÃO" checked> NÃO</label>

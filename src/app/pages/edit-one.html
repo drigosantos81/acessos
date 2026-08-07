@@ -130,8 +130,8 @@
                 <div class="field validade_cnh {% if acesso.com_veiculo != 'sim' and acesso.com_veiculo != 1 %}hidden{% endif %}"
                     id="validadeCnhField">
                     <label>Validade *</label>
-                    <input type="text" name="data_validade_cnh" id="validade_cnh_input"
-                        value="{{ acesso.data_validade_cnh }}" maxlength="10" {% if acesso.autorizado=='SIM' and not
+                    <input type="text" name="validade_cnh" id="validade_cnh_input"
+                        value="{{ acesso.validade_cnh }}" maxlength="10" {% if acesso.autorizado=='SIM' and not
                         session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                 </div>
             </div>

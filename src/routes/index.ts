@@ -3,9 +3,12 @@ import { validateAcesso } from '../app/middlewares/validateAcesso.js';
 import FrontControllers from '../app/controllers/FrontControllers.js';
 import SessionController from '../app/controllers/SessionController.js'
 import { onlyUsers, isAdmin } from '../app/middlewares/session.js';
+import { loadMenuCounts } from '../app/middlewares/loadMenuCounts.js';
 import path from "path";
 
 const routes = Router();
+
+routes.use(loadMenuCounts);
 
 // ==========================================
 // ROTAS PÚBLICAS (Páginas)
@@ -31,6 +34,7 @@ routes.delete('/visualizar/:ticket', onlyUsers, FrontControllers.deleteEditOne);
 // ROTAS DE API (Consultas invisíveis do Javascript) / ADMIN
 // ==========================================
 routes.get('/api/admin/search-nomes', FrontControllers.searchAutocomplete);
+routes.get('/download-csv', FrontControllers.downloadCSV);
 routes.get('/admin/edit', isAdmin, FrontControllers.showEdit);
 routes.put('/admin/edit', isAdmin, FrontControllers.updateMassivo);
 

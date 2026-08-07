@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     {% block head %}
-        <title>Portal de Atendimento</title>
+    <title>Portal de Atendimento</title>
     {% endblock %}
 
     <link rel="stylesheet" href="/css/style.css">
@@ -50,22 +50,25 @@
     <div class="main-content">
         <div class="menu">
             <div class="menu-links">
-                <a href="/" class="menu-home">
+                <a href="/" class="menu-link-btn {% if activeMenu == 'abertos' %}active{% endif %}">
                     <i class="fa-solid fa-folder-open"></i> Pedidos Abertos
+                    {% if counts.abertos > 0 %}<span class="badge-counter">{{ counts.abertos }}</span>{% endif %}
                 </a>
 
-                {% if session.userId %}
-                <a href="/admin/edit" class="menu-home">
+                {% if session.isAdmin %}
+                <a href="/admin/edit" class="menu-link-btn {% if activeMenu == 'edit' %}active{% endif %}">
                     <i class="fa-solid fa-pen-to-square"></i> Edição Massiva
                 </a>
                 {% endif %}
 
-                <a href="/resolvidos" class="menu-home">
+                <a href="/resolvidos" class="menu-link-btn {% if activeMenu == 'resolvidos' %}active{% endif %}">
                     <i class="fa-solid fa-check-double"></i> Pedidos Resolvidos
+                    {% if counts.resolvidos > 0 %}<span class="badge-counter">{{ counts.resolvidos }}</span>{% endif %}
                 </a>
 
-                <a href="/pendentes" class="menu-home">
+                <a href="/pendentes" class="menu-link-btn {% if activeMenu == 'pendentes' %}active{% endif %}">
                     <i class="fa-solid fa-triangle-exclamation"></i> Pedidos Pendentes
+                    {% if counts.pendentes > 0 %}<span class="badge-counter">{{ counts.pendentes }}</span>{% endif %}
                 </a>
             </div>
         </div>
