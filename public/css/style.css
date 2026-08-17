@@ -11,7 +11,10 @@ body {
 
 .card {
     background: white;
-    width: 920px;
+    width: 96%;
+    /* Expande o card para as extremidades da tela */
+    max-width: 1600px;
+    /* Limite seguro para telas UltraWide */
     padding: 15px 25px 20px 25px;
     margin: 25px auto 15px auto;
     border-radius: 6px;
@@ -20,10 +23,16 @@ body {
 
 .card-edit-mass {
     background: white;
-    width: 920px;
+    width: 96%;
+    /* Expande o card para as extremidades da tela */
+    max-width: 1600px;
     margin: 0 auto 15px auto;
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.col-empresa {
+    width: 25%;
 }
 
 #caixa_justificativa {
@@ -589,6 +598,11 @@ input[type="radio"] {
     text-overflow: ellipsis;
 }
 
+.sidebar-user a {
+    text-decoration: none;
+    color: #00bedd;
+}
+
 .sidebar-logout-form {
     margin: 0;
     padding: 0;
@@ -838,4 +852,25 @@ input[type="radio"] {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
+}
+
+/* =========================================
+   FILTROS DE DATA (EDIÇÃO MASSIVA)
+========================================= */
+.filter-dates-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    margin-bottom: 15px;
+}
+
+.filter-date-item label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.filter-date-input {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
 }

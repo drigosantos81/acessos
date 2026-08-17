@@ -31,18 +31,21 @@
 
         <div class="sidebar-footer">
             {% if session.userId %}
-            <div class="sidebar-user">
-                <i class="fa-solid fa-user"></i> {{ session.userName }}
-            </div>
-            <form action="/logout" method="POST" class="sidebar-logout-form">
-                <button type="submit" class="sidebar-logout-btn">
-                    Sair <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
-            </form>
+                <div class="sidebar-user">
+                    <a href="/perfil" class="sidebar-user-link">
+                        <i class="fa-solid fa-user"></i> {{ session.userName }}
+                    </a>
+                </div>
+
+                <form action="/logout" method="POST" class="sidebar-logout-form">
+                    <button type="submit" class="sidebar-logout-btn">
+                        Sair <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
             {% else %}
-            <a href="/login" class="sidebar-login">
-                <i class="fa-solid fa-lock"></i> Login
-            </a>
+                <a href="/login" class="sidebar-login">
+                    <i class="fa-solid fa-lock"></i> Login
+                </a>
             {% endif %}
         </div>
     </div>

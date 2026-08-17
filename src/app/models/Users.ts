@@ -1,8 +1,92 @@
 import db from "../../config/db.js";
-import fs from "fs";
+import bcrypt from "bcryptjs";
 import { Acesso } from "../interfaces/AcessosTable.js";
 
 export default {
+    // ==========================================
+    // FUNÇÕES DE USUÁRIOS
+    // ==========================================
+
+    // Busca um usuário dinamicamente (por email, por id, etc)
+    async findOne(filters: { [key: string]: any }) {
+        let query = "SELECT * FROM users";
+        let values: any[] = [];
+
+        const keys = Object.keys(filters);
+        if (keys.length > 0) {
+            query += " WHERE " + keys.map(key => `${key} = ?`).join(" AND ");
+            values = keys.map(key => filters[key]);
+        }
+
+        try {
+            const result = await db.query(query, values);
+            // Prevenção de erro para SQLite (pode retornar array direto ou dentro de .rows)
+            return Array.isArray(result) ? result[0] : result?.rows?.[0] || null;
+        } catch (error) {
+            console.error("Erro no User.findOne:", error);
+        }
+    },
+
+    // Cria um novo usuário
+    async create(data: any) {
+        try {
+            // Criptografa a senha antes de salvar
+            const passwordHash = await bcrypt.hash(data.password, 8);
+
+            const query = `
+                INSERT INTO users (
+                    name,
+                    email,
+                    password,
+                    is_admin
+                ) VALUES (?, ?, ?, ?)
+                RETURNING id;
+            `;
+
+            const values = [
+                data.name,
+                data.email,
+                passwordHash,
+                data.is_admin || 0
+            ];
+
+            const result = await db.query(query, values);
+            return Array.isArray(result) ? result[0]?.id : result?.rows?.[0]?.id || null;
+        } catch (error) {
+            console.error("Erro no User.create:", error);
+        }
+    },
+
+    // Atualiza um usuário (usado na página de edição de perfil)
+    async update(id: number, data: any) {
+        try {
+            let query = `UPDATE users SET name = ?, email = ?`;
+            let values: any[] = [data.name, data.email];
+
+            // Só atualiza a senha se o usuário digitou uma nova
+            if (data.password) {
+                const passwordHash = await bcrypt.hash(data.password, 8);
+                query += `, password = ?`;
+                values.push(passwordHash);
+            }
+
+            query += ` WHERE id = ?`;
+            values.push(id);
+
+            await db.query(query, values);
+            return true;
+        } catch (error) {
+            console.error("Erro no User.update:", error);
+            throw error;
+        }
+    },
+
+
+    // ==========================================
+    // FUNÇÕES MANTIDAS PARA NÃO QUEBRAR O SISTEMA 
+    // (Avisando: o ideal seria movê-las para o model Acessos.ts futuramente)
+    // ==========================================
+
     // Retorna a lista dos acessos solicitados
     allUsers() {
         try {
@@ -29,56 +113,11 @@ export default {
         }
     },
 
-    // Busca um usuário dinamicamente (por email, por id, etc)
-    async findOne(filters: { [key: string]: any }) {
-        let query = "SELECT * FROM users";
-        let values: any[] = [];
-
-        // Monta a query dinamicamente (Ex: WHERE email = ?)
-        Object.keys(filters).map((key) => {
-            query = `${query} WHERE ${key} = ?`;
-            values.push(filters[key]);
-        });
-
-        try {
-            const results = await db.query(query, values);
-            // Retorna apenas o primeiro usuário encontrado (ou undefined se não achar)
-            return results?.rows ? results.rows[0] : null;
-        } catch (error) {
-            console.error("Erro no User.findOne:", error);
-        }
-    },
-
-    // Cria um novo usuário
-    async create(data: any) {
-        try {
-            const query = `
-                INSERT INTO users (
-                    name,
-                    email,
-                    password,
-                    is_admin
-                ) VALUES (?, ?, ?, ?)
-                RETURNING id; -- O SQLite moderno permite retornar o ID criado na mesma hora!
-            `;
-
-            const values = [
-                data.name,
-                data.email,
-                data.password,
-                data.is_admin || 0 // Se não enviar is_admin, o padrão é 0 (falso)
-            ];
-
-            const results = await db.query(query, values);
-            return results?.rows ? results.rows[0].id : null;
-        } catch (error) {
-            console.error("Erro no User.create:", error);
-        }
-    },
-
     // Comando POST para novo cadastro de solicitação de acesso
     postUser(data: Acesso) {
         try {
+            // OBS: Deixado o uso de placeholders ($1, $2) inalterado pois você os usa aqui,
+            // mas o SQLite puro prefere o uso de '?' na query preparada.
             const query = `
                 INSERT INTO acesso (
                     ticket, nome, doc_nacional, numero_doc, empresa, data_do_acesso, qtd_dias, visita_a,
@@ -93,31 +132,12 @@ export default {
             `;
 
             const value = [
-                data.ticket,
-                data.nome,
-                data.doc_nacional,
-                data.numero_doc,
-                data.empresa,
-                data.data_do_acesso,
-                data.qtd_dias,
-                data.visita_a,
-                data.com_veiculo,
-                data.placa,
-                data.tipo_veiculo,
-                data.justificativa,
-                data.portoes,
-                data.autorizado,
-                data.empresa_id,
-                data.centro_custo_id,
-                data.data_solicitacao,
-                data.data_encerramento,
-                data.updated_at,
-                data.telefone,
-                data.tel_interno,
-                data.data_limite
+                data.ticket, data.nome, data.doc_nacional, data.numero_doc, data.empresa, data.data_do_acesso,
+                data.qtd_dias, data.visita_a, data.com_veiculo, data.placa, data.tipo_veiculo, data.justificativa,
+                data.portoes, data.autorizado, data.empresa_id, data.centro_custo_id, data.data_solicitacao,
+                data.data_encerramento, data.updated_at, data.telefone, data.tel_interno, data.data_limite
             ];
 
-            // AQUI ESTÁ A CORREÇÃO
             return db
                 .query(query, value)
                 .then(result => result.rows[0].id);
@@ -126,5 +146,4 @@ export default {
             console.log('Erro no model Acessos.post:', error);
         }
     }
-
-}
+};

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if user %}Editar Perfil{% else %}Criar Acesso{% endif %}</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style-login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="auth-body">
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-header">
+                <img src="/img/logo-ws.png" alt="Logo TECON">
+                <h2>{% if user %}Editar Perfil{% else %}Criar Acesso{% endif %}</h2>
+            </div>
+
+            <!-- A rota de envio muda dinamicamente baseada no contexto -->
+            <form action="{% if user %}/perfil/editar{% else %}/criar-acesso{% endif %}" method="POST"
+                class="auth-form">
+
+                {% if user %}
+                <!-- Envia o ID oculto para o Back-end saber qual usuário atualizar -->
+                <input type="hidden" name="id" value="{{ user.id }}">
+                {% endif %}
+
+                <div class="auth-field">
+                    <label for="name">Nome Completo</label>
+                    <input type="text" id="name" name="name" value="{{ user.name }}" required>
+                </div>
+
+                <div class="auth-field">
+                    <label for="email">E-mail Corporativo</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                </div>
+
+                <div class="auth-field">
+                    <label for="password">Senha</label>
+                    <!-- Se for criar, a senha é obrigatória. Se for editar, é opcional -->
+                    <input type="password" id="password" name="password" {% if not user %}required{% endif %}>
+
+                    {% if user %}
+                    <small class="auth-hint">Deixe em branco se não quiser alterar a senha atual.</small>
+                    {% endif %}
+                </div>
+
+                <div class="auth-actions">
+                    <button type="button" class="button-cancel auth-btn-cancel"
+                        onclick="window.history.back()">Cancelar</button>
+                    <button type="submit" class="button-send auth-btn-send">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>

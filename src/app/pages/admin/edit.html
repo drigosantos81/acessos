@@ -1,7 +1,7 @@
 {% extends '../layout.html' %}
 
 {% block head %}
-    <title>Edição Massiva | Acessos</title>
+<title>Edição Massiva | Acessos</title>
 {% endblock %}
 
 {% block content %}
@@ -18,7 +18,7 @@
 
             <div class="filter-header-row">
                 <span style="font-weight: bold;">Filtrar por Status na Tabela:</span>
-                
+
                 <button type="button" class="btn-download-csv" onclick="window.location.href='/download-csv'">
                     <i class="fa-solid fa-download"></i> Download CSV
                 </button>
@@ -34,15 +34,17 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="field data">
-            <label for="dataInicio">Data Início</label>
-            <input type="date" id="dataInicio" name="dataInicio" value="2026-04-01">
+    <div class="filter-dates-row">
+        <div class="filter-date-item">
+            <label>Data Início</label>
+            <input type="date" id="dataInicioEdit" class="filter-date-input" value="{{ dataInicio }}"
+                onchange="atualizarFiltroEdit()" onkeypress="atualizarFiltroEdit(event)">
         </div>
 
-        <div class="field data">
-            <label for="dataFim">Data Fim</label>
-            <input type="date" id="dataFim" name="dataFim" value="2026-07-30">
+        <div class="filter-date-item">
+            <label>Data Fim</label>
+            <input type="date" id="dataFimEdit" class="filter-date-input" value="{{ dataFim }}"
+                onchange="atualizarFiltroEdit()" onkeypress="atualizarFiltroEdit(event)">
         </div>
 
         <div class="field field-relative">

@@ -17,6 +17,14 @@ routes.get('/', onlyUsers, FrontControllers.index);
 routes.get('/resolvidos', FrontControllers.showResolved); // Aponta para resolved.html
 routes.get('/pendentes', FrontControllers.showPending); // Aponta para pending.html
 
+// ROTAS DE AUTENTICAÇÃO E PERFIL
+routes.get('/criar-acesso', SessionController.createAcessoForm);
+routes.post('/criar-acesso', SessionController.createAcessoPost);
+
+routes.get('/perfil', onlyUsers, SessionController.editProfileForm);
+routes.post('/perfil/editar', onlyUsers, SessionController.updateProfile);
+
+// NAVEGAÇÃO APÓS LOGIN
 routes.get('/form', onlyUsers, FrontControllers.createAcesso);
 routes.get('/login', SessionController.loginForm);  // Exibe o HTML do login
 routes.post('/login', SessionController.login);     // Recebe os dados do formulário e valida

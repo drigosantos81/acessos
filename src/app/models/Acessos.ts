@@ -191,7 +191,7 @@ export default {
             const query = `
                 INSERT INTO acesso (
                     ticket, nome, doc_nacional, numero_doc, empresa, data_do_acesso, qtd_dias, visita_a,
-                    com_veiculo, placa, tipo_veiculo, cnh, cat_habilitacao, validade_cnh, 
+                    com_veiculo, placa, tipo_veiculo, cnh, cat_habilitacao, data_validade_cnh, 
                     justificativa, portoes, autorizado, empresa_id, centro_custo_id, data_solicitacao, 
                     data_encerramento, updated_at, telefone, tel_interno, data_limite, user_id
                 ) 
@@ -346,16 +346,11 @@ export default {
     async allResolved() {
         try {
             return await db.query(`
-                SELECT
-                    ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
-                    com_veiculo, justificativa, autorizado
-                FROM acesso
-                WHERE
-                    UPPER(autorizado) IN ('SIM', 'NÃO', 'NAO')
-                GROUP BY
-                    ticket
-                ORDER BY
-                    data_do_acesso DESC;
+                SELECT a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite,
+                    a.qtd_dias, a.com_veiculo, a.autorizado, u.name AS solicitante
+                FROM acesso a LEFT JOIN users u ON a.user_id = u.id
+                WHERE UPPER(a.autorizado) IN ('SIM', 'NÃO', 'NAO')
+                GROUP BY a.ticket ORDER BY a.data_do_acesso DESC;
                 `
             );
         } catch (error) {
@@ -368,18 +363,11 @@ export default {
     async findResolvedByUser(userId: number) {
         try {
             return await db.query(`
-            SELECT
-                ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
-                com_veiculo, justificativa, autorizado
-            FROM  acesso
-            WHERE
-                user_id = ?
-            AND PPER(autorizado) IN ('SIM', 'NÃO', 'NAO')
-            GROUP BY
-                ticket
-            ORDER BY
-                data_do_acesso DESC;
-
+            SELECT a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite,
+                a.qtd_dias, a.com_veiculo, a.autorizado, u.name AS solicitante
+            FROM acesso a LEFT JOIN users u ON a.user_id = u.id
+            WHERE a.user_id = ? AND UPPER(a.autorizado) IN ('SIM', 'NÃO', 'NAO')
+            GROUP BY a.ticket ORDER BY a.data_do_acesso DESC;
             `, [userId]);
         } catch (error) {
             console.log("Erro no findResolvedByUser:", error);
@@ -391,16 +379,11 @@ export default {
     async allPending() {
         try {
             return await db.query(`
-                SELECT
-                    ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
-                    com_veiculo, justificativa, autorizado
-                FROM acesso
-                WHERE
-                    UPPER(autorizado) IN ('SOLICITADO', 'PENDENTE')
-                GROUP BY
-                    ticket
-                ORDER BY
-                    data_do_acesso ASC;
+                SELECT a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite,
+                    a.qtd_dias, a.com_veiculo, a.autorizado, u.name AS solicitante
+                FROM acesso a LEFT JOIN users u ON a.user_id = u.id
+                WHERE UPPER(a.autorizado) IN ('SOLICITADO', 'PENDENTE')
+                GROUP BY a.ticket ORDER BY a.data_do_acesso ASC;
             `
             );
         } catch (error) {
@@ -413,17 +396,11 @@ export default {
     async findPendingByUser(userId: number) {
         try {
             return await db.query(`
-                SELECT
-                    ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso,
-                    data_limite, qtd_dias, com_veiculo, justificativa, autorizado
-                FROM acesso
-                WHERE
-                    user_id = ?
-                    AND PPER(autorizado) IN ('SOLICITADO', 'PENDENTE')
-                GROUP BY
-                    ticket
-                ORDER BY
-                    data_do_acesso ASC;
+                SELECT a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite,
+                    a.qtd_dias, a.com_veiculo, a.autorizado, u.name AS solicitante
+                FROM acesso a LEFT JOIN users u ON a.user_id = u.id
+                WHERE a.user_id = ? AND UPPER(a.autorizado) IN ('SOLICITADO', 'PENDENTE')
+                GROUP BY a.ticket ORDER BY a.data_do_acesso ASC;
 
                 `, [userId]);
         } catch (error) {
@@ -442,7 +419,7 @@ export default {
                 SELECT 
                     ticket, nome, doc_nacional, numero_doc, empresa, data_do_acesso, 
                     qtd_dias, data_limite, com_veiculo, placa, tipo_veiculo, 
-                    cnh, cat_habilitacao, validade_cnh, justificativa, portoes, 
+                    cnh, cat_habilitacao, data_validade_cnh, justificativa, portoes, 
                     visita_a, telefone, tel_interno, autorizado, data_solicitacao 
                 FROM acesso 
                 WHERE UPPER(autorizado) NOT IN ('SIM', 'NÃO', 'NAO')
@@ -493,7 +470,7 @@ export default {
     },
 
     // ==========================================
-    // NOVA CONSULTA DA PÁGINA INICIAL (COM REGRAS DE DATA)
+    // CONSULTA DA PÁGINA INICIAL (COM REGRAS DE DATA E SOLICITANTE)
     // ==========================================
     async getIndexTable(dataSelecionada: string, userId?: number) {
         try {
@@ -501,35 +478,31 @@ export default {
             let whereClause = "";
             let values: any[] = [];
 
-            // Regra de Data e Status
             if (dataSelecionada === today || !dataSelecionada) {
-                // Hoje: Apenas diferentes de SIM e NÃO
-                whereClause = "WHERE data_do_acesso >= ? AND UPPER(autorizado) NOT IN ('SIM', 'NÃO', 'NAO')";
+                whereClause = "WHERE a.data_do_acesso >= ? AND UPPER(a.autorizado) NOT IN ('SIM', 'NÃO', 'NAO')";
                 values.push(today);
             } else if (dataSelecionada < today) {
-                // Passado: Tudo a partir dessa data até hoje (Independente de status)
-                whereClause = "WHERE data_do_acesso >= ? AND data_do_acesso <= ?";
+                whereClause = "WHERE a.data_do_acesso >= ? AND a.data_do_acesso <= ?";
                 values.push(dataSelecionada, today);
             } else {
-                // Futuro: Tudo a partir dessa data (Independente de status)
-                whereClause = "WHERE data_do_acesso >= ?";
+                whereClause = "WHERE a.data_do_acesso >= ?";
                 values.push(dataSelecionada);
             }
 
-            // Regra de Permissão (Usuário Comum só vê os dele)
             if (userId) {
-                whereClause += " AND user_id = ?";
+                whereClause += " AND a.user_id = ?";
                 values.push(userId);
             }
 
             const query = `
                 SELECT
-                    ticket, nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
-                    com_veiculo, justificativa, autorizado
-                FROM acesso
+                    a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite, a.qtd_dias,
+                    a.com_veiculo, a.justificativa, a.autorizado, u.name AS solicitante
+                FROM acesso a
+                LEFT JOIN users u ON a.user_id = u.id
                 ${whereClause}
-                GROUP BY ticket
-                ORDER BY data_do_acesso DESC, CAST(ticket AS INTEGER) DESC;
+                GROUP BY a.ticket
+                ORDER BY a.data_do_acesso DESC, CAST(a.ticket AS INTEGER) DESC;
             `;
 
             return await db.query(query, values);
@@ -538,4 +511,41 @@ export default {
             throw error;
         }
     },
+
+    // ==========================================
+    // CONSULTA DA EDIÇÃO MASSIVA (INTERVALO DE DATAS)
+    // ==========================================
+    async getMassEditTable(dataInicio: string, dataFim: string) {
+        try {
+            let whereClause = "";
+            let values: any[] = [];
+
+            // Se tem as duas datas: busca o intervalo
+            if (dataInicio && dataFim) {
+                whereClause = "WHERE a.data_do_acesso >= ? AND a.data_do_acesso <= ?";
+                values.push(dataInicio, dataFim);
+            }
+            // Se tem só a data de início (padrão ao carregar a página): busca tudo a partir dela
+            else if (dataInicio) {
+                whereClause = "WHERE a.data_do_acesso >= ?";
+                values.push(dataInicio);
+            }
+
+            const query = `
+                SELECT
+                    a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite, a.qtd_dias,
+                    a.com_veiculo, a.autorizado, u.name AS solicitante
+                FROM acesso a
+                LEFT JOIN users u ON a.user_id = u.id
+                ${whereClause}
+                GROUP BY a.ticket
+                ORDER BY a.data_do_acesso DESC, CAST(a.ticket AS INTEGER) DESC;
+            `;
+
+            return await db.query(query, values);
+        } catch (error) {
+            console.log("Erro no getMassEditTable:", error);
+            throw error;
+        }
+    }
 }

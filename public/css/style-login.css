@@ -55,3 +55,132 @@
      font-size: 14px;
      border: 1px solid #f87171;
  }
+
+ /* =========================================
+   AUTENTICAÇÃO (LOGIN E PERFIL)
+========================================= */
+
+/* Fundo da tela de login e registro isolado */
+.auth-body {
+    background-color: #011C43; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.auth-wrapper {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+}
+
+.auth-card {
+    background: #ffffff;
+    padding: 30px 35px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.auth-header img {
+    width: 90px;
+    margin-bottom: 15px;
+}
+
+.auth-header h2 {
+    color: #011C43;
+    font-size: 20px;
+    margin: 0;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-field label {
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.auth-field input {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.auth-field input:focus {
+    outline: none;
+    border-color: #00BEDD;
+    box-shadow: 0 0 0 1px #00BEDD;
+}
+
+.auth-hint {
+    font-size: 11px;
+    color: #888;
+    margin-top: 5px;
+}
+
+/* Links abaixo do botão "Entrar" na tela de login */
+.auth-links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    font-size: 13px;
+}
+
+.auth-link {
+    color: #00BEDD;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.auth-link:hover {
+    color: #011C43;
+    text-decoration: underline;
+}
+
+/* Botões do formulário Auth */
+.auth-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.auth-btn-cancel, .auth-btn-send {
+    width: 100%;
+    text-align: center;
+}
+
+/* Transformação do nome do usuário na sidebar (layout.html) */
+.sidebar-user-link {
+    color: #00BEDD;
+    text-decoration: none;
+    transition: color 0.3s;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-user-link:hover {
+    color: #ffffff;
+}

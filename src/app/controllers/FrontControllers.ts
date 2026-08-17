@@ -21,7 +21,7 @@ export default {
 				results = await Acessos.getIndexTable(dataFiltro);
 			} else {
 				// Manda com userId (Usuário vê apenas os dele)
-				results = await Acessos.getIndexTable(dataFiltro, req.session.userId!); 
+				results = await Acessos.getIndexTable(dataFiltro, req.session.userId!);
 			}
 
 			// Normaliza o retorno do banco (SQLite)
@@ -46,9 +46,9 @@ export default {
 			else if (req.query.success === '2') successMsg = "Agendado! Alguns dias já existentes foram ignorados.";
 
 			// Envia a dataFiltro de volta pro Nunjucks preencher o <input type="date"> na tela
-			return res.render('index', { 
-				acessos, 
-				success: successMsg, 
+			return res.render('index', {
+				acessos,
+				success: successMsg,
 				activeMenu: 'abertos',
 				dataAtual: dataFiltro // <-- Para manter a data visível e atualizada no HTML
 			});
@@ -257,41 +257,38 @@ export default {
 	// Carrega a página de edição massiva
 	async showEdit(req: Request, res: Response) {
 		try {
-			const buscaTermo = req.query.buscaTermo as string | undefined;
+			// Pega as datas da URL. Se não existir, a Data Início ganha o dia de hoje.
+			const today = new Date().toISOString().slice(0, 10);
+			const dataInicio = req.query.dataInicio as string || today;
+			const dataFim = req.query.dataFim as string || '';
 
-			// Executa o editAll (que já aplica a ordenação padrão por pesos de Autorizado)
-			let results = await Acessos.editAll(buscaTermo);
-
-			// CORREÇÃO 1: Removido o ".rows", pois o SQLite retorna o array diretamente!
+			// Consulta o banco usando a nova função do Model
+			const results = await Acessos.getMassEditTable(dataInicio, dataFim);
 			let acessos = Array.isArray(results) ? results : (results?.rows || []);
-			// let acessos = results || [];
 
+			// Normaliza as datas para DD/MM/AAAA
 			acessos = acessos.map((acesso: any) => {
-				const dataFormatada = formatDate(acesso.data_do_acesso).format;
-				const limiteFormatado = formatDate(acesso.data_limite).format;
-				let documentoFormatado = acesso.numero_doc;
-
-				if (acesso.doc_nacional === 'CPF' && documentoFormatado) {
-					const numerosPuros = String(documentoFormatado).replace(/\D/g, '');
-					if (numerosPuros.length === 11) {
-						documentoFormatado = numerosPuros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-					}
+				if (acesso.data_do_acesso && acesso.data_do_acesso.includes('-')) {
+					const [ano, mes, dia] = acesso.data_do_acesso.split('-');
+					acesso.data_do_acesso = `${dia}/${mes}/${ano}`;
 				}
-				return {
-					...acesso,
-					data_do_acesso: dataFormatada,
-					data_limite: limiteFormatado,
-					numero_doc: documentoFormatado
-				};
+				if (acesso.data_limite && acesso.data_limite.includes('-')) {
+					const [ano, mes, dia] = acesso.data_limite.split('-');
+					acesso.data_limite = `${dia}/${mes}/${ano}`;
+				}
+				return acesso;
 			});
 
-			// CORREÇÃO 2: Alterado de 'admin/edit' para 'edit' para o Nunjucks achar o arquivo
-			return res.render('admin/edit', { acessos, activeMenu: 'edit', buscaTermoAtual: buscaTermo || '' });
-
+			// Retorna preenchendo os valores no Nunjucks
+			return res.render('admin/edit', {
+				acessos,
+				activeMenu: 'edit',
+				dataInicio,
+				dataFim
+			});
 		} catch (error) {
-			console.log("Erro no showEdit:", error);
-			// CORREÇÃO 3: Adicionado um retorno caso dê erro no template ou no banco
-			return res.status(500).send("Ocorreu um erro ao tentar carregar a página de Edição Massiva. Verifique o console do VSCode.");
+			console.log("Erro no controller Acessos.showEdit:", error);
+			return res.status(500).send("Erro ao carregar a página de edição.");
 		}
 	},
 
