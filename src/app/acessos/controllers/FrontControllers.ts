@@ -1,7 +1,11 @@
 import { Request, Response, Router } from 'express';
 import Acessos from "../models/Acessos.js";
 import { Acesso } from '../interfaces/AcessosTable.js';
-import { formatDate } from '../../lib/utils.js';
+import { formatDate } from '../../../lib/utils.js';
+/* 
+import { sendStatusChangeEmail } from '../../shared/lib/mailer.js';
+import Users from '../../shared/models/Users.js'; 
+*/
 
 function onlyDigits(v: string | null | undefined) {
 	if (!v) return '';
@@ -372,8 +376,26 @@ export default {
 				data.autorizado = acessoAtual.autorizado;
 			}
 
-			// Como as variáveis do form.html (validade_cnh) agora possuem o nome correto,
-			// req.body já carrega os nomes perfeitos para serem despachados pro Acessos.ts
+			// ==========================================
+            // VERIFICAÇÃO PARA ENVIO DE E-MAIL (EDIÇÃO INDIVIDUAL)
+            // ==========================================
+            /*
+            if (data.autorizado && String(acessoAtual.autorizado).toUpperCase() !== String(data.autorizado).toUpperCase()) {
+                // O status mudou! Buscar e-mail do solicitante original
+                const solicitante = await Users.findOne({ id: acessoAtual.user_id });
+                
+                if (solicitante && solicitante.email) {
+                    await sendStatusChangeEmail(
+                        solicitante.email, 
+                        solicitante.name, 
+                        ticket, 
+                        data.autorizado, 
+                        'Acessos' // Nome do módulo (Para reaproveitar depois em 'Avarias')
+                    );
+                }
+            }
+            */
+
 			await Acessos.update(ticket, data);
 
 			return res.redirect('/?success=1');
@@ -453,6 +475,30 @@ export default {
 
 			// Manda o Model executar a atualização no banco
 			await Acessos.updateMassivo(tickets, status);
+
+			// ==========================================
+            // VERIFICAÇÃO PARA ENVIO DE E-MAIL (EDIÇÃO MASSIVA)
+            // ==========================================
+            /*
+            // Percorre os tickets que foram atualizados para enviar os e-mails
+            for (const t of tickets) {
+                const results = await Acessos.findByTicket(t);
+                const acessoAtual = Array.isArray(results) ? results[0] : (results?.rows ? results.rows[0] : results);
+                
+                if (acessoAtual && acessoAtual.user_id) {
+                    const solicitante = await Users.findOne({ id: acessoAtual.user_id });
+                    if (solicitante && solicitante.email) {
+                        await sendStatusChangeEmail(
+                            solicitante.email, 
+                            solicitante.name, 
+                            t, 
+                            status, 
+                            'Acessos'
+                        );
+                    }
+                }
+            }
+            */
 
 			return res.status(200).json({ message: "Atualizado com sucesso!" });
 

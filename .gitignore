@@ -4,3 +4,4 @@
 .env
 # Banco de dados de sessões
 src/database/sessions.sqlite
+rascunho.sql

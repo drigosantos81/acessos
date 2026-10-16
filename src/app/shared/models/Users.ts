@@ -1,6 +1,6 @@
-import db from "../../config/db.js";
+import db from "../../../config/db.js";
 import bcrypt from "bcryptjs";
-import { Acesso } from "../interfaces/AcessosTable.js";
+import { Acesso } from "../../acessos/interfaces/AcessosTable.js";
 
 export default {
     // ==========================================

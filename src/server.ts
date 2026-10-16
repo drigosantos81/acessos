@@ -27,8 +27,12 @@ app.use((req, res, next) => {
 // VIEW ENGINE
 app.set("view engine", "html");
 
-nunjucks.configure(
-    path.join(process.cwd(), "src", "app", "pages"),
+nunjucks.configure([
+    path.join(process.cwd(), "src", "app", "acessos", "pages"),
+    path.join(process.cwd(), "src", "app", "avarias", "pages"),
+    path.join(process.cwd(), "src", "app", "pagamentos", "pages"),
+    path.join(process.cwd(), "src", "app", "shared", "pages")
+],    
     {
         express: app,
         autoescape: false,
