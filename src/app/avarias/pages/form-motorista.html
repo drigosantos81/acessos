@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <title>Ressarcimento de Avaria</title>
+    <link rel="stylesheet" href="/css/avarias/styleAvarias.css">
+{% endblock %}
+
+{% block content %}
+    <div class="avarias-form-header">
+        <h1 style="color: #011C43; font-size: 28px; margin: 0 0 10px 0;">Vamos cuidar do seu ressarcimento</h1>
+        <p>Preencha as informações abaixo para o terminal analisar sua solicitação.</p>
+    </div>
+
+    <!-- Instruções -->
+    <div class="avarias-instructions">
+        <h3>Antes de preencher, leia as instruções</h3>
+        <ol>
+            <li>A Tecon Salvador <strong>não trabalha com horas paradas</strong>.</li>
+            <li>O prazo do processo de reembolso é de <strong>30 dias úteis</strong>.</li>
+            <li>É necessário enviar <strong>3 orçamentos</strong> para análise.</li>
+            <li>Após a validação do orçamento pela Gestão de Operações, o termo será enviado para o e-mail informado para assinatura. O pagamento será realizado somente após a assinatura do termo.</li>
+        </ol>
+    </div>
+
+    <!-- Resumo do Protocolo Estático para Teste de Layout -->
+    <div class="avarias-protocol-bar">
+        <div class="avarias-protocol-item">
+            <span>Protocolo</span>
+            <strong>AV-2026-0021</strong>
+        </div>
+        <div class="avarias-protocol-item">
+            <span>Placa</span>
+            <strong>ABC1D23</strong>
+        </div>
+        <div class="avarias-protocol-item">
+            <span>Data da avaria</span>
+            <strong>16/10/2026</strong>
+        </div>
+    </div>
+
+    <div class="avarias-form-wrapper">
+        <h3 style="margin-top: 0; color: #888; font-size: 12px; text-transform: uppercase;">Etapa 1 de 5</h3>
+        <h2 style="color: #011C43; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">Dados do motorista</h2>
+
+        <form action="/avarias/ressarcimento" method="POST">
+            <div class="avarias-row">
+                <div class="avarias-col">
+                    <label>Nome completo *</label>
+                    <input type="text" name="nome" required>
+                </div>
+                <div class="avarias-col">
+                    <label>CPF *</label>
+                    <input type="text" name="cpf" required>
+                </div>
+            </div>
+
+            <div class="avarias-row">
+                <div class="avarias-col">
+                    <label>Data de nascimento *</label>
+                    <input type="date" name="data_nascimento" required>
+                </div>
+                <div class="avarias-col">
+                    <label>Endereço *</label>
+                    <input type="text" name="endereco" placeholder="Rua, Número, Bairro, Cidade" required>
+                </div>
+            </div>
+
+            <div class="avarias-row">
+                <div class="avarias-col">
+                    <label>E-mail *</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="avarias-col">
+                    <label>Telefone *</label>
+                    <input type="text" name="telefone" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-avarias-submit" style="width: auto; float: right;">Continuar &rarr;</button>
+            <div style="clear: both;"></div> <!-- Limpa o float do botão -->
+        </form>
+    </div>
+{% endblock %}

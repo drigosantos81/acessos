@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<title>Registrar Avaria - Interno</title>
+<link rel="stylesheet" href="/css/avarias/styleAvarias.css">
+{% endblock %}
+
+{% block content %}
+<div class="avarias-form-header">
+    <h2 style="font-size: 14px; color: #888; text-transform: uppercase;">1. Registro da Ocorrência</h2>
+    <h1 style="color: #011C43; font-size: 28px; margin: 10px 0;">Registrar avaria</h1>
+    <p>Preencha os dados da ocorrência e entregue o link ao motorista para ele continuar.</p>
+</div>
+
+<div class="avarias-form-wrapper">
+    <h3
+        style="margin-top: 0; color: #011C43; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
+        <i class="fa-solid fa-clipboard-list"></i> Dados da avaria
+    </h3>
+
+    <form action="/avarias/registro-interno" method="POST">
+        <div class="avarias-row">
+            <div class="avarias-col">
+                <label>Placa do veículo *</label>
+                <input type="text" name="placa" required>
+            </div>
+            <div class="avarias-col">
+                <label>RDA — Registro da Avaria no Terminal (opcional)</label>
+                <input type="text" name="rda">
+            </div>
+        </div>
+
+        <div class="avarias-row">
+            <div class="avarias-col">
+                <label>Responsável pelo registro *</label>
+                <!-- Idealmente virá bloqueado e preenchido pela sessão logada -->
+                <input type="text" name="responsavel" value="{{ session.userName }}" required>
+            </div>
+            <div class="avarias-col">
+                <label>Matrícula *</label>
+                <input type="text" name="matricula" required>
+            </div>
+        </div>
+
+        <div class="avarias-row">
+            <div class="avarias-col">
+                <label>Setor *</label>
+                <input type="text" name="setor" required>
+            </div>
+            <div class="avarias-col">
+                <label>Unidade *</label>
+                <select name="unidade" required>
+                    <option value="TECON SALVADOR">TECON SALVADOR</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="avarias-row">
+            <div class="avarias-col">
+                <label>Data da avaria *</label>
+                <input type="date" name="data_avaria" required>
+            </div>
+            <div class="avarias-col">
+                <label>Nome do motorista</label>
+                <input type="text" name="nome_motorista">
+            </div>
+        </div>
+
+        <div class="avarias-row">
+            <div class="avarias-col">
+                <label>CPF do motorista *</label>
+                <input type="text" name="cpf_motorista" required>
+            </div>
+            <div class="avarias-col">
+                <label>Telefone do motorista *</label>
+                <input type="text" name="telefone_motorista" required>
+            </div>
+        </div>
+
+        <div class="avarias-row">
+            <div class="avarias-col">
+                <label>E-mail do motorista (opcional)</label>
+                <input type="email" name="email_motorista">
+            </div>
+        </div>
+
+        <div class="avarias-row">
+            <div class="avarias-col">
+                <label>Descrição da ocorrência *</label>
+                <textarea name="descricao" rows="4" required></textarea>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-avarias-submit">Registrar e gerar link do motorista &rarr;</button>
+    </form>
+</div>
+{% endblock %}

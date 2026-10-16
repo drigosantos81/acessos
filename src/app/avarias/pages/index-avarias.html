@@ -2,20 +2,26 @@
 
 {% block head %}
     <title>Avarias - Portal de Atendimento</title>
-    <!-- Apontando para a nova pasta de CSS que você criou -->
     <link rel="stylesheet" href="/css/avarias/styleAvarias.css">
 {% endblock %}
 
 {% block content %}
-<div class="header-page">
-    <h2>Gestão de Avarias</h2>
-</div>
-<hr>
+    <div class="header-page">
+        <h2>Gestão de Avarias</h2>
+    </div>
+    <hr>
+    
+    <div class="avarias-menu-grid">
+        <a href="/avarias/registro-interno" class="avarias-btn-card">
+            <i class="fa-solid fa-clipboard-check"></i>
+            <h3>Registrar Avaria</h3>
+            <p>Acesso restrito para funcionários. Inicie um protocolo de ocorrência.</p>
+        </a>
 
-<div class="avarias-card-construcao">
-    <i class="fa-solid fa-person-digging avarias-icon"></i>
-    <h3 class="avarias-title">Módulo em Construção</h3>
-    <p class="avarias-text">A página estática de Avarias já está configurada e pronta para receber as futuras
-        atualizações.</p>
-</div>
+        <a href="/avarias/ressarcimento" class="avarias-btn-card">
+            <i class="fa-solid fa-truck-moving"></i>
+            <h3>Área do Motorista</h3>
+            <p>Formulário de ressarcimento e envio de orçamentos.</p>
+        </a>
+    </div>
 {% endblock %}
