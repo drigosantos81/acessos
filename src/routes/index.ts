@@ -2,21 +2,23 @@ import { Router } from 'express';
 import authRoutes from './auth.routes.js';
 import acessosRoutes from './acessos.routes.js';
 import avariasRoutes from './avarias.routes.js';
-import pagamentosRoutes from './pagamentos.routes.js';
+import { onlyUsers } from '../app/shared/middlewares/session.js';
 
 const routes = Router();
 
-// Rotas de Autenticação não têm prefixo (ficam na raiz como /login)
+// ==========================================
+// ROTAS PÚBLICAS (Abertas para todos)
+// ==========================================
+// Contém a tela de /login e a lógica de autenticação
 routes.use('/', authRoutes);
 
-// Rotas de Acessos ficam na raiz por enquanto (ou você pode mudar para '/acessos')
-routes.use('/', acessosRoutes);
+// ==========================================
+// ROTAS PROTEGIDAS (Exigem Login)
+// ==========================================
+// Ao colocar o 'onlyUsers' aqui, TODAS as rotas de acessos e avarias ficam blindadas.
+// Se alguém digitar localhost:3000/, o onlyUsers intercepta e manda pro /login.
 
-// Tudo de avarias começa com /avarias
-routes.use('/avarias', avariasRoutes);
-
-// Tudo de avarias começa com /avarias
-routes.use('/pagamentos', pagamentosRoutes);
-
+routes.use('/', onlyUsers, acessosRoutes);
+routes.use('/avarias', onlyUsers, avariasRoutes);
 
 export default routes;

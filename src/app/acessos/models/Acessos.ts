@@ -261,7 +261,7 @@ export default {
     // ==========================================
     // ATUALIZAR REGISTRO INDIVIDUAL
     // ==========================================
-    async update(ticket: string, data: any) {
+    async update(ticket: string, data: Partial<Acesso>) {
         try {
             const query = `
                 UPDATE acesso SET 
@@ -277,7 +277,7 @@ export default {
                     tipo_veiculo = ?, 
                     cnh = ?, 
                     cat_habilitacao = ?, 
-                    validade_cnh = ?, 
+                    data_validade_cnh = ?, 
                     justificativa = ?, 
                     visita_a = ?, 
                     tel_interno = ?, 

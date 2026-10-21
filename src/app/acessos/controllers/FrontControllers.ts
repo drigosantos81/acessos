@@ -116,26 +116,6 @@ export default {
 			}
 
 			// ==========================================
-			// BACKEND CHECK 2: CPF INVÁLIDO
-			// ==========================================
-			const doc = String(body.doc_nacional).trim().toUpperCase();
-			if (!["CPF", "PASSAPORTE", "RG"].includes(doc)) {
-				return res.render("form", { acesso: body, error: "Tipo de documento inválido." });
-			}
-			body.doc_nacional = doc;
-
-			let numero = String(body.numero_doc);
-			if (doc === "CPF") {
-				const digits = numero.replace(/\D/g, "");
-				if (digits.length !== 11) {
-					return res.render("form", { acesso: body, error: "O CPF informado é inválido." });
-				}
-				body.numero_doc = digits;
-			} else {
-				body.numero_doc = numero.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 20);
-			}
-
-			// ==========================================
 			// BACKEND CHECK 3: TELEFONE E DATA INVÁLIDOS
 			// ==========================================
 			if (body.telefone && String(body.telefone).trim() !== "") {
@@ -148,11 +128,24 @@ export default {
 				body.telefone = null;
 			}
 
+			// CORREÇÃO E NORMALIZAÇÃO DA DATA
 			let inputDate = String(body.data_do_acesso).trim();
+
 			if (inputDate.includes('/')) {
 				const parts = inputDate.split('/');
-				inputDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+				let anoConvertido = parts[2];
+
+				// Se o usuário digitou apenas 2 dígitos (ex: 26), converte para 2026
+				if (anoConvertido.length === 2) {
+					anoConvertido = "20" + anoConvertido;
+				}
+
+				inputDate = `${anoConvertido}-${parts[1]}-${parts[0]}`;
 			}
+
+			// Força o formato AAAA-MM-DD no body. 
+			// Assim, se houver um erro, o <input type="date"> consegue recarregar o valor na tela sem ficar em branco.
+			body.data_do_acesso = inputDate;
 
 			const [ano, mes, dia] = inputDate.split('-').map(Number);
 			if (!ano || !mes || !dia || ano < 2024 || ano > 2100) {
@@ -191,6 +184,10 @@ export default {
 			body.updated_at = now;
 			body.empresa_id = body.empresa_id ? Number(body.empresa_id) : null;
 			body.centro_custo_id = body.centro_custo_id ? Number(body.centro_custo_id) : null;
+
+			// ==========================================
+			// FINAL DO CHECK 3 TELEFONE E DATA INVÁLIDOS
+			// ==========================================
 
 			// ==========================================
 			// BACKEND CHECK 4: DUPLICIDADE DE DATAS
@@ -377,24 +374,24 @@ export default {
 			}
 
 			// ==========================================
-            // VERIFICAÇÃO PARA ENVIO DE E-MAIL (EDIÇÃO INDIVIDUAL)
-            // ==========================================
-            /*
-            if (data.autorizado && String(acessoAtual.autorizado).toUpperCase() !== String(data.autorizado).toUpperCase()) {
-                // O status mudou! Buscar e-mail do solicitante original
-                const solicitante = await Users.findOne({ id: acessoAtual.user_id });
-                
-                if (solicitante && solicitante.email) {
-                    await sendStatusChangeEmail(
-                        solicitante.email, 
-                        solicitante.name, 
-                        ticket, 
-                        data.autorizado, 
-                        'Acessos' // Nome do módulo (Para reaproveitar depois em 'Avarias')
-                    );
-                }
-            }
-            */
+			// VERIFICAÇÃO PARA ENVIO DE E-MAIL (EDIÇÃO INDIVIDUAL)
+			// ==========================================
+			/*
+			if (data.autorizado && String(acessoAtual.autorizado).toUpperCase() !== String(data.autorizado).toUpperCase()) {
+				// O status mudou! Buscar e-mail do solicitante original
+				const solicitante = await Users.findOne({ id: acessoAtual.user_id });
+			    
+				if (solicitante && solicitante.email) {
+					await sendStatusChangeEmail(
+						solicitante.email, 
+						solicitante.name, 
+						ticket, 
+						data.autorizado, 
+						'Acessos' // Nome do módulo (Para reaproveitar depois em 'Avarias')
+					);
+				}
+			}
+			*/
 
 			await Acessos.update(ticket, data);
 
@@ -477,28 +474,28 @@ export default {
 			await Acessos.updateMassivo(tickets, status);
 
 			// ==========================================
-            // VERIFICAÇÃO PARA ENVIO DE E-MAIL (EDIÇÃO MASSIVA)
-            // ==========================================
-            /*
-            // Percorre os tickets que foram atualizados para enviar os e-mails
-            for (const t of tickets) {
-                const results = await Acessos.findByTicket(t);
-                const acessoAtual = Array.isArray(results) ? results[0] : (results?.rows ? results.rows[0] : results);
-                
-                if (acessoAtual && acessoAtual.user_id) {
-                    const solicitante = await Users.findOne({ id: acessoAtual.user_id });
-                    if (solicitante && solicitante.email) {
-                        await sendStatusChangeEmail(
-                            solicitante.email, 
-                            solicitante.name, 
-                            t, 
-                            status, 
-                            'Acessos'
-                        );
-                    }
-                }
-            }
-            */
+			// VERIFICAÇÃO PARA ENVIO DE E-MAIL (EDIÇÃO MASSIVA)
+			// ==========================================
+			/*
+			// Percorre os tickets que foram atualizados para enviar os e-mails
+			for (const t of tickets) {
+				const results = await Acessos.findByTicket(t);
+				const acessoAtual = Array.isArray(results) ? results[0] : (results?.rows ? results.rows[0] : results);
+			    
+				if (acessoAtual && acessoAtual.user_id) {
+					const solicitante = await Users.findOne({ id: acessoAtual.user_id });
+					if (solicitante && solicitante.email) {
+						await sendStatusChangeEmail(
+							solicitante.email, 
+							solicitante.name, 
+							t, 
+							status, 
+							'Acessos'
+						);
+					}
+				}
+			}
+			*/
 
 			return res.status(200).json({ message: "Atualizado com sucesso!" });
 

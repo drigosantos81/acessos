@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import Acessos from "../../../acessos/models/Acessos.js";
+import Acessos from "../../acessos/models/Acessos.js";
 
 export async function loadMenuCounts(req: Request, res: Response, next: NextFunction) {
     // Se o usuário não estiver logado, não tem o que contar, zera tudo.
