@@ -24,9 +24,17 @@
         </div>
 
         <ul class="sidebar-menu">
-            <li><a href="/"><i class="fa-solid fa-address-card"></i> ACESSOS</a></li>
-            <li><a href="/pagamentos"><i class="fa-solid fa-file-invoice-dollar"></i> PAGAMENTOS</a></li>
-            <li><a href="/avarias"><i class="fa-solid fa-car-burst"></i> AVARIAS</a></li>
+            {% if session.isAdmin or 'acessos' in session.modulosPermitidos %}
+                <li><a href="/"><i class="fa-solid fa-address-card"></i> ACESSOS</a></li>
+            {% endif %}
+
+            {% if session.isAdmin or 'pagamentos' in session.modulosPermitidos %}
+                <li><a href="/pagamentos"><i class="fa-solid fa-file-invoice-dollar"></i> PAGAMENTOS</a></li>
+            {% endif %}
+            
+            {% if session.isAdmin or 'avarias' in session.modulosPermitidos %}
+                <li><a href="/avarias"><i class="fa-solid fa-car-burst"></i> AVARIAS</a></li>
+            {% endif %}
         </ul>
 
         <div class="sidebar-footer">
@@ -52,28 +60,32 @@
 
     <div class="main-content">
         <div class="menu">
-            <div class="menu-links">
-                <a href="/" class="menu-link-btn {% if activeMenu == 'abertos' %}active{% endif %}">
-                    <i class="fa-solid fa-folder-open"></i> Pedidos Abertos
-                    {% if counts.abertos > 0 %}<span class="badge-counter">{{ counts.abertos }}</span>{% endif %}
-                </a>
 
-                {% if session.isAdmin %}
-                <a href="/admin/edit" class="menu-link-btn {% if activeMenu == 'edit' %}active{% endif %}">
-                    <i class="fa-solid fa-pen-to-square"></i> Edição Massiva
-                </a>
-                {% endif %}
+            {% if activeMenu == 'acessos' %}
+                <div class="menu-links">
+                    <a href="/" class="menu-link-btn {% if activeMenu == 'abertos' %}active{% endif %}">
+                        <i class="fa-solid fa-folder-open"></i> Pedidos Abertos
+                        {% if counts.abertos > 0 %}<span class="badge-counter">{{ counts.abertos }}</span>{% endif %}
+                    </a>
 
-                <a href="/resolvidos" class="menu-link-btn {% if activeMenu == 'resolvidos' %}active{% endif %}">
-                    <i class="fa-solid fa-check-double"></i> Pedidos Resolvidos
-                    {% if counts.resolvidos > 0 %}<span class="badge-counter">{{ counts.resolvidos }}</span>{% endif %}
-                </a>
+                    {% if session.isAdmin %}
+                    <a href="/admin/edit" class="menu-link-btn {% if activeMenu == 'edit' %}active{% endif %}">
+                        <i class="fa-solid fa-pen-to-square"></i> Edição Massiva
+                    </a>
+                    {% endif %}
 
-                <a href="/pendentes" class="menu-link-btn {% if activeMenu == 'pendentes' %}active{% endif %}">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Pedidos Pendentes
-                    {% if counts.pendentes > 0 %}<span class="badge-counter">{{ counts.pendentes }}</span>{% endif %}
-                </a>
-            </div>
+                    <a href="/resolvidos" class="menu-link-btn {% if activeMenu == 'resolvidos' %}active{% endif %}">
+                        <i class="fa-solid fa-check-double"></i> Pedidos Resolvidos
+                        {% if counts.resolvidos > 0 %}<span class="badge-counter">{{ counts.resolvidos }}</span>{% endif %}
+                    </a>
+
+                    <a href="/pendentes" class="menu-link-btn {% if activeMenu == 'pendentes' %}active{% endif %}">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Pedidos Pendentes
+                        {% if counts.pendentes > 0 %}<span class="badge-counter">{{ counts.pendentes }}</span>{% endif %}
+                    </a>
+                </div>
+            {% endif %}
+            
         </div>
 
         <!-- CONTEÚDO DA PÁGINA (MIOLO) -->

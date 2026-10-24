@@ -20,10 +20,12 @@
             onchange="atualizarDataIndex(this)" onkeypress="atualizarDataIndex(this, event)">
 
         <div style="display: flex; gap: 10px;">
-            <button class="button-send" style="background-color: #16a34a;"
-                onclick="window.location.href='/download-csv'">
-                <i class="fa-solid fa-download"></i> Download
-            </button>
+            {% if session.isAdmin %}
+                <button class="button-send" style="background-color: #08A2A6;"
+                    onclick="window.location.href='/download-csv'">
+                    <i class="fa-solid fa-download"></i> Download
+                </button>
+            {% endif %}
 
             <button class="button-send" onclick="window.location.href='/form'">
                 Solicitar Acesso

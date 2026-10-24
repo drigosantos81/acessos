@@ -15,23 +15,18 @@ function onlyDigits(v: string | null | undefined) {
 export default {
 	async index(req: Request, res: Response) {
 		try {
-			// Pega a data da URL (se existir), ou usa a de hoje
 			const dataQuery = req.query.data as string;
 			const dataFiltro = dataQuery || new Date().toISOString().slice(0, 10);
 
 			let results;
 			if (req.session.isAdmin) {
-				// Manda sem userId (Admin vê tudo)
 				results = await Acessos.getIndexTable(dataFiltro);
 			} else {
-				// Manda com userId (Usuário vê apenas os dele)
 				results = await Acessos.getIndexTable(dataFiltro, req.session.userId!);
 			}
 
-			// Normaliza o retorno do banco (SQLite)
 			let acessos = Array.isArray(results) ? results : (results?.rows || []);
 
-			// Formata as datas para o padrão brasileiro DD/MM/AAAA
 			acessos = acessos.map((acesso: any) => {
 				if (acesso.data_do_acesso && acesso.data_do_acesso.includes('-')) {
 					const [ano, mes, dia] = acesso.data_do_acesso.split('-');
@@ -44,17 +39,16 @@ export default {
 				return acesso;
 			});
 
-			// Captura mensagens de sucesso na URL
 			let successMsg = null;
 			if (req.query.success === '1') successMsg = "Acesso agendado com sucesso!";
 			else if (req.query.success === '2') successMsg = "Agendado! Alguns dias já existentes foram ignorados.";
 
-			// Envia a dataFiltro de volta pro Nunjucks preencher o <input type="date"> na tela
 			return res.render('index', {
 				acessos,
 				success: successMsg,
-				activeMenu: 'abertos',
-				dataAtual: dataFiltro // <-- Para manter a data visível e atualizada no HTML
+				activeMenu: 'acessos', // <-- Garante que a div de botões apareça
+				activeTab: 'abertos',  // <-- Garante que o botão Solicitações fique aceso
+				dataAtual: dataFiltro 
 			});
 
 		} catch (error) {
@@ -64,9 +58,7 @@ export default {
 	},
 
 	async createAcesso(req: Request, res: Response) {
-
 		return res.render('form');
-
 	},
 
 	async post(req: Request<{}, {}, Acesso>, res: Response) {
@@ -76,9 +68,6 @@ export default {
 
 			const body = req.body as any;
 
-			// ==========================================
-			// BACKEND CHECK 1: CAMPOS VAZIOS
-			// ==========================================
 			const camposObrigatorios = ["nome", "doc_nacional", "numero_doc", "data_do_acesso", "qtd_dias", "justificativa"];
 
 			for (const campo of camposObrigatorios) {
@@ -87,37 +76,29 @@ export default {
 				}
 			}
 
-			// ==========================================
-			// BACKEND CHECK 1.5: VEÍCULO E CNH OBRIGATÓRIOS
-			// ==========================================
 			const temVeiculo = ["sim", "true", "1", "s"].includes(String(body.com_veiculo).toLowerCase());
 			if (temVeiculo) {
-				// Se marcou SIM, nenhum dos 5 campos pode estar vazio
-				if (!body.placa || !body.tipo_veiculo || !body.cnh || !body.cat_habilitacao || !body.validade_cnh) {
+				// Correção do nome da coluna de CNH
+				if (!body.placa || !body.tipo_veiculo || !body.cnh || !body.cat_habilitacao || !body.data_vencimento_cnh) {
 					return res.render("form", {
 						acesso: body,
 						error: "Erro no servidor: Placa, Tipo, CNH, Categoria e Validade são obrigatórios quando selecionado 'SIM'."
 					});
 				}
 
-				// Formatar data da validade da CNH para o formato de banco (YYYY-MM-DD)
-				let validadeInput = String(body.validade_cnh).trim();
+				let validadeInput = String(body.data_vencimento_cnh).trim();
 				if (validadeInput.includes('/')) {
 					const parts = validadeInput.split('/');
-					body.validade_cnh = `${parts[2]}-${parts[1]}-${parts[0]}`;
+					body.data_vencimento_cnh = `${parts[2]}-${parts[1]}-${parts[0]}`;
 				}
 			} else {
-				// Limpa lixo residual se veículo for não
 				body.placa = null;
 				body.tipo_veiculo = null;
 				body.cnh = null;
 				body.cat_habilitacao = null;
-				body.validade_cnh = null;
+				body.data_vencimento_cnh = null;
 			}
 
-			// ==========================================
-			// BACKEND CHECK 3: TELEFONE E DATA INVÁLIDOS
-			// ==========================================
 			if (body.telefone && String(body.telefone).trim() !== "") {
 				const telDigits = String(body.telefone).replace(/\D/g, "");
 				if (telDigits.length < 10) {
@@ -128,23 +109,17 @@ export default {
 				body.telefone = null;
 			}
 
-			// CORREÇÃO E NORMALIZAÇÃO DA DATA
 			let inputDate = String(body.data_do_acesso).trim();
 
 			if (inputDate.includes('/')) {
 				const parts = inputDate.split('/');
 				let anoConvertido = parts[2];
-
-				// Se o usuário digitou apenas 2 dígitos (ex: 26), converte para 2026
 				if (anoConvertido.length === 2) {
 					anoConvertido = "20" + anoConvertido;
 				}
-
 				inputDate = `${anoConvertido}-${parts[1]}-${parts[0]}`;
 			}
 
-			// Força o formato AAAA-MM-DD no body. 
-			// Assim, se houver um erro, o <input type="date"> consegue recarregar o valor na tela sem ficar em branco.
 			body.data_do_acesso = inputDate;
 
 			const [ano, mes, dia] = inputDate.split('-').map(Number);
@@ -185,13 +160,6 @@ export default {
 			body.empresa_id = body.empresa_id ? Number(body.empresa_id) : null;
 			body.centro_custo_id = body.centro_custo_id ? Number(body.centro_custo_id) : null;
 
-			// ==========================================
-			// FINAL DO CHECK 3 TELEFONE E DATA INVÁLIDOS
-			// ==========================================
-
-			// ==========================================
-			// BACKEND CHECK 4: DUPLICIDADE DE DATAS
-			// ==========================================
 			const datasPedidas: string[] = [];
 			for (let i = 0; i < body.qtd_dias; i++) {
 				const novaDataObj = new Date(dataBaseObj.getTime());
@@ -223,7 +191,7 @@ export default {
 				tipo_veiculo: body.tipo_veiculo || null,
 				cnh: body.cnh || null,
 				cat_habilitacao: body.cat_habilitacao || null,
-				validade_cnh: body.validade_cnh || null,
+				data_vencimento_cnh: body.data_vencimento_cnh || null, // Correção aqui
 				justificativa: body.justificativa,
 				portoes: body.portoes,
 				autorizado: body.autorizado || "SOLICITADO",
@@ -255,19 +223,15 @@ export default {
 		}
 	},
 
-	// Carrega a página de edição massiva
 	async showEdit(req: Request, res: Response) {
 		try {
-			// Pega as datas da URL. Se não existir, a Data Início ganha o dia de hoje.
 			const today = new Date().toISOString().slice(0, 10);
 			const dataInicio = req.query.dataInicio as string || today;
 			const dataFim = req.query.dataFim as string || '';
 
-			// Consulta o banco usando a nova função do Model
 			const results = await Acessos.getMassEditTable(dataInicio, dataFim);
 			let acessos = Array.isArray(results) ? results : (results?.rows || []);
 
-			// Normaliza as datas para DD/MM/AAAA
 			acessos = acessos.map((acesso: any) => {
 				if (acesso.data_do_acesso && acesso.data_do_acesso.includes('-')) {
 					const [ano, mes, dia] = acesso.data_do_acesso.split('-');
@@ -280,7 +244,6 @@ export default {
 				return acesso;
 			});
 
-			// Retorna preenchendo os valores no Nunjucks
 			return res.render('admin/edit', {
 				acessos,
 				activeMenu: 'edit',
@@ -293,9 +256,6 @@ export default {
 		}
 	},
 
-	// ==========================================
-	// EXIBIR UM REGISTRO INDIVIDUAL (Visualizar/Editar)
-	// ==========================================
 	async showEditOne(req: Request, res: Response) {
 		try {
 			const ticket = req.params.ticket as string;
@@ -311,15 +271,15 @@ export default {
 				return res.redirect('/');
 			}
 
-			// Formatação das datas para o padrão brasileiro DD/MM/AAAA para exibir bonito na tela
 			if (acesso.data_do_acesso && acesso.data_do_acesso.includes('-')) {
 				const [ano, mes, dia] = acesso.data_do_acesso.split('-');
 				acesso.data_do_acesso = `${dia}/${mes}/${ano}`;
 			}
-			// CORREÇÃO AQUI para usar validade_cnh
-			if (acesso.validade_cnh && acesso.validade_cnh.includes('-')) {
-				const [ano, mes, dia] = acesso.validade_cnh.split('-');
-				acesso.validade_cnh = `${dia}/${mes}/${ano}`;
+			
+			// CORREÇÃO: Usando a coluna certa
+			if (acesso.data_vencimento_cnh && acesso.data_vencimento_cnh.includes('-')) {
+				const [ano, mes, dia] = acesso.data_vencimento_cnh.split('-');
+				acesso.data_vencimento_cnh = `${dia}/${mes}/${ano}`;
 			}
 
 			const formatTrackDate = (d: string) => {
@@ -343,9 +303,6 @@ export default {
 		}
 	},
 
-	// ==========================================
-	// ATUALIZAR UM REGISTRO INDIVIDUAL
-	// ==========================================
 	async updateEditOne(req: Request, res: Response) {
 		try {
 			const ticket = req.params.ticket as string;
@@ -373,28 +330,7 @@ export default {
 				data.autorizado = acessoAtual.autorizado;
 			}
 
-			// ==========================================
-			// VERIFICAÇÃO PARA ENVIO DE E-MAIL (EDIÇÃO INDIVIDUAL)
-			// ==========================================
-			/*
-			if (data.autorizado && String(acessoAtual.autorizado).toUpperCase() !== String(data.autorizado).toUpperCase()) {
-				// O status mudou! Buscar e-mail do solicitante original
-				const solicitante = await Users.findOne({ id: acessoAtual.user_id });
-			    
-				if (solicitante && solicitante.email) {
-					await sendStatusChangeEmail(
-						solicitante.email, 
-						solicitante.name, 
-						ticket, 
-						data.autorizado, 
-						'Acessos' // Nome do módulo (Para reaproveitar depois em 'Avarias')
-					);
-				}
-			}
-			*/
-
 			await Acessos.update(ticket, data);
-
 			return res.redirect('/?success=1');
 
 		} catch (error) {
@@ -403,14 +339,10 @@ export default {
 		}
 	},
 
-	// ==========================================
-	// DELETAR UM REGISTRO INDIVIDUAL
-	// ==========================================
 	async deleteEditOne(req: Request, res: Response) {
 		try {
 			const ticket = req.params.ticket as string;
 
-			// 1. Busca o registro atual
 			const results = await Acessos.findByTicket(ticket);
 			const acessoAtual = Array.isArray(results) ? results[0] : (results?.rows ? results.rows[0] : results);
 
@@ -418,20 +350,15 @@ export default {
 				return res.status(404).send("Acesso não encontrado.");
 			}
 
-			// 2. SEGURANÇA: Usuário comum não pode deletar se não for dono
 			if (!req.session.isAdmin && acessoAtual.user_id !== req.session.userId) {
 				return res.redirect('/');
 			}
 
-			// 3. SEGURANÇA: Usuário comum não pode deletar se o status for "SIM"
 			if (!req.session.isAdmin && String(acessoAtual.autorizado).toUpperCase() === 'SIM') {
 				return res.status(403).send("Acesso negado: Este registro já foi aprovado e não pode ser deletado.");
 			}
 
-			// 4. Deleta do banco de dados
 			await Acessos.delete(ticket);
-
-			// Volta para a página inicial
 			return res.redirect('/');
 
 		} catch (error) {
@@ -440,29 +367,23 @@ export default {
 		}
 	},
 
-	// API que alimenta o Autocomplete do Google
 	async searchAutocomplete(req: Request, res: Response) {
 		try {
 			const termo = req.query.q as string;
 			if (!termo) return res.json([]);
 
-			// Executa o searchGlobal (que aplica a ordenação Alfabética + Ticket)
 			const results = await Acessos.searchGlobal(termo);
-
 			return res.json(results?.rows || []);
-
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json([]);
 		}
 	},
 
-	// Adicione dentro do seu Controller
 	async updateMassivo(req: Request, res: Response) {
 		try {
 			const { tickets, status } = req.body;
 
-			// Validação básica para evitar erros
 			if (!tickets || !Array.isArray(tickets) || tickets.length === 0) {
 				return res.status(400).json({ error: "Nenhum ticket selecionado." });
 			}
@@ -470,44 +391,14 @@ export default {
 				return res.status(400).json({ error: "Status não informado." });
 			}
 
-			// Manda o Model executar a atualização no banco
 			await Acessos.updateMassivo(tickets, status);
-
-			// ==========================================
-			// VERIFICAÇÃO PARA ENVIO DE E-MAIL (EDIÇÃO MASSIVA)
-			// ==========================================
-			/*
-			// Percorre os tickets que foram atualizados para enviar os e-mails
-			for (const t of tickets) {
-				const results = await Acessos.findByTicket(t);
-				const acessoAtual = Array.isArray(results) ? results[0] : (results?.rows ? results.rows[0] : results);
-			    
-				if (acessoAtual && acessoAtual.user_id) {
-					const solicitante = await Users.findOne({ id: acessoAtual.user_id });
-					if (solicitante && solicitante.email) {
-						await sendStatusChangeEmail(
-							solicitante.email, 
-							solicitante.name, 
-							t, 
-							status, 
-							'Acessos'
-						);
-					}
-				}
-			}
-			*/
-
 			return res.status(200).json({ message: "Atualizado com sucesso!" });
-
 		} catch (error) {
 			console.log("Erro no controller Acessos.updateMassivo:", error);
 			return res.status(500).json({ error: "Erro ao processar a atualização massiva." });
 		}
 	},
 
-	// ==========================================
-	// API: BUSCAR DADOS PARA O MODAL
-	// ==========================================
 	async getModalData(req: Request, res: Response) {
 		try {
 			const ticket = req.params.ticket as string;
@@ -518,95 +409,69 @@ export default {
 			if (!acesso) {
 				return res.status(404).json({ error: "Acesso não encontrado." });
 			}
-
-			// Devolve os dados em formato JSON para o Javascript do frontend ler
 			return res.json(acesso);
-
 		} catch (error) {
 			console.log("Erro no getModalData:", error);
 			return res.status(500).json({ error: "Erro interno do servidor." });
 		}
 	},
 
-	// Controller para a tela resolved.html
 	async showResolved(req: Request, res: Response) {
 		try {
 			let results;
-			// REGRA DE NEGÓCIO: Admin vê todos resolvidas, usuário comum vê as próprias
-
 			if (req.session.isAdmin) {
-
 				results = await Acessos.allResolved();
 			} else {
-				results = await
-
-					Acessos.findResolvedByUser(req.session.userId!);
+				results = await Acessos.findResolvedByUser(req.session.userId!);
 			}
 
-			// Normaliza o retorno do banco de dados (SQLite)
-			let acessos = Array.isArray(results) ? results :
+			let acessos = Array.isArray(results) ? results : (results?.rows || []);
 
-				(results?.rows || []);
-
-			// Mapeia e formata datas
 			acessos = acessos.map((acesso: any) => {
-				if (acesso.data_do_acesso &&
-					acesso.data_do_acesso.includes('-')) {
-					const [ano, mes, dia] =
-
-						acesso.data_do_acesso.split('-');
-
+				if (acesso.data_do_acesso && acesso.data_do_acesso.includes('-')) {
+					const [ano, mes, dia] = acesso.data_do_acesso.split('-');
 					acesso.data_do_acesso = `${dia}/${mes}/${ano}`;
 				}
-				if (acesso.data_limite &&
-					acesso.data_limite.includes('-')) {
-
-					const [ano, mes, dia] =
-
-						acesso.data_limite.split('-');
-
+				if (acesso.data_limite && acesso.data_limite.includes('-')) {
+					const [ano, mes, dia] = acesso.data_limite.split('-');
 					acesso.data_limite = `${dia}/${mes}/${ano}`;
 				}
 				return acesso;
 			});
-			return res.render('resolved', { acessos, activeMenu: 'resolvidos' });
+			
+			// Retornando activeMenu e activeTab
+			return res.render('resolved', { acessos, activeMenu: 'acessos', activeTab: 'resolvidos' });
 		} catch (error) {
 			console.log("Erro no showResolved:", error);
 			return res.status(500).send("Erro ao carregar os pedidos esolvidos.");
 		}
 	},
 
-	// Controller para a tela pending.html (Todos trasados/ esquecidos)
 	async showPending(req: Request, res: Response) {
 		try {
 			let results;
 			if (req.session.isAdmin) {
 				results = await Acessos.allPending();
 			} else {
-				results = await
-					Acessos.findPendingByUser(req.session.userId!);
+				results = await Acessos.findPendingByUser(req.session.userId!);
 			}
 
 			let acessos = Array.isArray(results) ? results : (results?.rows || []);
 
 			acessos = acessos.map((acesso: any) => {
-				if (acesso.data_do_acesso &&
-					acesso.data_do_acesso.includes('-')) {
+				if (acesso.data_do_acesso && acesso.data_do_acesso.includes('-')) {
 					const [ano, mes, dia] = acesso.data_do_acesso.split('-');
-
 					acesso.data_do_acesso = `${dia}/${mes}/${ano}`;
 				}
-				if (acesso.data_limite &&
-					acesso.data_limite.includes('-')) {
-
+				if (acesso.data_limite && acesso.data_limite.includes('-')) {
 					const [ano, mes, dia] = acesso.data_limite.split('-');
-
 					acesso.data_limite = `${dia}/${mes}/${ano}`;
 				}
 				return acesso;
 			});
 
-			return res.render('pending', { acessos, activeMenu: 'pendentes' });
+			// Retornando activeMenu e activeTab
+			return res.render('pending', { acessos, activeMenu: 'acessos', activeTab: 'pendentes' });
 		} catch (error) {
 			console.log("Erro no showPending:", error);
 			return res.status(500).send("Erro ao carregar os pedidos pendentes.");
@@ -614,14 +479,38 @@ export default {
 	},
 
 	// ==========================================
-	// GERAR DOWNLOAD DO ARQUIVO CSV
+	// NOVA CONSULTA DE AGENDAMENTOS GERAIS
 	// ==========================================
+	async consultaAgendamentos(req: Request, res: Response) {
+		try {
+			const results = await Acessos.getAllConsulta();
+			const agendamentos = Array.isArray(results) ? results : (results?.rows || []);
+
+			// Formata a data para padrão brasileiro antes de exibir
+			const agendamentosFormatados = agendamentos.map((item: any) => {
+				if (item.data_do_acesso && item.data_do_acesso.includes('-')) {
+					const [ano, mes, dia] = item.data_do_acesso.split('-');
+					item.data_do_acesso = `${dia}/${mes}/${ano}`;
+				}
+				return item;
+			});
+
+			return res.render('consulta-agendamentos.html', { 
+				agendamentos: agendamentosFormatados, 
+				activeMenu: 'acessos', 
+				activeTab: 'consulta' 
+			});
+		} catch (error) {
+			console.error("Erro na consultaAgendamentos:", error);
+			return res.redirect('/');
+		}
+	},
+
 	async downloadCSV(req: Request, res: Response) {
 		try {
 			const isAdmin = req.session.isAdmin;
 			const userId = req.session.userId;
 
-			// 1. Busca os dados no Model
 			let results;
 			if (isAdmin) {
 				results = await Acessos.getForCSV();
@@ -635,7 +524,6 @@ export default {
 				return res.status(404).send("Nenhum dado pendente encontrado para exportação.");
 			}
 
-			// 2. Definir o cabeçalho das colunas do arquivo Excel
 			const cabecalho = [
 				"Ticket", "Status", "Nome", "Documento", "Nº Documento", "Empresa",
 				"Data Acesso", "Qtd Dias", "Data Limite", "Veiculo", "Placa",
@@ -643,24 +531,20 @@ export default {
 				"Portões", "Visita A", "Telefone", "Tel Interno", "Data Solicitação"
 			];
 
-			// Função para escapar textos (evita que vírgulas ou quebras de linha quebrem o Excel)
 			const escapeCSV = (str: any) => {
 				if (str === null || str === undefined) return '""';
-				const text = String(str).replace(/"/g, '""'); // Escapa aspas duplas
-				return `"${text}"`; // Coloca entre aspas
+				const text = String(str).replace(/"/g, '""');
+				return `"${text}"`;
 			};
 
-			// Função para converter data YYYY-MM-DD para o padrão Brasileiro DD/MM/AAAA
 			const formataData = (dataStr: string) => {
 				if (!dataStr || !dataStr.includes('-')) return dataStr;
 				const [ano, mes, dia] = dataStr.split('-');
 				return `${dia}/${mes}/${ano}`;
 			};
 
-			// 3. Inicia a string do CSV juntando o cabeçalho com ponto e vírgula
 			let csvString = cabecalho.join(";") + "\n";
 
-			// 4. Monta linha a linha
 			acessos.forEach((a: any) => {
 				const linha = [
 					a.ticket,
@@ -677,22 +561,20 @@ export default {
 					a.tipo_veiculo,
 					a.cnh,
 					a.cat_habilitacao,
-					formataData(a.validade_cnh),
+					formataData(a.data_vencimento_cnh), // Correção para validação da CNH na planilha
 					a.justificativa,
 					a.portoes,
 					a.visita_a,
 					a.telefone,
 					a.tel_interno,
 					formataData(a.data_solicitacao)
-				].map(escapeCSV); // Aplica a formatação em todos os campos
+				].map(escapeCSV);
 
 				csvString += linha.join(";") + "\n";
 			});
 
-			// 5. Adiciona o BOM (Byte Order Mark) para forçar o Excel a ler em UTF-8 (acentos corretos)
 			const bom = "\uFEFF";
 
-			// 6. Configura a resposta do servidor para forçar o Download do arquivo
 			res.setHeader('Content-Type', 'text/csv; charset=utf-8');
 			res.setHeader('Content-Disposition', 'attachment; filename="solicitacoes_pendentes.csv"');
 
@@ -703,5 +585,4 @@ export default {
 			return res.status(500).send("Erro ao gerar o CSV.");
 		}
 	}
-
 }

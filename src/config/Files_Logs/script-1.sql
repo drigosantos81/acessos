@@ -139,3 +139,22 @@ CREATE TABLE acesso (
   FOREIGN KEY (empresa_id) REFERENCES empresa(id),
   FOREIGN KEY (centro_custo_id) REFERENCES centro_custo(id)
 );
+
+CREATE TABLE users(
+ FERENCES centro_custo(id)
+);
+
+CREATE TABLE modulos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE permissoes_usuarios (
+    user_id INTEGER NOT NULL,
+    modulo_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (modulo_id) REFERENCES modulos (id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, modulo_id) -- A chave primária dupla impede permissões repetidas
+);
+
+INSERT INTO modulos (nome) VALUES ('acessos'), ('avarias'), ('pagamentos'), ('reservas');

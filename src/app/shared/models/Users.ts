@@ -7,6 +7,26 @@ export default {
     // FUNÇÕES DE USUÁRIOS
     // ==========================================
 
+    // NOVO: Busca no banco quais módulos este usuário pode acessar
+    async getModulosDoUsuario(userId: number): Promise<string[]> {
+        try {
+            const query = `
+                SELECT m.nome 
+                FROM modulos m
+                INNER JOIN permissoes_usuarios p ON m.id = p.modulo_id
+                WHERE p.user_id = ?
+            `;
+            const resultados = await db.query(query, [userId]);
+            
+            // Trata o retorno do banco mantendo a segurança da sua configuração
+            const rows = Array.isArray(resultados) ? resultados : (resultados?.rows || []);
+            return rows.map((row: any) => row.nome);
+        } catch (error) {
+            console.error("Erro no getModulosDoUsuario:", error);
+            return []; // Retorna array vazio em caso de erro para não quebrar o sistema
+        }
+    },
+
     // Busca um usuário dinamicamente (por email, por id, etc)
     async findOne(filters: { [key: string]: any }) {
         let query = "SELECT * FROM users";
@@ -20,7 +40,6 @@ export default {
 
         try {
             const result = await db.query(query, values);
-            // Prevenção de erro para SQLite (pode retornar array direto ou dentro de .rows)
             return Array.isArray(result) ? result[0] : result?.rows?.[0] || null;
         } catch (error) {
             console.error("Erro no User.findOne:", error);
@@ -30,25 +49,12 @@ export default {
     // Cria um novo usuário
     async create(data: any) {
         try {
-            // Criptografa a senha antes de salvar
             const passwordHash = await bcrypt.hash(data.password, 8);
-
             const query = `
-                INSERT INTO users (
-                    name,
-                    email,
-                    password,
-                    is_admin
-                ) VALUES (?, ?, ?, ?)
-                RETURNING id;
+                INSERT INTO users (name, email, password, is_admin) 
+                VALUES (?, ?, ?, ?) RETURNING id;
             `;
-
-            const values = [
-                data.name,
-                data.email,
-                passwordHash,
-                data.is_admin || 0
-            ];
+            const values = [data.name, data.email, passwordHash, data.is_admin || 0];
 
             const result = await db.query(query, values);
             return Array.isArray(result) ? result[0]?.id : result?.rows?.[0]?.id || null;
@@ -57,13 +63,12 @@ export default {
         }
     },
 
-    // Atualiza um usuário (usado na página de edição de perfil)
+    // Atualiza um usuário
     async update(id: number, data: any) {
         try {
             let query = `UPDATE users SET name = ?, email = ?`;
             let values: any[] = [data.name, data.email];
 
-            // Só atualiza a senha se o usuário digitou uma nova
             if (data.password) {
                 const passwordHash = await bcrypt.hash(data.password, 8);
                 query += `, password = ?`;
@@ -81,25 +86,18 @@ export default {
         }
     },
 
-
     // ==========================================
     // FUNÇÕES MANTIDAS PARA NÃO QUEBRAR O SISTEMA 
-    // (Avisando: o ideal seria movê-las para o model Acessos.ts futuramente)
     // ==========================================
-
-    // Retorna a lista dos acessos solicitados
     allUsers() {
         try {
             return db.query(`
                 SELECT
                     nome, empresa, MIN(data_do_acesso) AS data_do_acesso, data_limite, qtd_dias,
                     com_veiculo, justificativa, autorizado
-                FROM 
-                    ACESSO
-                WHERE 
-                    data_do_acesso >= DATE('now')
-                GROUP BY 
-                    ticket
+                FROM ACESSO
+                WHERE data_do_acesso >= DATE('now')
+                GROUP BY ticket
                 ORDER BY 
                     CASE autorizado 
                         WHEN 'SOLICITADO' THEN 1 
@@ -107,17 +105,14 @@ export default {
                         ELSE 3 
                     END ASC,
                     data_do_acesso ASC;
-                `);
+            `);
         } catch (error) {
             console.log(error);
         }
     },
 
-    // Comando POST para novo cadastro de solicitação de acesso
     postUser(data: Acesso) {
         try {
-            // OBS: Deixado o uso de placeholders ($1, $2) inalterado pois você os usa aqui,
-            // mas o SQLite puro prefere o uso de '?' na query preparada.
             const query = `
                 INSERT INTO acesso (
                     ticket, nome, doc_nacional, numero_doc, empresa, data_do_acesso, qtd_dias, visita_a,
@@ -130,7 +125,6 @@ export default {
                 )
                 RETURNING id
             `;
-
             const value = [
                 data.ticket, data.nome, data.doc_nacional, data.numero_doc, data.empresa, data.data_do_acesso,
                 data.qtd_dias, data.visita_a, data.com_veiculo, data.placa, data.tipo_veiculo, data.justificativa,
@@ -138,10 +132,7 @@ export default {
                 data.data_encerramento, data.updated_at, data.telefone, data.tel_interno, data.data_limite
             ];
 
-            return db
-                .query(query, value)
-                .then(result => result.rows[0].id);
-
+            return db.query(query, value).then(result => result.rows[0].id);
         } catch (error) {
             console.log('Erro no model Acessos.post:', error);
         }

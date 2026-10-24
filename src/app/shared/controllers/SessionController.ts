@@ -14,49 +14,47 @@ export default {
         try {
             const { email, password } = req.body;
 
-            // Busca o usuário pelo email
             const user = await Users.findOne({ email });
 
             if (!user) {
-                return res.render("session/login", {
-                    error: "Usuário não cadastrado!"
-                });
+                return res.render("session/login", { error: "Usuário não cadastrado!" });
             }
 
-            // Verifica se a senha digitada bate com a embaralhada no banco
             const passed = await bcrypt.compare(password, user.password);
 
             if (!passed) {
                 return res.render("session/login", {
-                    user: req.body, // Devolve o email digitado pra não ter que digitar de novo
+                    user: req.body,
                     error: "Senha incorreta."
                 });
             }
 
-            // Colocamos o ID e se é admin na sessão
+            // Sessão base
             req.session.userId = user.id;
             req.session.userName = user.name;
             req.session.isAdmin = user.is_admin === 1;
 
+            // NOVO: Busca e salva os módulos permitidos
+            const modulos = await Users.getModulosDoUsuario(user.id);
+            req.session.modulosPermitidos = modulos;
+
             // Redirecionamento Inteligente
             if (req.session.isAdmin) {
-                return res.redirect("/admin/edit"); // Admin vai para edição
+                return res.redirect("/admin/edit");
             } else {
-                return res.redirect("/"); // Usuário comum vai para a Home
+                return res.redirect("/");
             }
 
         } catch (error) {
             console.error(error);
-            return res.render("session/login", {
-                error: "Erro inesperado, tente novamente."
-            });
+            return res.render("session/login", { error: "Erro inesperado, tente novamente." });
         }
     },
 
     logout(req: Request, res: Response) {
         req.session.destroy((err) => {
             if (err) console.error("Erro ao destruir sessão:", err);
-            return res.redirect("/login"); // Manda de volta pra Home pública
+            return res.redirect("/login");
         });
     },
 
@@ -64,7 +62,6 @@ export default {
     // 2. CRIAÇÃO DE ACESSO (NOVOS USUÁRIOS)
     // ==========================================
     createAcessoForm(req: Request, res: Response) {
-        // Renderiza o formulário reaproveitável
         return res.render('session/data_login');
     },
 
@@ -72,21 +69,16 @@ export default {
         try {
             const { name, email, password } = req.body;
 
-            // Validação de campos
             if (!name || !email || !password) {
                 return res.render('session/data_login', { error: "Todos os campos são obrigatórios." });
             }
 
-            // Impede e-mails duplicados
             const userExists = await Users.findOne({ email });
             if (userExists) {
                 return res.render('session/data_login', { error: "Este e-mail já está em uso." });
             }
 
-            // Cadastra no banco
             await Users.create({ name, email, password });
-
-            // Redireciona para o login (você pode passar uma mensagem de sucesso via URL se quiser)
             return res.redirect('/login');
 
         } catch (error) {
@@ -103,7 +95,6 @@ export default {
             const userId = req.session.userId;
             if (!userId) return res.redirect('/login');
 
-            // Busca os dados do usuário logado para preencher a tela
             const user = await Users.findOne({ id: userId });
             return res.render('session/data_login', { user });
         } catch (error) {
@@ -119,22 +110,17 @@ export default {
 
             const { name, email, password } = req.body;
 
-            // Verifica se o usuário tentou trocar para um e-mail que já é de outra pessoa
             const userExists = await Users.findOne({ email });
             if (userExists && userExists.id !== userId) {
                 return res.render('session/data_login', {
-                    user: { id: userId, name, email }, // Mantém o que ele digitou
+                    user: { id: userId, name, email },
                     error: "Este e-mail já está sendo usado por outra pessoa."
                 });
             }
 
-            // Atualiza no banco
             await Users.update(userId, { name, email, password });
-
-            // Atualiza o nome na sessão para refletir imediatamente na Sidebar
             req.session.userName = name;
-
-            return res.redirect('/'); // Volta pra home após salvar
+            return res.redirect('/');
         } catch (error) {
             console.error("Erro ao atualizar perfil:", error);
             return res.render('session/data_login', { error: "Erro ao salvar as alterações." });

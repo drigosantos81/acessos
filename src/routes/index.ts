@@ -2,7 +2,8 @@ import { Router } from 'express';
 import authRoutes from './auth.routes.js';
 import acessosRoutes from './acessos.routes.js';
 import avariasRoutes from './avarias.routes.js';
-import { onlyUsers } from '../app/shared/middlewares/session.js';
+import pagamentosRoutes from './pagamentos.routes.js';
+import { onlyUsers, requireModulo } from '../app/shared/middlewares/session.js';
 
 const routes = Router();
 
@@ -13,12 +14,13 @@ const routes = Router();
 routes.use('/', authRoutes);
 
 // ==========================================
-// ROTAS PROTEGIDAS (Exigem Login)
+// ROTAS PROTEGIDAS (Exigem Login e/ou Módulo)
 // ==========================================
-// Ao colocar o 'onlyUsers' aqui, TODAS as rotas de acessos e avarias ficam blindadas.
-// Se alguém digitar localhost:3000/, o onlyUsers intercepta e manda pro /login.
-
+// Acessos continua exigindo apenas que o usuário esteja logado
 routes.use('/', onlyUsers, acessosRoutes);
-routes.use('/avarias', onlyUsers, avariasRoutes);
+
+// Avarias e Pagamentos exigem o login E a permissão específica no banco
+routes.use('/avarias', requireModulo('avarias'), avariasRoutes);
+routes.use('/pagamentos', requireModulo('pagamentos'), pagamentosRoutes);
 
 export default routes;

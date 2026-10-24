@@ -547,5 +547,24 @@ export default {
             console.log("Erro no getMassEditTable:", error);
             throw error;
         }
+    },
+
+    // ==========================================
+    // CONSULTAS GERAIS
+    // ==========================================
+    async getAllConsulta() {
+        try {
+            const query = `
+                SELECT nome, empresa, MIN(data_do_acesso) AS data_do_acesso, qtd_dias, visita_a, autorizado 
+                FROM acesso 
+                WHERE data_do_acesso >= DATE('now')
+                GROUP BY ticket
+                ORDER BY data_do_acesso ASC
+            `;
+            return await db.query(query);
+        } catch (error) {
+            console.log("Erro no getAllConsulta:", error);
+            throw error;
+        }
     }
 }

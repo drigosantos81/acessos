@@ -3,6 +3,8 @@ import Acessos from "../../acessos/models/Acessos.js";
 
 export async function loadMenuCounts(req: Request, res: Response, next: NextFunction) {
     // Se o usuário não estiver logado, não tem o que contar, zera tudo.
+    res.locals.session = req.session;
+    
     if (!req.session || !req.session.userId) {
         res.locals.counts = { abertos: 0, pendentes: 0, resolvidos: 0 };
         return next();

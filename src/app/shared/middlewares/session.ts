@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-// Bloqueia quem não está logado
+// 1. Bloqueia quem não está logado
 export function onlyUsers(req: Request, res: Response, next: NextFunction) {
     if (!req.session.userId) {
         return res.redirect('/login');
@@ -8,20 +8,34 @@ export function onlyUsers(req: Request, res: Response, next: NextFunction) {
     next(); // Pode passar
 }
 
-// Bloqueia quem não é Admin
+// 2. Bloqueia quem não é Admin
 export function isAdmin(req: Request, res: Response, next: NextFunction) {
-    // 1. Verifica se está logado primeiro
     if (!req.session.userId) {
         return res.redirect('/login');
     }
 
-    // 2. Checagem blindada para o SQLite (Aceita booleano, número 1 ou string '1')
     const userIsAdmin = req.session.isAdmin as any;
-    
+
     if (userIsAdmin === true || userIsAdmin === 1 || userIsAdmin === '1') {
-        return next(); // É admin comprovado, pode passar!
+        return next();
     }
 
-    // Se falhou na checagem acima, chuta de volta pra Home
-    return res.redirect('/'); 
+    return res.redirect('/');
+}
+
+// 3. NOVO: Valida o acesso dinâmico aos módulos
+export function requireModulo(moduloRequerido: string) {
+    return (req: Request, res: Response, next: NextFunction) => {
+        if (!req.session.userId) return res.redirect('/login');
+        
+        const userIsAdmin = req.session.isAdmin as any;
+        if (userIsAdmin === true || userIsAdmin === 1 || userIsAdmin === '1') {
+            return next();
+        }
+        
+        const modulos = req.session.modulosPermitidos || [];
+        if (modulos.includes(moduloRequerido)) return next();
+        
+        return res.redirect('/'); 
+    };
 }

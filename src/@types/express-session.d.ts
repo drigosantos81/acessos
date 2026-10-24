@@ -5,5 +5,6 @@ declare module 'express-session' {
         userId: number;
         userName: string;
         isAdmin: boolean;
+        modulosPermitidos: string[];
     }
 }
