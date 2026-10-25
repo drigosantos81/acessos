@@ -246,7 +246,8 @@ export default {
 
 			return res.render('admin/edit', {
 				acessos,
-				activeMenu: 'edit',
+				activeMenu: 'acessos', // <-- Forçar a exibição da barra superior
+				activeTab: 'edit',
 				dataInicio,
 				dataFim
 			});
