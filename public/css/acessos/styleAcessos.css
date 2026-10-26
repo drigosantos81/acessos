@@ -15,7 +15,7 @@ body {
     /* Expande o card para as extremidades da tela */
     max-width: 1600px;
     /* Limite seguro para telas UltraWide */
-    padding: 15px 25px 20px 25px;
+    padding: 15px 15px 20px 25px;
     margin: 25px auto 15px auto;
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -42,11 +42,19 @@ body {
 }
 
 .row {
+    display: grid;
+    grid-template-columns: 400px 220px;
+    gap: 380px 280px;
+    margin-bottom: 10px;
+    align-items: flex-end;
+}
+
+/* .row {
     display: flex;
     gap: 15px;
     margin-bottom: 10px;
     align-items: flex-end;
-}
+} */
 
 .row-veiculo {
     display: grid;
@@ -873,4 +881,34 @@ input[type="radio"] {
     padding: 8px;
     border-radius: 6px;
     border: 1px solid #ddd;
+}
+
+/* ==========================================
+   DESTAQUE DO MENU LATERAL (SIDEBAR)
+========================================== */
+.sidebar-menu .menu-item.active {
+    background-color: #00BEDD;
+}
+
+.sidebar-menu .menu-item.active a {
+    color: #ffffff;
+    /* Deixa o texto e o ícone brancos para dar contraste com o azul */
+    font-weight: bold;
+}
+
+.sidebar-menu .menu-item.active a i {
+    color: #ffffff;
+}
+
+/* ==========================================
+   DESTAQUE DOS BOTÕES DO MENU SUPERIOR (TOPO)
+========================================== */
+.menu-link-btn.active {
+    background-color: #00BEDD !important;
+    color: #ffffff !important;
+    border-color: #00BEDD !important;
+}
+
+.menu-link-btn.active i {
+    color: #ffffff !important;
 }

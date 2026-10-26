@@ -22,6 +22,7 @@
     "@types/node": "^25.9.5",
     "@types/nodemailer": "^8.0.2",
     "@types/nunjucks": "^3.2.6",
+    "@types/oracledb": "^7.0.3",
     "@types/pg": "^8.20.0",
     "@types/sqlite3": "^3.1.11",
     "eslint": "^10.2.1",
@@ -42,6 +43,7 @@
     "method-override": "^3.0.0",
     "nodemailer": "^10.1.2",
     "nunjucks": "^3.2.4",
+    "oracledb": "^26.0.0",
     "override": "^0.0.1",
     "sqlite3": "^6.0.1"
   }

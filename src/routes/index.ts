@@ -8,6 +8,14 @@ import { onlyUsers, requireModulo } from '../app/shared/middlewares/session.js';
 const routes = Router();
 
 // ==========================================
+// INJEÇÃO GLOBAL DA SESSÃO NO HTML
+// ==========================================
+routes.use((req, res, next) => {
+    res.locals.session = req.session;
+    next();
+})
+
+// ==========================================
 // ROTAS PÚBLICAS (Abertas para todos)
 // ==========================================
 // Contém a tela de /login e a lógica de autenticação
@@ -18,8 +26,6 @@ routes.use('/', authRoutes);
 // ==========================================
 // Acessos continua exigindo apenas que o usuário esteja logado
 routes.use('/', onlyUsers, acessosRoutes);
-
-// Avarias e Pagamentos exigem o login E a permissão específica no banco
 routes.use('/avarias', requireModulo('avarias'), avariasRoutes);
 routes.use('/pagamentos', requireModulo('pagamentos'), pagamentosRoutes);
 

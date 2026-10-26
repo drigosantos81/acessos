@@ -14,10 +14,10 @@ async function createSuperAdmin() {
             VALUES (?, ?, ?, ?)
         `;
         const values = [
-            'Carlos Araujo',
-            'carlos@tecon.com.br', 
+            'Felipe Silva',
+            'felipe.silva@wilsonsons.com.br', 
             passwordHash,
-            0 // 1 define que o usuário é Administrador
+            1 // 1 define que o usuário é Administrador
         ];
 
         // 3. Executa a inserção usando o método exato da sua configuração

@@ -24,47 +24,57 @@
         </div>
 
         <ul class="sidebar-menu">
-            {% if session.isAdmin or 'acessos' in session.modulosPermitidos %}
-                <li><a href="/"><i class="fa-solid fa-address-card"></i> ACESSOS</a></li>
+
+            {% if session.isAdmin or (session.modulosPermitidos and 'acessos' in session.modulosPermitidos) %}
+            <li class="menu-item {% if activeMenu == 'acessos' or activeMenu == 'form_acessos' %}active{% endif %}">
+                <a href="/"><i class="fa-solid fa-address-card"></i> ACESSOS</a>
+            </li>
             {% endif %}
 
-            {% if session.isAdmin or 'pagamentos' in session.modulosPermitidos %}
-                <li><a href="/pagamentos"><i class="fa-solid fa-file-invoice-dollar"></i> PAGAMENTOS</a></li>
+            {% if session.isAdmin or (session.modulosPermitidos and 'pagamentos' in session.modulosPermitidos) %}
+            <li class="menu-item {% if activeMenu == 'pagamentos' %}active{% endif %}">
+                <a href="/pagamentos"><i class="fa-solid fa-file-invoice-dollar"></i> PAGAMENTOS</a>
+            </li>
             {% endif %}
-            
-            {% if session.isAdmin or 'avarias' in session.modulosPermitidos %}
-                <li><a href="/avarias"><i class="fa-solid fa-car-burst"></i> AVARIAS</a></li>
+
+            {% if session.isAdmin or (session.modulosPermitidos and 'avarias' in session.modulosPermitidos) %}
+            <li class="menu-item {% if activeMenu == 'avarias' %}active{% endif %}">
+                <a href="/avarias"><i class="fa-solid fa-car-burst"></i> AVARIAS</a>
+            </li>
             {% endif %}
+
         </ul>
 
         <div class="sidebar-footer">
             {% if session.userId %}
-                <div class="sidebar-user">
-                    <a href="/perfil" class="sidebar-user-link">
-                        <i class="fa-solid fa-user"></i> {{ session.userName }}
-                    </a>
-                </div>
-
-                <form action="/logout" method="POST" class="sidebar-logout-form">
-                    <button type="submit" class="sidebar-logout-btn">
-                        Sair <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </form>
-            {% else %}
-                <a href="/login" class="sidebar-login">
-                    <i class="fa-solid fa-lock"></i> Login
+            <div class="sidebar-user">
+                <a href="/perfil" class="sidebar-user-link">
+                    <i class="fa-solid fa-user"></i> {{ session.userName }}
                 </a>
+            </div>
+
+            <form action="/logout" method="POST" class="sidebar-logout-form">
+                <button type="submit" class="sidebar-logout-btn">
+                    Sair <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </form>
+            {% else %}
+            <a href="/login" class="sidebar-login">
+                <i class="fa-solid fa-lock"></i> Login
+            </a>
             {% endif %}
         </div>
     </div>
 
     <div class="main-content">
+        
         <div class="menu">
 
             {% if activeMenu == 'acessos' %}
                 <div class="menu-links">
-                    <a href="/" class="menu-link-btn {% if activeMenu == 'abertos' %}active{% endif %}">
-                        <i class="fa-solid fa-folder-open"></i> Pedidos Abertos
+                    <!-- O activeTab define qual botão do topo fica aceso -->
+                    <a href="/" class="menu-link-btn {% if activeTab == 'abertos' %}active{% endif %}">
+                        <i class="fa-solid fa-folder-open"></i> Solicitações
                         {% if counts.abertos > 0 %}<span class="badge-counter">{{ counts.abertos }}</span>{% endif %}
                     </a>
 
@@ -74,14 +84,42 @@
                     </a>
                     {% endif %}
 
-                    <a href="/resolvidos" class="menu-link-btn {% if activeMenu == 'resolvidos' %}active{% endif %}">
+                    <a href="/resolvidos" class="menu-link-btn {% if activeTab == 'resolvidos' %}active{% endif %}">
                         <i class="fa-solid fa-check-double"></i> Pedidos Resolvidos
                         {% if counts.resolvidos > 0 %}<span class="badge-counter">{{ counts.resolvidos }}</span>{% endif %}
                     </a>
 
-                    <a href="/pendentes" class="menu-link-btn {% if activeMenu == 'pendentes' %}active{% endif %}">
+                    <a href="/pendentes" class="menu-link-btn {% if activeTab == 'pendentes' %}active{% endif %}">
                         <i class="fa-solid fa-triangle-exclamation"></i> Pedidos Pendentes
                         {% if counts.pendentes > 0 %}<span class="badge-counter">{{ counts.pendentes }}</span>{% endif %}
+                    </a>
+
+                    <a href="/consulta-agendamentos" class="menu-link-btn {% if activeTab == 'consulta' %}active{% endif %}">
+                        <i class="fa-solid fa-users-viewfinder"></i> Consulta Agendamentos
+                    </a>
+                </div>
+            
+            <!-- NOVO: Menu Falso apenas para preencher espaço no Formulário de Acessos -->
+            {% elif activeMenu == 'form_acessos' %}
+                <div class="menu-links">
+                    <div class="menu-link-btn active" style="cursor: default; pointer-events: none;">
+                        <i class="fa-solid fa-folder-open"></i> Nova Solicitação
+                    </div>
+                </div>
+
+            <!-- NOVO: Preenchimento do menu superior de Pagamentos -->
+            {% elif activeMenu == 'pagamentos' %}
+                <div class="menu-links">
+                    <a href="/pagamentos" class="menu-link-btn active">
+                        <i class="fa-solid fa-file-invoice-dollar"></i> Módulo Pagamentos
+                    </a>
+                </div>
+            
+            <!-- NOVO: Preenchimento do menu superior de Avarias -->
+            {% elif activeMenu == 'avarias' %}
+                <div class="menu-links">
+                    <a href="/avarias" class="menu-link-btn active">
+                        <i class="fa-solid fa-car-burst"></i> Módulo Avarias
                     </a>
                 </div>
             {% endif %}

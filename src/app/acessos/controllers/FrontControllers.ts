@@ -58,7 +58,9 @@ export default {
 	},
 
 	async createAcesso(req: Request, res: Response) {
-		return res.render('form');
+		return res.render('form', {
+			activeMenu: 'form_acessos'
+		});
 	},
 
 	async post(req: Request<{}, {}, Acesso>, res: Response) {
