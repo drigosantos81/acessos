@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     {% block head %}
-    <title>Portal de Atendimento</title>
+        <title>Portal de Atendimento</title>
     {% endblock %}
 
     <link rel="stylesheet" href="/css/acessos/styleAcessos.css">
@@ -94,9 +94,9 @@
                         {% if counts.pendentes > 0 %}<span class="badge-counter">{{ counts.pendentes }}</span>{% endif %}
                     </a>
 
-                    <a href="/consulta-agendamentos" class="menu-link-btn {% if activeTab == 'consulta' %}active{% endif %}">
+                    <!-- <a href="/consulta-agendamentos" class="menu-link-btn {% if activeTab == 'consulta' %}active{% endif %}">
                         <i class="fa-solid fa-users-viewfinder"></i> Consulta Agendamentos
-                    </a>
+                    </a> -->
                 </div>
             
             <!-- NOVO: Menu Falso apenas para preencher espaço no Formulário de Acessos -->

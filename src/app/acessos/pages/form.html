@@ -31,7 +31,7 @@
                 <select name="doc_nacional" id="doc_nacional_select">
                     <option value="CPF" selected>CPF</option>
                     <option value="PASSAPORTE">PASSAPORTE</option>
-                    <option value="RG">RG</option>
+                    <!-- <option value="RG">RG</option> -->
                 </select>
             </div>
 
@@ -51,14 +51,21 @@
             <div class="field data">
                 <label>Data</label>
                 <input type="text" name="data_do_acesso" id="data_input"
-                    value="{{ acesso.data_do_acesso }}" required>
+                    value="{{ acesso.data_do_acesso }}" min="{{ dataAtual }}" required>
             </div>
 
-            <div class="field dias">
+            <select name="qtd_dias" required>
+                <option value="1" {% if acesso.qtd_dias == '1' %}selected{% endif %}>1</option>
+                <option value="2" {% if acesso.qtd_dias == '2' %}selected{% endif %}>2</option>
+                <option value="3" {% if acesso.qtd_dias == '3' %}selected{% endif %}>3</option>
+                <option value="4" {% if acesso.qtd_dias == '4' %}selected{% endif %}>4</option>
+                <option value="5" {% if acesso.qtd_dias == '5' %}selected{% endif %}>5</option>
+            </select>
+            <!-- <div class="field dias">
                 <label>Qtd. Dias</label>
                 <input type="number" name="qtd_dias" id="qtd_dias_input" maxlength="2" value="{{ acesso.qtd_dias }}"
                     required>
-            </div>
+            </div> -->
         </div>
 
         <div class="row-veiculo">
@@ -104,8 +111,8 @@
 
             <div class="field validade_cnh hidden" id="validadeCnhField">
                 <label>Validade *</label>
-                <input type="text" name="validade_cnh" id="validade_cnh_input"
-                    value="{{ acesso.validade_cnh }}" placeholder="00/00/0000" maxlength="10" inputmode="numeric">
+                <input type="text" name="data_vencimento_cnh" id="validade_cnh_input"
+                    value="{{ acesso.data_vencimento_cnh }}" placeholder="00/00/0000" maxlength="10" inputmode="numeric">
             </div>
         </div>
 
@@ -151,7 +158,7 @@
                         maxlength="15" inputmode="numeric">
                 </div>
 
-                <input type="hidden" id="autorizado" name="autorizado" value="SOLICITADO">
+                <input type="hidden" id="autorizado" name="autorizado" value="EM ANÁLISE">
             </div>
         </div>
 

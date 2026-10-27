@@ -37,6 +37,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>Ticket</th>
                     <th>Nome</th>
                     <th class="col-empresa">Empresa</th> <!-- Classe de expansão aqui -->
                     <th>Data do<br>Acesso</th>
@@ -52,6 +53,7 @@
             <tbody>
                 {% for acesso in acessos %}
                 <tr data-ticket="{{ acesso.ticket }}">
+                    <td>{{ acesso.ticket }}</td>
                     <td>{{ acesso.nome }}</td>
                     <td>{{ acesso.empresa }}</td>
                     <td>{{ acesso.data_do_acesso }}</td>
@@ -67,10 +69,20 @@
                         </span>
                     </td>
 
-                    <td
-                        class="autorizado {{ acesso.autorizado | lower | replace('ã','a') | replace('á','a') | replace('â','a') | replace(' ', '-') }}">
-                        {{ acesso.autorizado }}
+                    <td class="autorizado {{ acesso.autorizado | lower | replace('ã','a') | replace(' ','-') }}">
+                        {% if acesso.autorizado == 'ACESSO AUTORIZADO' %}
+                            <i class="fa-solid fa-circle-check" style="color: #28a745;"></i> ACESSO AUTORIZADO
+                        {% elif acesso.autorizado == 'EM ANÁLISE' %}
+                            <i class="fa-solid fa-circle-pause" style="color: #007bff;"></i> EM ANÁLISE
+                        {% elif acesso.autorizado == 'ACESSO NEGADO' %}
+                            <i class="fa-solid fa-circle-xmark" style="color: #dc3545;"></i> ACESSO NEGADO
+                        {% elif acesso.autorizado == 'PENDENTE' %}
+                            <i class="fa-solid fa-circle-exclamation" style="color: #ffc107;"></i> PENDENTE
+                        {% else %}
+                            {{ acesso.autorizado }}
+                        {% endif %}
                     </td>
+
                 </tr>
                 {% endfor %}
             </tbody>

@@ -36,7 +36,6 @@ function formatPhone(value) {
 // ==========================================
 
 
-
 // ==========================================
 // === INÍCIO: INICIALIZAÇÃO GERAL DA PÁGINA ===
 // ==========================================
@@ -247,17 +246,13 @@ document.addEventListener('DOMContentLoaded', function () {
     // -----------------------------
     // --- INÍCIO: ESTILIZAÇÃO DA TABELA (Cores Status) ---
     // -----------------------------
-    const autorizados = document.querySelectorAll("td.autorizado");
-    autorizados.forEach(td => {
-        const valor = td.textContent.trim().toUpperCase();
-        td.classList.remove("sim", "nao", "não", "pendente", "solicitado");
-        let icon = "";
-        if (valor === "SIM") { td.classList.add("sim"); icon = '<i class="fa-solid fa-circle-check"></i>'; }
-        else if (valor === "NÃO" || valor === "NAO") { td.classList.add("nao"); icon = '<i class="fa-solid fa-circle-xmark"></i>'; }
-        else if (valor === "PENDENTE") { td.classList.add("pendente"); icon = '<i class="fa-solid fa-circle-exclamation"></i>'; }
-        else if (valor === "SOLICITADO") { td.classList.add("solicitado"); icon = '<i class="fa-solid fa-circle-pause"></i>'; }
-        td.innerHTML = icon + " " + valor;
-    });
+    /* 
+       [REMOVIDO] Esta função foi removida porque o HTML (Nunjucks) agora renderiza as classes corretas 
+       ('em-analise', 'acesso-autorizado', etc.) diretamente na página.
+    
+       const autorizados = document.querySelectorAll("td.autorizado");
+       autorizados.forEach(td => { ... });
+    */
     // -----------------------------
     // --- FIM: ESTILIZAÇÃO DA TABELA ---
     // -----------------------------
@@ -389,7 +384,6 @@ document.addEventListener('DOMContentLoaded', function () {
 // ==========================================
 
 
-
 // ==========================================
 // === INÍCIO: SELECIONAR TODOS OS CHECKBOXES ===
 // ==========================================
@@ -405,7 +399,6 @@ document.addEventListener('DOMContentLoaded', function () {
 // ==========================================
 // === FIM: SELECIONAR TODOS OS CHECKBOXES ===
 // ==========================================
-
 
 
 // ==========================================
@@ -491,7 +484,6 @@ document.addEventListener('DOMContentLoaded', function () {
 // ==========================================
 
 
-
 // ==========================================
 // === INÍCIO: FUNÇÃO DE EDIÇÃO MASSIVA ===
 // ==========================================
@@ -526,7 +518,6 @@ window.editarSelecionados = async function () {
 // === FILTRO DE DATA NO SERVIDOR (INDEX) ===
 // ==========================================
 function atualizarDataIndex(inputElement, evento) {
-    // Se o evento foi passado, verifica se foi a tecla Enter
     if (evento && evento.key !== 'Enter') return;
 
     const valorData = inputElement.value;
@@ -539,7 +530,6 @@ function atualizarDataIndex(inputElement, evento) {
 // ==========================================
 
 
-
 // ==========================================
 // FILTRO COM TECLA ENTER (PÁGINA INICIAL)
 // ==========================================
@@ -548,16 +538,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (buscaIndex) {
         buscaIndex.addEventListener('keypress', function (evento) {
-            // Se a tecla pressionada for Enter
             if (evento.key === 'Enter') {
-                evento.preventDefault(); // Evita recarregar a tela
+                evento.preventDefault();
 
                 const termo = this.value.trim().toLowerCase();
                 const linhasDaTabela = document.querySelectorAll('.table-container tbody tr');
 
                 linhasDaTabela.forEach(linha => {
                     const textoDaLinha = linha.innerText.toLowerCase();
-                    // Se o texto da linha contiver o termo digitado, exibe, senão, oculta
                     if (textoDaLinha.includes(termo)) {
                         linha.style.display = '';
                     } else {
@@ -574,7 +562,6 @@ document.addEventListener('DOMContentLoaded', function () {
 // === FILTRO DE DATAS (EDIÇÃO MASSIVA) ===
 // ==========================================
 function atualizarFiltroEdit(evento) {
-    // Se um evento de teclado foi passado, verifica se foi a tecla Enter
     if (evento && evento.key !== 'Enter') return;
 
     const dataInicio = document.getElementById('dataInicioEdit');
@@ -584,13 +571,11 @@ function atualizarFiltroEdit(evento) {
         const valInicio = dataInicio.value;
         const valFim = dataFim.value;
 
-        // Só recarrega se a Data Início existir (evita buscas quebradas)
         if (valInicio) {
             window.location.href = `/admin/edit?dataInicio=${valInicio}&dataFim=${valFim}`;
         }
     }
 }
-
 // ==========================================
 // === FIM FILTRO DE DATAS (EDIÇÃO MASSIVA) ===
 // ==========================================

@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block head %}
-    <title>Visualizar Acesso - {{ acesso.ticket }}</title>
+    <title>Editar Acesso - {{ acesso.ticket }}</title>
 {% endblock %}
 
 {% block content %}
@@ -9,41 +9,36 @@
     {% if error %}
         <div class="messages error">{{ error }}</div>
     {% endif %}
-
     {% if success %}
         <div class="messages success">{{ success }}</div>
     {% endif %}
 
     <div class="card">
-        <h2>Visualizar/Editar Acesso (Ticket: {{ acesso.ticket }})</h2>
+        <h2>Editar Acesso (Ticket: {{ acesso.ticket }})</h2>
         <hr style="margin-bottom: 20px;">
 
-        <form id="editForm" method="POST" action="/visualizar/{{ acesso.ticket }}?_method=PUT" novalidate>
+        <!-- Rota alterada para POST simples apontando para /edit/ticket -->
+        <form id="editForm" method="POST" action="/edit/{{ acesso.ticket }}" novalidate>
 
             <!-- linha 1 -->
             <div class="row-name">
                 <div class="field grow">
                     <label>Nome *</label>
-                    <input type="text" name="nome" value="{{ acesso.nome }}" required {% if acesso.autorizado=='SIM' and not
-                        session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
+                    <input type="text" name="nome" value="{{ acesso.nome }}" required {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                 </div>
 
                 <div class="field documento">
                     <label>Documento</label>
-                    <select name="doc_nacional" id="doc_nacional_select" {% if acesso.autorizado=='SIM' and not
-                        session.isAdmin %}disabled{% endif %}>
+                    <select name="doc_nacional" id="doc_nacional_select" {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}disabled{% endif %}>
                         <option value="CPF" {% if acesso.doc_nacional=='CPF' %}selected{% endif %}>CPF</option>
-                        <option value="PASSAPORTE" {% if acesso.doc_nacional=='PASSAPORTE' %}selected{% endif %}>PASSAPORTE
-                        </option>
+                        <option value="PASSAPORTE" {% if acesso.doc_nacional=='PASSAPORTE' %}selected{% endif %}>PASSAPORTE</option>
                         <option value="RG" {% if acesso.doc_nacional=='RG' %}selected{% endif %}>RG</option>
                     </select>
                 </div>
 
                 <div class="field docnumero">
                     <label>Nº do Documento</label>
-                    <input type="text" id="numero_doc_input" name="numero_doc" value="{{ acesso.numero_doc }}"
-                        autocomplete="off" maxlength="20" required {% if acesso.autorizado=='SIM' and not session.isAdmin
-                        %}readonly style="background-color: #f3f4f6;" {% endif %}>
+                    <input type="text" id="numero_doc_input" name="numero_doc" value="{{ acesso.numero_doc }}" autocomplete="off" maxlength="20" required {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                 </div>
             </div>
 
@@ -51,22 +46,17 @@
             <div class="row-empresa">
                 <div class="field empresa">
                     <label>Empresa</label>
-                    <input type="text" name="empresa" value="{{ acesso.empresa }}" required {% if acesso.autorizado=='SIM'
-                        and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
+                    <input type="text" name="empresa" value="{{ acesso.empresa }}" required {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                 </div>
 
                 <div class="field data">
                     <label>DATA</label>
-                    <input type="text" name="data_do_acesso" id="data_input" value="{{ acesso.data_do_acesso }}"
-                        maxlength="10" required {% if acesso.autorizado=='SIM' and not session.isAdmin %}readonly
-                        style="background-color: #f3f4f6;" {% endif %}>
+                    <input type="text" name="data_do_acesso" id="data_input" value="{{ acesso.data_do_acesso }}" maxlength="10" required {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                 </div>
 
                 <div class="field dias">
                     <label>QTD. DIAS</label>
-                    <input type="number" name="qtd_dias" id="qtd_dias_input" value="{{ acesso.qtd_dias }}" maxlength="2"
-                        required {% if acesso.autorizado=='SIM' and not session.isAdmin %}readonly
-                        style="background-color: #f3f4f6;" {% endif %}>
+                    <input type="number" name="qtd_dias" id="qtd_dias_input" value="{{ acesso.qtd_dias }}" maxlength="2" required {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                 </div>
             </div>
 
@@ -74,94 +64,62 @@
             <div class="row-veiculo">
                 <div class="field telefone">
                     <label>Telefone</label>
-                    <input type="text" id="telefone_input" name="telefone" value="{{ acesso.telefone }}" maxlength="15" {%
-                        if acesso.autorizado=='SIM' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {%
-                        endif %}>
+                    <input type="text" id="telefone_input" name="telefone" value="{{ acesso.telefone }}" maxlength="15" {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                 </div>
 
                 <div class="field veiculo">
                     <label>Com Veículo</label>
-                    <div class="radio" {% if acesso.autorizado=='SIM' and not session.isAdmin
-                        %}style="pointer-events: none; opacity: 0.7;" {% endif %}>
-                        <label><input type="radio" name="com_veiculo" id="veiculo_sim" value="sim" {% if
-                                acesso.com_veiculo=='sim' or acesso.com_veiculo==1 %}checked{% endif %}> SIM</label>
-                        <label><input type="radio" name="com_veiculo" id="veiculo_nao" value="nao" {% if
-                                acesso.com_veiculo=='nao' or acesso.com_veiculo==0 or not acesso.com_veiculo %}checked{%
-                                endif %}> NÃO</label>
+                    <div class="radio" {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}style="pointer-events: none; opacity: 0.7;" {% endif %}>
+                        <label><input type="radio" name="com_veiculo" id="veiculo_sim" value="sim" {% if acesso.com_veiculo=='sim' or acesso.com_veiculo==1 %}checked{% endif %}> SIM</label>
+                        <label><input type="radio" name="com_veiculo" id="veiculo_nao" value="nao" {% if acesso.com_veiculo=='nao' or acesso.com_veiculo==0 or not acesso.com_veiculo %}checked{% endif %}> NÃO</label>
                     </div>
                 </div>
 
-                <div class="field placa {% if acesso.com_veiculo != 'sim' and acesso.com_veiculo != 1 %}hidden{% endif %}"
-                    id="placaField">
+                <div class="field placa {% if acesso.com_veiculo != 'sim' and acesso.com_veiculo != 1 %}hidden{% endif %}" id="placaField">
                     <label>Placa</label>
-                    <input type="text" name="placa" id="placa" value="{{ acesso.placa }}" maxlength="8" {% if
-                        acesso.autorizado=='SIM' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {%
-                        endif %}>
+                    <input type="text" name="placa" id="placa" value="{{ acesso.placa }}" maxlength="8" {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                 </div>
 
-                <div class="field tipo {% if acesso.com_veiculo != 'sim' and acesso.com_veiculo != 1 %}hidden{% endif %}"
-                    id="tipoField">
+                <div class="field tipo {% if acesso.com_veiculo != 'sim' and acesso.com_veiculo != 1 %}hidden{% endif %}" id="tipoField">
                     <label>Tipo Veículo</label>
-                    <div class="radio" id="caixa_tipo_veiculo" {% if acesso.autorizado=='SIM' and not session.isAdmin
-                        %}style="pointer-events: none; opacity: 0.7;" {% endif %}>
-                        <label><input type="radio" name="tipo_veiculo" value="DE CARGA" {% if
-                                acesso.tipo_veiculo=='DE CARGA' %}checked{% endif %}> DE CARGA</label>
-                        <label><input type="radio" name="tipo_veiculo" value="PASSEIO" {% if acesso.tipo_veiculo=='PASSEIO'
-                                %}checked{% endif %}> PASSEIO</label>
+                    <div class="radio" id="caixa_tipo_veiculo" {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}style="pointer-events: none; opacity: 0.7;" {% endif %}>
+                        <label><input type="radio" name="tipo_veiculo" value="DE CARGA" {% if acesso.tipo_veiculo=='DE CARGA' %}checked{% endif %}> DE CARGA</label>
+                        <label><input type="radio" name="tipo_veiculo" value="PASSEIO" {% if acesso.tipo_veiculo=='PASSEIO' %}checked{% endif %}> PASSEIO</label>
                     </div>
                 </div>
 
-                <div class="field cnh {% if acesso.com_veiculo != 'sim' and acesso.com_veiculo != 1 %}hidden{% endif %}"
-                    id="cnhField">
+                <div class="field cnh {% if acesso.com_veiculo != 'sim' and acesso.com_veiculo != 1 %}hidden{% endif %}" id="cnhField">
                     <label>Nº CNH *</label>
-                    <input type="text" name="cnh" id="cnh_input" value="{{ acesso.cnh }}" maxlength="11" {% if
-                        acesso.autorizado=='SIM' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {%
-                        endif %}>
+                    <input type="text" name="cnh" id="cnh_input" value="{{ acesso.cnh }}" maxlength="11" {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                 </div>
 
-                <div class="field cat_hab {% if acesso.com_veiculo != 'sim' and acesso.com_veiculo != 1 %}hidden{% endif %}"
-                    id="catHabField">
+                <div class="field cat_hab {% if acesso.com_veiculo != 'sim' and acesso.com_veiculo != 1 %}hidden{% endif %}" id="catHabField">
                     <label>Cat. *</label>
-                    <input type="text" name="cat_habilitacao" id="cat_habilitacao_input"
-                        value="{{ acesso.cat_habilitacao }}" maxlength="2" {% if acesso.autorizado=='SIM' and not
-                        session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
+                    <input type="text" name="cat_habilitacao" id="cat_habilitacao_input" value="{{ acesso.cat_habilitacao }}" maxlength="2" {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                 </div>
 
-                <div class="field validade_cnh {% if acesso.com_veiculo != 'sim' and acesso.com_veiculo != 1 %}hidden{% endif %}"
-                    id="validadeCnhField">
+                <!-- CORREÇÃO AQUI: data_vencimento_cnh -->
+                <div class="field validade_cnh {% if acesso.com_veiculo != 'sim' and acesso.com_veiculo != 1 %}hidden{% endif %}" id="validadeCnhField">
                     <label>Validade *</label>
-                    <input type="text" name="validade_cnh" id="validade_cnh_input"
-                        value="{{ acesso.validade_cnh }}" maxlength="10" {% if acesso.autorizado=='SIM' and not
-                        session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
+                    <input type="text" name="data_vencimento_cnh" id="validade_cnh_input" value="{{ acesso.data_vencimento_cnh }}" maxlength="10" {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                 </div>
             </div>
-
             <hr>
 
             <!-- justificativa -->
             <div class="row row-justificativa">
                 <div class="field justificativa">
                     <label>Justificativa</label>
-                    <div class="grid-just" id="caixa_justificativa" {% if acesso.autorizado=='SIM' and not session.isAdmin
-                        %}style="pointer-events: none; opacity: 0.7;" {% endif %}>
+                    <div class="grid-just" id="caixa_justificativa" {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}style="pointer-events: none; opacity: 0.7;" {% endif %}>
                         <div>
-                            <label><input type="radio" name="justificativa" value="Execução de Serviço" {% if
-                                    acesso.justificativa=='Execução de Serviço' %}checked{% endif %}> Execução de
-                                Serviço</label>
-                            <label><input type="radio" name="justificativa" value="Entrega de Material" {% if
-                                    acesso.justificativa=='Entrega de Material' %}checked{% endif %}> Entrega de
-                                Material</label>
-                            <label><input type="radio" name="justificativa" value="Reunião" {% if
-                                    acesso.justificativa=='Reunião' %}checked{% endif %}> Reunião</label>
+                            <label><input type="radio" name="justificativa" value="Execução de Serviço" {% if acesso.justificativa=='Execução de Serviço' %}checked{% endif %}> Execução de Serviço</label>
+                            <label><input type="radio" name="justificativa" value="Entrega de Material" {% if acesso.justificativa=='Entrega de Material' %}checked{% endif %}> Entrega de Material</label>
+                            <label><input type="radio" name="justificativa" value="Reunião" {% if acesso.justificativa=='Reunião' %}checked{% endif %}> Reunião</label>
                         </div>
                         <div>
-                            <label><input type="radio" name="justificativa" value="Visitante" {% if
-                                    acesso.justificativa=='Visitante' %}checked{% endif %}> Visitante</label>
-                            <label><input type="radio" name="justificativa" value="Processo Seletivo" {% if
-                                    acesso.justificativa=='Processo Seletivo' %}checked{% endif %}> Processo
-                                Seletivo</label>
-                            <label><input type="radio" name="justificativa" value="Integração" {% if
-                                    acesso.justificativa=='Integração' %}checked{% endif %}> Integração</label>
+                            <label><input type="radio" name="justificativa" value="Visitante" {% if acesso.justificativa=='Visitante' %}checked{% endif %}> Visitante</label>
+                            <label><input type="radio" name="justificativa" value="Processo Seletivo" {% if acesso.justificativa=='Processo Seletivo' %}checked{% endif %}> Processo Seletivo</label>
+                            <label><input type="radio" name="justificativa" value="Integração" {% if acesso.justificativa=='Integração' %}checked{% endif %}> Integração</label>
                         </div>
                     </div>
                 </div>
@@ -169,46 +127,35 @@
                 <div class="field-setor">
                     <div class="field">
                         <label>Setor da Visita</label>
-                        <input type="text" name="visita_a" value="{{ acesso.visita_a }}" {% if acesso.autorizado=='SIM' and
-                            not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
+                        <input type="text" name="visita_a" value="{{ acesso.visita_a }}" {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                     </div>
                     <div class="field">
                         <label>Contato Tecon</label>
-                        <input type="text" name="tel_interno" id="tel_interno_input" value="{{ acesso.tel_interno }}"
-                            maxlength="15" {% if acesso.autorizado=='SIM' and not session.isAdmin %}readonly
-                            style="background-color: #f3f4f6;" {% endif %}>
+                        <input type="text" name="tel_interno" id="tel_interno_input" value="{{ acesso.tel_interno }}" maxlength="15" {% if acesso.autorizado=='ACESSO AUTORIZADO' and not session.isAdmin %}readonly style="background-color: #f3f4f6;" {% endif %}>
                     </div>
 
-                    <!-- CAMPO AUTORIZADO (Editável apenas por admin, oculto para usuários comuns) -->
+                    <!-- CAMPO AUTORIZADO COM NOVOS NOMES (Admin) -->
                     {% if session.isAdmin %}
                     <div class="field" style="margin-top: 10px;">
                         <label>Status (Admin)</label>
                         <select name="autorizado" style="height: 30px; font-size: 13px;">
-                            <option value="SOLICITADO" {% if acesso.autorizado=='SOLICITADO' %}selected{% endif %}>
-                                SOLICITADO</option>
-                            <option value="PENDENTE" {% if acesso.autorizado=='PENDENTE' %}selected{% endif %}>PENDENTE
-                            </option>
-                            <option value="SIM" {% if acesso.autorizado=='SIM' %}selected{% endif %}>SIM (Autorizado)
-                            </option>
-                            <option value="NÃO" {% if acesso.autorizado=='NÃO' %}selected{% endif %}>NÃO (Negado)</option>
+                            <option value="EM ANÁLISE" {% if acesso.autorizado=='EM ANÁLISE' %}selected{% endif %}>EM ANÁLISE</option>
+                            <option value="PENDENTE" {% if acesso.autorizado=='PENDENTE' %}selected{% endif %}>PENDENTE</option>
+                            <option value="ACESSO AUTORIZADO" {% if acesso.autorizado=='ACESSO AUTORIZADO' %}selected{% endif %}>ACESSO AUTORIZADO</option>
+                            <option value="ACESSO NEGADO" {% if acesso.autorizado=='ACESSO NEGADO' %}selected{% endif %}>ACESSO NEGADO</option>
                         </select>
                     </div>
                     {% else %}
                     <input type="hidden" name="autorizado" value="{{ acesso.autorizado }}">
                     <div style="margin-top: 10px; font-size: 12px; font-weight: bold; color: #555;">
-                        Status Atual: <span
-                            style="color: {% if acesso.autorizado == 'SIM' %}#16a34a{% else %}#eab308{% endif %};">{{
-                            acesso.autorizado }}</span>
+                        Status Atual: <span style="color: {% if acesso.autorizado == 'ACESSO AUTORIZADO' %}#16a34a{% elif acesso.autorizado == 'ACESSO NEGADO' %}#dc2626{% else %}#007bff{% endif %};">{{ acesso.autorizado }}</span>
                     </div>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- ==========================================
-                DADOS DE RASTREAMENTO 
-            =========================================== -->
+            <!-- DADOS DE RASTREAMENTO -->
             <div style="background-color: #f8fafc; padding: 12px 15px; border-radius: 6px; margin-top: 20px; border: 1px solid #e2e8f0; font-size: 13px; color: #475569;">
-                <!-- O 'width: auto' impede a tabela de esticar até o fim da tela -->
                 <table style="border-collapse: collapse; text-align: left; width: auto;">
                     <thead>
                         <tr>
@@ -232,18 +179,14 @@
                     </tbody>
                 </table>
             </div>
-        <!-- O FORMULÁRIO DE EDIÇÃO DEVE SER FECHADO AQUI, ANTES DOS BOTÕES -->
         </form>
 
-        <!-- ==========================================
-             BOTÕES DE AÇÃO (Com forms separados)
-        =========================================== -->
+        <!-- BOTÕES DE AÇÃO -->
         <div class="form-actions" style="display: flex; justify-content: space-between; border-top: 1px solid #eee; margin-top: 15px; padding-top: 15px;">
-            
             <div>
-                <!-- FORMULÁRIO EXCLUSIVO PARA O BOTÃO DELETAR -->
-                {% if session.isAdmin or acesso.autorizado != 'SIM' %}
-                <form id="formDelete" method="POST" action="/visualizar/{{ acesso.ticket }}?_method=DELETE">
+                <!-- FORMULÁRIO EXCLUSIVO PARA O BOTÃO DELETAR (POST PURA) -->
+                {% if session.isAdmin or acesso.autorizado != 'ACESSO AUTORIZADO' %}
+                <form id="formDelete" method="POST" action="/delete/{{ acesso.ticket }}">
                     <button type="submit" class="button-cancel" style="background: #ef4444; color: white;" onclick="return confirm('Tem certeza que deseja apagar este agendamento definitivamente?')">
                         Deletar
                     </button>
@@ -252,19 +195,15 @@
             </div>
 
             <div style="display: flex; gap: 10px;">
-                <button type="button" class="button-cancel" onclick="window.location.href = document.referrer || '/'">
+                <button type="button" class="button-cancel" onclick="window.location.href = '/visualizar/{{ acesso.ticket }}'">
                     Cancelar
                 </button>
-
-                <!-- Este botão usa o atributo form="editForm" para enviar os dados de edição, mesmo estando fora da tag form -->
-                {% if session.isAdmin or acesso.autorizado != 'SIM' %}
+                {% if session.isAdmin or acesso.autorizado != 'ACESSO AUTORIZADO' %}
                 <button type="submit" form="editForm" class="button-send btn-auto">
                     Atualizar Registro
                 </button>
                 {% endif %}
             </div>
         </div>
-
     </div>
-
 {% endblock %}

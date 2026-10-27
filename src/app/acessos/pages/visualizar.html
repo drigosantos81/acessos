@@ -1,0 +1,97 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <title>Consulta de Acesso - {{ acesso.ticket }}</title>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="view-header">
+        <h2>Detalhes da Solicitação (Ticket: {{ acesso.ticket }})</h2>
+        
+        <!-- O Nunjucks agora só injeta o nome da classe CSS correta, sem misturar com atributos de estilo -->
+        <div class="status-badge 
+            {% if acesso.autorizado == 'ACESSO AUTORIZADO' %} badge-autorizado
+            {% elif acesso.autorizado == 'ACESSO NEGADO' %} badge-negado
+            {% elif acesso.autorizado == 'PENDENTE' %} badge-pendente
+            {% else %} badge-analise {% endif %}">
+            STATUS: {{ acesso.autorizado }}
+        </div>
+    </div>
+
+    <h3 class="view-section-title">Dados Básicos</h3>
+    <div class="view-grid">
+        <div><div class="view-label">Nome Completo</div><div class="view-value">{{ acesso.nome }}</div></div>
+        <div><div class="view-label">Documento</div><div class="view-value">{{ acesso.doc_nacional }} - {{ acesso.numero_doc }}</div></div>
+        <div><div class="view-label">Empresa</div><div class="view-value">{{ acesso.empresa }}</div></div>
+        <div><div class="view-label">Data do Acesso</div><div class="view-value">{{ acesso.data_do_acesso }}</div></div>
+        <div><div class="view-label">Qtd. Dias</div><div class="view-value">{{ acesso.qtd_dias }}</div></div>
+        <div><div class="view-label">Data Limite</div><div class="view-value">{{ acesso.data_limite }}</div></div>
+        <div><div class="view-label">Telefone</div><div class="view-value">{{ acesso.telefone | default('-') }}</div></div>
+    </div>
+
+    <h3 class="view-section-title">Dados do Veículo</h3>
+    <div class="view-grid">
+        <div>
+            <div class="view-label">Com Veículo?</div>
+            <div class="view-value">{% if acesso.com_veiculo == 'sim' or acesso.com_veiculo == 1 %} SIM {% else %} NÃO {% endif %}</div>
+        </div>
+        {% if acesso.com_veiculo == 'sim' or acesso.com_veiculo == 1 %}
+        <div><div class="view-label">Placa</div><div class="view-value">{{ acesso.placa }}</div></div>
+        <div><div class="view-label">Tipo Veículo</div><div class="view-value">{{ acesso.tipo_veiculo }}</div></div>
+        <div><div class="view-label">Nº CNH</div><div class="view-value">{{ acesso.cnh }}</div></div>
+        <div><div class="view-label">Categoria</div><div class="view-value">{{ acesso.cat_habilitacao }}</div></div>
+        <div><div class="view-label">Vencimento CNH</div><div class="view-value">{{ acesso.data_vencimento_cnh }}</div></div>
+        {% endif %}
+    </div>
+
+    <h3 class="view-section-title">Informações Adicionais</h3>
+    <div class="view-grid">
+        <div><div class="view-label">Justificativa</div><div class="view-value">{{ acesso.justificativa }}</div></div>
+        <div><div class="view-label">Setor da Visita</div><div class="view-value">{{ acesso.visita_a | default('-') }}</div></div>
+        <div><div class="view-label">Contato Tecon</div><div class="view-value">{{ acesso.tel_interno | default('-') }}</div></div>
+    </div>
+
+    <div class="tracking-box">
+        <table class="tracking-table">
+            <thead>
+                <tr>
+                    <th>Data da Solicitação</th>
+                    <th>Última Atualização</th>
+                    <th>Solicitante</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ acesso.data_solicitacao }}</td>
+                    <td>{{ acesso.updated_at }}</td>
+                    <td>
+                        {% if session.isAdmin %}
+                            {{ acesso.user_name | default("ID: " ~ acesso.user_id) }}
+                        {% else %}
+                            {{ session.userName }}
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- BOTÕES DE AÇÃO -->
+    <div class="form-actions view-actions">
+        <div>
+            <button type="button" class="button-cancel btn-voltar" onclick="window.location.href = '/'">
+                Voltar
+            </button>
+        </div>
+        <div>
+            <!-- Botão de Edição Visível Apenas se EM ANÁLISE ou PENDENTE -->
+            {% if acesso.autorizado == 'EM ANÁLISE' or acesso.autorizado == 'PENDENTE' %}
+                <a href="/edit/{{ acesso.ticket }}" class="button-send btn-auto btn-editar-link">
+                    <i class="fa-solid fa-pen-to-square"></i> Editar Solicitação
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -24,12 +24,11 @@
                 </button>
             </div>
 
-            <!-- <label>Filtrar por Status na Tabela:</label> -->
             <div class="checkbox-group">
-                <label><input type="checkbox" class="status-filter" value="SIM" checked> SIM</label>
-                <label><input type="checkbox" class="status-filter" value="NÃO" checked> NÃO</label>
+                <label><input type="checkbox" class="status-filter" value="ACESSO AUTORIZADO" checked> ACESSO AUTORIZADO</label>
+                <label><input type="checkbox" class="status-filter" value="ACESSO NEGADO" checked> ACESSO NEGADO</label>
                 <label><input type="checkbox" class="status-filter" value="PENDENTE" checked> PENDENTE</label>
-                <label><input type="checkbox" class="status-filter" value="SOLICITADO" checked> SOLICITADO</label>
+                <label><input type="checkbox" class="status-filter" value="EM ANÁLISE" checked> EM ANÁLISE</label>
             </div>
         </div>
     </div>
@@ -56,7 +55,7 @@
         </div>
 
         <div class="field flex-none">
-            <button type="button" class="button-send">Filtrar</button>
+            <button type="button" class="button-send" onclick="atualizarFiltroEdit()">Filtrar</button>
         </div>
     </div>
 
@@ -83,6 +82,7 @@
                     {% for acesso in acessos %}
                     <tr data-ticket="{{ acesso.ticket }}">
                         <td class="text-center">
+                            <!-- Corrigido para .row-checkbox que o Javascript espera -->
                             <input type="checkbox" class="row-checkbox" value="{{ acesso.ticket }}">
                         </td>
                         <td>{{ acesso.ticket }}</td>
@@ -95,16 +95,21 @@
                         <td>
                             {% if acesso.com_veiculo %} Sim {% else %} Não {% endif %}
                         </td>
-                        <td class="autorizado 
-                            {{ acesso.autorizado 
-                                | lower 
-                                | replace('ã','a') 
-                                | replace('á','a') 
-                                | replace('â','a') 
-                                | replace(' ', '-') 
-                            }}">
-                            {{ acesso.autorizado }}
+
+                        <td class="autorizado {{ acesso.autorizado | lower | replace('ã','a') | replace(' ','-') }}">
+                            {% if acesso.autorizado == 'ACESSO AUTORIZADO' %}
+                                <i class="fa-solid fa-circle-check" style="color: #28a745;"></i> ACESSO AUTORIZADO
+                            {% elif acesso.autorizado == 'EM ANÁLISE' %}
+                                <i class="fa-solid fa-circle-pause" style="color: #007bff;"></i> EM ANÁLISE
+                            {% elif acesso.autorizado == 'ACESSO NEGADO' %}
+                                <i class="fa-solid fa-circle-xmark" style="color: #dc3545;"></i> ACESSO NEGADO
+                            {% elif acesso.autorizado == 'PENDENTE' %}
+                                <i class="fa-solid fa-circle-exclamation" style="color: #ffc107;"></i> PENDENTE
+                            {% else %}
+                                {{ acesso.autorizado }}
+                            {% endif %}
                         </td>
+                        
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -112,10 +117,12 @@
         </div>
 
         <div class="form-actions">
+            <!-- Corrigido para os nomes novos exigidos pelo banco -->
             <select name="autorizado" id="status_select">
-                <option value="SIM" selected>SIM</option>
-                <option value="NÃO">NÃO</option>
+                <option value="EM ANÁLISE" selected>EM ANÁLISE</option>
                 <option value="PENDENTE">PENDENTE</option>
+                <option value="ACESSO AUTORIZADO">ACESSO AUTORIZADO</option>
+                <option value="ACESSO NEGADO">ACESSO NEGADO</option>
             </select>
 
             <button class="button-send btn-auto" onclick="editarSelecionados()">

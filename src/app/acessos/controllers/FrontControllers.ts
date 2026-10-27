@@ -13,6 +13,10 @@ function onlyDigits(v: string | null | undefined) {
 }
 
 export default {
+
+	// ==========================================
+	// FUNÇÃO QUE CARREGA A TELA INICIAL (GET)
+	// ==========================================
 	async index(req: Request, res: Response) {
 		try {
 			const dataQuery = req.query.data as string;
@@ -46,8 +50,8 @@ export default {
 			return res.render('index', {
 				acessos,
 				success: successMsg,
-				activeMenu: 'acessos', // <-- Garante que a div de botões apareça
-				activeTab: 'abertos',  // <-- Garante que o botão Solicitações fique aceso
+				activeMenu: 'acessos', 
+				activeTab: 'abertos',  
 				dataAtual: dataFiltro 
 			});
 
@@ -56,20 +60,39 @@ export default {
 			return res.status(500).send("Erro ao carregar os agendamentos.");
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO INDEX
+	// ==========================================
 
+
+	// ==========================================
+	// FUNÇÃO QUE RENDERIZA O FORMULÁRIO (GET)
+	// ==========================================
 	async createAcesso(req: Request, res: Response) {
+		const dataAtual = new Date().toISOString().slice(0, 10);
 		return res.render('form', {
-			activeMenu: 'form_acessos'
+			activeMenu: 'form_acessos',
+			dataAtual
 		});
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO CREATE ACESSO
+	// ==========================================
 
+
+	// ==========================================
+	// FUNÇÃO QUE CRIA UMA NOVA SOLICITAÇÃO (POST)
+	// ==========================================
 	async post(req: Request<{}, {}, Acesso>, res: Response) {
 		try {
+			console.log("\n=== DADOS RECEBIDOS NO POST (FORMULÁRIO) ===");
+			console.log(req.body);
+			console.log("============================================\n");
+
 			const userId = req.session.userId;
 			if (!userId) return res.redirect('/login');
 
 			const body = req.body as any;
-
 			const camposObrigatorios = ["nome", "doc_nacional", "numero_doc", "data_do_acesso", "qtd_dias", "justificativa"];
 
 			for (const campo of camposObrigatorios) {
@@ -80,7 +103,6 @@ export default {
 
 			const temVeiculo = ["sim", "true", "1", "s"].includes(String(body.com_veiculo).toLowerCase());
 			if (temVeiculo) {
-				// Correção do nome da coluna de CNH
 				if (!body.placa || !body.tipo_veiculo || !body.cnh || !body.cat_habilitacao || !body.data_vencimento_cnh) {
 					return res.render("form", {
 						acesso: body,
@@ -112,21 +134,37 @@ export default {
 			}
 
 			let inputDate = String(body.data_do_acesso).trim();
+			let ano = 0, mes = 0, dia = 0;
 
-			if (inputDate.includes('/')) {
+			if (inputDate.includes('-')) {
+				const parts = inputDate.split('-');
+				ano = Number(parts[0]);
+				mes = Number(parts[1]);
+				dia = Number(parts[2]);
+			} else if (inputDate.includes('/')) {
 				const parts = inputDate.split('/');
-				let anoConvertido = parts[2];
-				if (anoConvertido.length === 2) {
-					anoConvertido = "20" + anoConvertido;
-				}
-				inputDate = `${anoConvertido}-${parts[1]}-${parts[0]}`;
+				dia = Number(parts[0]);
+				mes = Number(parts[1]);
+				ano = Number(parts[2]);
 			}
 
-			body.data_do_acesso = inputDate;
+			if (ano > 0 && ano < 100) {
+				ano += 2000;
+			}
 
-			const [ano, mes, dia] = inputDate.split('-').map(Number);
 			if (!ano || !mes || !dia || ano < 2024 || ano > 2100) {
 				return res.render("form", { acesso: body, error: "Data de acesso inválida bloqueada pelo servidor." });
+			}
+
+			const strAno = String(ano).padStart(4, '0');
+			const strMes = String(mes).padStart(2, '0');
+			const strDia = String(dia).padStart(2, '0');
+			body.data_do_acesso = `${strAno}-${strMes}-${strDia}`;
+
+			const dataAgora = new Date();
+			const todayStr = new Date(dataAgora.getTime() - dataAgora.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+			if (body.data_do_acesso < todayStr) {
+				return res.render("form", { acesso: body, error: "Não é permitido agendar acessos com datas retroativas." });
 			}
 
 			const dataBaseObj = new Date(ano, mes - 1, dia, 12, 0, 0);
@@ -138,8 +176,8 @@ export default {
 			};
 
 			body.qtd_dias = Number(body.qtd_dias);
-			if (!Number.isInteger(body.qtd_dias) || body.qtd_dias < 1) {
-				return res.render("form", { acesso: body, error: "Quantidade de dias inválida." });
+			if (!Number.isInteger(body.qtd_dias) || body.qtd_dias < 1 || body.qtd_dias > 5) {
+				return res.render("form", { acesso: body, error: "A quantidade de dias deve ser entre 1 e 5." });
 			}
 
 			const dataLimiteObj = new Date(dataBaseObj.getTime());
@@ -193,10 +231,10 @@ export default {
 				tipo_veiculo: body.tipo_veiculo || null,
 				cnh: body.cnh || null,
 				cat_habilitacao: body.cat_habilitacao || null,
-				data_vencimento_cnh: body.data_vencimento_cnh || null, // Correção aqui
+				data_vencimento_cnh: body.data_vencimento_cnh || null,
 				justificativa: body.justificativa,
 				portoes: body.portoes,
-				autorizado: body.autorizado || "SOLICITADO",
+				autorizado: "EM ANÁLISE", // body.autorizado || "EM ANÁLISE",
 				empresa_id: body.empresa_id,
 				centro_custo_id: body.centro_custo_id,
 				data_solicitacao: body.data_solicitacao,
@@ -224,7 +262,14 @@ export default {
 			return res.render("form", { acesso: req.body, error: "Erro inesperado ao salvar acesso." });
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO POST
+	// ==========================================
 
+
+	// ==========================================
+	// FUNÇÃO QUE CARREGA A EDIÇÃO MASSIVA (GET)
+	// ==========================================
 	async showEdit(req: Request, res: Response) {
 		try {
 			const today = new Date().toISOString().slice(0, 10);
@@ -248,7 +293,7 @@ export default {
 
 			return res.render('admin/edit', {
 				acessos,
-				activeMenu: 'acessos', // <-- Forçar a exibição da barra superior
+				activeMenu: 'acessos',
 				activeTab: 'edit',
 				dataInicio,
 				dataFim
@@ -258,33 +303,62 @@ export default {
 			return res.status(500).send("Erro ao carregar a página de edição.");
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO SHOW EDIT
+	// ==========================================
 
-	async showEditOne(req: Request, res: Response) {
+	// ==========================================
+	// FUNÇÃO QUE CARREGA A NOVA TELA DE CONSULTA (VISUALIZAR)
+	// ==========================================
+	async showViewOne(req: Request, res: Response) {
 		try {
 			const ticket = req.params.ticket as string;
-
 			const results = await Acessos.findByTicket(ticket);
 			const acesso = Array.isArray(results) ? results[0] : (results?.rows ? results.rows[0] : results);
 
-			if (!acesso) {
-				return res.status(404).send("Acesso não encontrado.");
-			}
-
-			if (!req.session.isAdmin && acesso.user_id !== req.session.userId) {
-				return res.redirect('/');
-			}
+			if (!acesso) return res.status(404).send("Acesso não encontrado.");
+			if (!req.session.isAdmin && acesso.user_id !== req.session.userId) return res.redirect('/');
 
 			if (acesso.data_do_acesso && acesso.data_do_acesso.includes('-')) {
 				const [ano, mes, dia] = acesso.data_do_acesso.split('-');
 				acesso.data_do_acesso = `${dia}/${mes}/${ano}`;
 			}
-			
-			// CORREÇÃO: Usando a coluna certa
 			if (acesso.data_vencimento_cnh && acesso.data_vencimento_cnh.includes('-')) {
 				const [ano, mes, dia] = acesso.data_vencimento_cnh.split('-');
 				acesso.data_vencimento_cnh = `${dia}/${mes}/${ano}`;
 			}
+            const dataSol = acesso.data_solicitacao || acesso.created_at;
+			acesso.data_solicitacao = dataSol ? String(dataSol).split(' ')[0] : '-';
+			acesso.updated_at = acesso.updated_at ? String(acesso.updated_at).split(' ')[0] : '-';
 
+            // O activeMenu garante que a barra com os botões "Solicitações, Edição Massiva..." apareça
+			return res.render('visualizar', { acesso, activeMenu: 'acessos' }); 
+		} catch (error) {
+			console.log("Erro no showViewOne:", error);
+			return res.status(500).send("Erro ao carregar o registro.");
+		}
+	},
+
+	// ==========================================
+	// FUNÇÃO QUE CARREGA O FORMULÁRIO DE EDIÇÃO (EDIT-ONE)
+	// ==========================================
+	async showEditOne(req: Request, res: Response) {
+		try {
+			const ticket = req.params.ticket as string;
+			const results = await Acessos.findByTicket(ticket);
+			const acesso = Array.isArray(results) ? results[0] : (results?.rows ? results.rows[0] : results);
+
+			if (!acesso) return res.status(404).send("Acesso não encontrado.");
+			if (!req.session.isAdmin && acesso.user_id !== req.session.userId) return res.redirect('/');
+
+			if (acesso.data_do_acesso && acesso.data_do_acesso.includes('-')) {
+				const [ano, mes, dia] = acesso.data_do_acesso.split('-');
+				acesso.data_do_acesso = `${dia}/${mes}/${ano}`;
+			}
+			if (acesso.data_vencimento_cnh && acesso.data_vencimento_cnh.includes('-')) {
+				const [ano, mes, dia] = acesso.data_vencimento_cnh.split('-');
+				acesso.data_vencimento_cnh = `${dia}/${mes}/${ano}`;
+			}
 			const formatTrackDate = (d: string) => {
 				if (!d || d === 'null' || d === '-') return '-';
 				const onlyDate = d.split(' ')[0];
@@ -294,18 +368,24 @@ export default {
 				}
 				return d;
 			};
-
 			const dataSol = acesso.data_solicitacao || acesso.created_at;
 			acesso.data_solicitacao = formatTrackDate(dataSol);
 			acesso.updated_at = formatTrackDate(acesso.updated_at);
 
-			return res.render('edit-one', { acesso });
+			return res.render('edit-one', { acesso, activeMenu: 'acessos' });
 		} catch (error) {
 			console.log("Erro no showEditOne:", error);
 			return res.status(500).send("Erro ao carregar o registro.");
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO SHOW EDIT ONE
+	// ==========================================
 
+
+	// ==========================================
+	// FUNÇÃO QUE ATUALIZA UM REGISTRO ÚNICO (POST)
+	// ==========================================
 	async updateEditOne(req: Request, res: Response) {
 		try {
 			const ticket = req.params.ticket as string;
@@ -321,7 +401,7 @@ export default {
 				return res.redirect('/');
 			}
 
-			if (!req.session.isAdmin && String(acessoAtual.autorizado).toUpperCase() === 'SIM') {
+			if (!req.session.isAdmin && String(acessoAtual.autorizado).toUpperCase() === 'ACESSO AUTORIZADO') {
 				return res.status(403).send("Acesso negado: Este registro já foi aprovado e não pode ser alterado.");
 			}
 
@@ -341,7 +421,14 @@ export default {
 			return res.status(500).send("Erro ao atualizar o registro.");
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO UPDATE EDIT ONE
+	// ==========================================
 
+
+	// ==========================================
+	// FUNÇÃO QUE DELETA UM REGISTRO ÚNICO (POST)
+	// ==========================================
 	async deleteEditOne(req: Request, res: Response) {
 		try {
 			const ticket = req.params.ticket as string;
@@ -357,7 +444,7 @@ export default {
 				return res.redirect('/');
 			}
 
-			if (!req.session.isAdmin && String(acessoAtual.autorizado).toUpperCase() === 'SIM') {
+			if (!req.session.isAdmin && String(acessoAtual.autorizado).toUpperCase() === 'ACESSO AUTORIZADO') {
 				return res.status(403).send("Acesso negado: Este registro já foi aprovado e não pode ser deletado.");
 			}
 
@@ -369,7 +456,14 @@ export default {
 			return res.status(500).send("Erro ao deletar o registro.");
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO DELETE EDIT ONE
+	// ==========================================
 
+
+	// ==========================================
+	// FUNÇÃO PARA BUSCA NO AUTOCOMPLETE (GET)
+	// ==========================================
 	async searchAutocomplete(req: Request, res: Response) {
 		try {
 			const termo = req.query.q as string;
@@ -382,7 +476,14 @@ export default {
 			return res.status(500).json([]);
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO SEARCH AUTOCOMPLETE
+	// ==========================================
 
+
+	// ==========================================
+	// FUNÇÃO QUE ATUALIZA VÁRIOS REGISTROS (POST)
+	// ==========================================
 	async updateMassivo(req: Request, res: Response) {
 		try {
 			const { tickets, status } = req.body;
@@ -401,7 +502,14 @@ export default {
 			return res.status(500).json({ error: "Erro ao processar a atualização massiva." });
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO UPDATE MASSIVO
+	// ==========================================
 
+
+	// ==========================================
+	// FUNÇÃO QUE BUSCA DADOS PARA O MODAL (GET)
+	// ==========================================
 	async getModalData(req: Request, res: Response) {
 		try {
 			const ticket = req.params.ticket as string;
@@ -418,7 +526,14 @@ export default {
 			return res.status(500).json({ error: "Erro interno do servidor." });
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO GET MODAL DATA
+	// ==========================================
 
+
+	// ==========================================
+	// FUNÇÃO QUE EXIBE OS PEDIDOS RESOLVIDOS (GET)
+	// ==========================================
 	async showResolved(req: Request, res: Response) {
 		try {
 			let results;
@@ -442,14 +557,20 @@ export default {
 				return acesso;
 			});
 			
-			// Retornando activeMenu e activeTab
 			return res.render('resolved', { acessos, activeMenu: 'acessos', activeTab: 'resolvidos' });
 		} catch (error) {
 			console.log("Erro no showResolved:", error);
 			return res.status(500).send("Erro ao carregar os pedidos esolvidos.");
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO SHOW RESOLVED
+	// ==========================================
 
+
+	// ==========================================
+	// FUNÇÃO QUE EXIBE OS PEDIDOS PENDENTES (GET)
+	// ==========================================
 	async showPending(req: Request, res: Response) {
 		try {
 			let results;
@@ -473,23 +594,25 @@ export default {
 				return acesso;
 			});
 
-			// Retornando activeMenu e activeTab
 			return res.render('pending', { acessos, activeMenu: 'acessos', activeTab: 'pendentes' });
 		} catch (error) {
 			console.log("Erro no showPending:", error);
 			return res.status(500).send("Erro ao carregar os pedidos pendentes.");
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO SHOW PENDING
+	// ==========================================
+
 
 	// ==========================================
-	// NOVA CONSULTA DE AGENDAMENTOS GERAIS
+	// FUNÇÃO DE CONSULTA GERAL DE AGENDAMENTOS (GET)
 	// ==========================================
 	async consultaAgendamentos(req: Request, res: Response) {
 		try {
 			const results = await Acessos.getAllConsulta();
 			const agendamentos = Array.isArray(results) ? results : (results?.rows || []);
 
-			// Formata a data para padrão brasileiro antes de exibir
 			const agendamentosFormatados = agendamentos.map((item: any) => {
 				if (item.data_do_acesso && item.data_do_acesso.includes('-')) {
 					const [ano, mes, dia] = item.data_do_acesso.split('-');
@@ -508,7 +631,14 @@ export default {
 			return res.redirect('/');
 		}
 	},
+	// ==========================================
+	// FIM DA FUNÇÃO CONSULTA AGENDAMENTOS
+	// ==========================================
 
+
+	// ==========================================
+	// FUNÇÃO QUE EXPORTA OS DADOS PARA CSV (GET)
+	// ==========================================
 	async downloadCSV(req: Request, res: Response) {
 		try {
 			const isAdmin = req.session.isAdmin;
@@ -564,7 +694,7 @@ export default {
 					a.tipo_veiculo,
 					a.cnh,
 					a.cat_habilitacao,
-					formataData(a.data_vencimento_cnh), // Correção para validação da CNH na planilha
+					formataData(a.data_vencimento_cnh), 
 					a.justificativa,
 					a.portoes,
 					a.visita_a,
@@ -588,4 +718,8 @@ export default {
 			return res.status(500).send("Erro ao gerar o CSV.");
 		}
 	}
+	// ==========================================
+	// FIM DA FUNÇÃO DOWNLOAD CSV
+	// ==========================================
+
 }
