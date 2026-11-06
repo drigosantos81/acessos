@@ -5,7 +5,7 @@ export interface Acesso {
 
     // Dados Pessoais
     nome: string;
-    doc_nacional: "CPF" | "PASSAPORTE" | "RG";
+    doc_nacional: "CPF" | "PASSAPORTE";
     numero_doc: string;
 
     // Dados da Visita/Empresa

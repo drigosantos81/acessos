@@ -34,10 +34,30 @@
             {% if session.isAdmin or (session.modulosPermitidos and 'pagamentos' in session.modulosPermitidos) %}
             <li class="menu-item {% if activeMenu == 'pagamentos' %}active{% endif %}">
                 <a href="/pagamentos"><i class="fa-solid fa-file-invoice-dollar"></i> PAGAMENTOS</a>
+                
+                <!-- SUBMENU DE PAGAMENTOS -->
+                <ul style="list-style: none; padding-left: 35px; margin-top: 5px; font-size: 11px;">
+                    <li style="margin-bottom: 12px; margin-top: 8px;">
+                        <a href="/pagamentos/tecon" style="color: #cbd5e1; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-chevron-right" style="font-size: 8px;"></i> Tecon
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/pagamentos/cls-depot" style="color: #cbd5e1; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-chevron-right" style="font-size: 8px;"></i> CLS / Depot
+                        </a>
+                    </li>
+                </ul>
             </li>
             {% endif %}
 
             {% if session.isAdmin or (session.modulosPermitidos and 'avarias' in session.modulosPermitidos) %}
+            <li class="menu-item {% if activeMenu == 'avarias' %}active{% endif %}">
+                <a href="/#"><i class="fa-solid fa-fax"></i> CADASTRO FORNECEDOR</a>
+            </li>
+            {% endif %}
+
+             {% if session.isAdmin or (session.modulosPermitidos and 'avarias' in session.modulosPermitidos) %}
             <li class="menu-item {% if activeMenu == 'avarias' %}active{% endif %}">
                 <a href="/avarias"><i class="fa-solid fa-car-burst"></i> AVARIAS</a>
             </li>
@@ -72,7 +92,6 @@
 
             {% if activeMenu == 'acessos' %}
                 <div class="menu-links">
-                    <!-- O activeTab define qual botão do topo fica aceso -->
                     <a href="/" class="menu-link-btn {% if activeTab == 'abertos' %}active{% endif %}">
                         <i class="fa-solid fa-folder-open"></i> Solicitações
                         {% if counts.abertos > 0 %}<span class="badge-counter">{{ counts.abertos }}</span>{% endif %}
@@ -93,13 +112,8 @@
                         <i class="fa-solid fa-triangle-exclamation"></i> Pedidos Pendentes
                         {% if counts.pendentes > 0 %}<span class="badge-counter">{{ counts.pendentes }}</span>{% endif %}
                     </a>
-
-                    <!-- <a href="/consulta-agendamentos" class="menu-link-btn {% if activeTab == 'consulta' %}active{% endif %}">
-                        <i class="fa-solid fa-users-viewfinder"></i> Consulta Agendamentos
-                    </a> -->
                 </div>
             
-            <!-- NOVO: Menu Falso apenas para preencher espaço no Formulário de Acessos -->
             {% elif activeMenu == 'form_acessos' %}
                 <div class="menu-links">
                     <div class="menu-link-btn active" style="cursor: default; pointer-events: none;">
@@ -107,7 +121,6 @@
                     </div>
                 </div>
 
-            <!-- NOVO: Preenchimento do menu superior de Pagamentos -->
             {% elif activeMenu == 'pagamentos' %}
                 <div class="menu-links">
                     <a href="/pagamentos" class="menu-link-btn active">
@@ -115,7 +128,6 @@
                     </a>
                 </div>
             
-            <!-- NOVO: Preenchimento do menu superior de Avarias -->
             {% elif activeMenu == 'avarias' %}
                 <div class="menu-links">
                     <a href="/avarias" class="menu-link-btn active">
@@ -130,18 +142,14 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- ==========================================
-         MODAL DE PRÉVIA GLOBAL
-    =========================================== -->
+    <!-- MODAL DE PRÉVIA GLOBAL -->
     <div class="modal-overlay" id="modalPrevia">
         <div class="modal-content modal-detalhes">
             <div class="modal-header">
                 <h3>Detalhes da Solicitação</h3>
                 <span class="modal-close">&times;</span>
             </div>
-            <div class="modal-body" id="modalBodyText">
-                <!-- O texto vai aparecer aqui via Javascript -->
-            </div>
+            <div class="modal-body" id="modalBodyText"></div>
         </div>
     </div>
 

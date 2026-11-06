@@ -1,0 +1,217 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <title>Novo Pagamento</title>
+    <link rel="stylesheet" href="/css/acessos/styleAcessos.css">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="header-page" style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <h2>Cadastro de Pagamento</h2>
+        <span style="font-size: 14px; font-weight: bold; color: #435773; margin-bottom: 5px;">
+            <i class="fa-solid fa-user"></i> {{ session.userName }}
+        </span>
+    </div>
+    <hr style="margin-bottom: 25px; border-top: 1px solid #e2e8f0;">
+
+    <form id="formPagamento" method="POST" action="/pagamentos/form" enctype="multipart/form-data">
+        
+        <!-- GRUPO 1: SOLICITANTE -->
+        <div class="row" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="field">
+                <label>Nome Contato Wilson Sons *</label>
+                <input type="text" name="contato_interno" required>
+            </div>
+            <div class="field">
+                <label>Setor</label>
+                <select name="setor">
+                    <option value="">Selecione...</option>
+                    <option value="FACILITIES">FACILITIES</option>
+                    <option value="ALMOXARIFADO">ALMOXARIFADO</option>
+                    <option value="ARMAZEM">ARMAZÉM</option>
+                    <option value="ENGENHARIA">ENGENHARIA</option>
+                    <option value="SMS">SMS</option>
+                </select>
+            </div>
+        </div>
+
+        <hr style="margin: 25px 0; border-top: 2px solid #cbd5e1;">
+
+        <!-- GRUPO 2: DADOS DO PAGAMENTO -->
+        <div class="row" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="field">
+                <label>Empresa *</label>
+                <select name="empresa" required>
+                    <option value="">Selecione...</option>
+                    <option value="Tecon Salvador">Tecon Salvador</option>
+                    <option value="CLS / Depot">CLS / Depot</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Pedido *</label>
+                <input type="text" name="pedido_compra" required>
+            </div>
+        </div>
+
+        <div class="row" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="field">
+                <label>CNPJ *</label>
+                <input type="text" name="cnpj_nota" id="cnpj_input" placeholder="00.000.000/0000-00" maxlength="18" required>
+            </div>
+            <div class="field">
+                <label>Razão Social *</label>
+                <input type="text" name="razao_social" required>
+            </div>
+        </div>
+
+        <div class="row" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="field">
+                <label>Tipo Documento *</label>
+                <select name="tipo_documento" required>
+                    <option value="">Selecione...</option>
+                    <option value="NOTA FISCAL">Nota Fiscal</option>
+                    <option value="FATURA">Fatura</option>
+                    <option value="RECIBO">Recibo</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Número Documento</label>
+                <input type="text" name="numero_nota_fatura">
+            </div>
+        </div>
+
+        <!-- O Novo Campo Anexo entrou aqui, antes da Data de Emissão, pareando o Grid -->
+        <div class="row" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="field">
+                <label>Anexo (Nota / Fatura / Recibo)</label>
+                <input type="file" name="anexo_nota_fatura" style="width: 95%; background: white;">
+            </div>
+            <div class="field">
+                <label>Data de Emissão *</label>
+                <input type="date" name="data_emissao_nota" required>
+            </div>
+        </div>
+
+        <div class="row" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="field">
+                <label>Valor *</label>
+                <input type="text" name="valor" id="valor_input" placeholder="R$ 0,00" required>
+            </div>
+            <div class="field">
+                <label>Data Vencimento *</label>
+                <input type="date" name="data_vencimento" required>
+            </div>
+        </div>
+
+        <div class="row" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="field">
+                <label>Tipo Pagamento</label>
+                <div class="radio">
+                    <label><input type="radio" name="tipo_pagamento" value="TED" checked onchange="togglePagamentos()"> TED</label>
+                    <label><input type="radio" name="tipo_pagamento" value="Boleto" onchange="togglePagamentos()"> Boleto</label>
+                </div>
+                <div id="box_boleto" style="display: none; margin-top: 10px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                    <label style="font-size: 12px; margin-bottom: 5px; display: block;">Anexar Arquivo do Boleto *</label>
+                    <input type="file" name="anexo_boleto" id="input_boleto" style="width: 95%; background: white;">
+                </div>
+            </div>
+            <div class="field">
+                <label>Serviço / Material entregue?</label>
+                <div class="radio">
+                    <label><input type="radio" name="servico_material_entregue" value="SIM" onchange="togglePagamentos()"> SIM</label>
+                    <label><input type="radio" name="servico_material_entregue" value="NAO" checked onchange="togglePagamentos()"> NÃO</label>
+                </div>
+                <div id="box_mes" style="display: none; margin-top: 10px;">
+                    <label style="font-size: 12px; display: block; margin-bottom: 5px;">Mês (MM/AAAA) *</label>
+                    <input type="text" name="mes_prestacao_servico" id="mes_input" placeholder="11/2026" maxlength="7">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px;">
+            <button type="button" class="button-cancel" onclick="window.location.href = '/pagamentos'">Cancelar</button>
+            <button type="submit" class="button-send" style="width: auto; padding: 12px 25px;">Enviar Solicitação</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function togglePagamentos() {
+        const tipoBoleto = document.querySelector('input[name="tipo_pagamento"][value="Boleto"]').checked;
+        const boxBoleto = document.getElementById('box_boleto');
+        const inputBoleto = document.getElementById('input_boleto');
+        if (tipoBoleto) {
+            boxBoleto.style.display = 'block';
+            inputBoleto.setAttribute('required', 'true');
+        } else {
+            boxBoleto.style.display = 'none';
+            inputBoleto.removeAttribute('required');
+            inputBoleto.value = "";
+        }
+
+        const entregueSim = document.querySelector('input[name="servico_material_entregue"][value="SIM"]').checked;
+        const boxMes = document.getElementById('box_mes');
+        const inputMes = document.getElementById('mes_input');
+        if (entregueSim) {
+            boxMes.style.display = 'block';
+            inputMes.setAttribute('required', 'true');
+        } else {
+            boxMes.style.display = 'none';
+            inputMes.removeAttribute('required');
+            inputMes.value = "";
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Garante que o estado inicial dos campos ocultos esteja correto
+        togglePagamentos();
+
+        // Rastreador de erros silenciosos do HTML5
+        const form = document.getElementById('formPagamento');
+        form.addEventListener('invalid', function(event) {
+            event.preventDefault(); // Impede o balão nativo que some
+            const campo = event.target;
+            alert(`ATENÇÃO: O campo obrigatório "${campo.previousElementSibling.innerText.replace('*', '').trim()}" precisa ser preenchido.`);
+            campo.focus();
+        }, true);
+
+        // Máscara CNPJ
+        const cnpjInput = document.getElementById('cnpj_input');
+        if(cnpjInput) {
+            cnpjInput.addEventListener('input', function() {
+                let v = this.value.replace(/\D/g, "");
+                v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+                v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+                v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
+                v = v.replace(/(\d{4})(\d)/, "$1-$2");
+                this.value = v;
+            });
+        }
+
+        // Máscara Moeda
+        const valorInput = document.getElementById('valor_input');
+        if(valorInput) {
+            valorInput.addEventListener('input', function() {
+                let v = this.value.replace(/\D/g, "");
+                if(v) {
+                    v = (parseInt(v) / 100).toFixed(2) + '';
+                    v = v.replace(".", ",");
+                    v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+                    this.value = "R$ " + v;
+                }
+            });
+        }
+
+        // Máscara Mês
+        const mesInput = document.getElementById('mes_input');
+        if(mesInput) {
+            mesInput.addEventListener('input', function() {
+                let v = this.value.replace(/\D/g, "");
+                if (v.length > 2) { v = v.substring(0,2) + "/" + v.substring(2,6); }
+                this.value = v;
+            });
+        }
+    });
+</script>
+{% endblock %}

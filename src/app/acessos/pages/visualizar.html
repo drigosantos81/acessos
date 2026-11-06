@@ -9,7 +9,6 @@
     <div class="view-header">
         <h2>Detalhes da Solicitação (Ticket: {{ acesso.ticket }})</h2>
         
-        <!-- O Nunjucks agora só injeta o nome da classe CSS correta, sem misturar com atributos de estilo -->
         <div class="status-badge 
             {% if acesso.autorizado == 'ACESSO AUTORIZADO' %} badge-autorizado
             {% elif acesso.autorizado == 'ACESSO NEGADO' %} badge-negado
@@ -84,14 +83,15 @@
                 Voltar
             </button>
         </div>
+        
+        <!-- Botão de Edição Visível Apenas se EM ANÁLISE ou PENDENTE -->
+        {% if acesso.autorizado == 'EM ANÁLISE' or acesso.autorizado == 'PENDENTE' %}
         <div>
-            <!-- Botão de Edição Visível Apenas se EM ANÁLISE ou PENDENTE -->
-            {% if acesso.autorizado == 'EM ANÁLISE' or acesso.autorizado == 'PENDENTE' %}
-                <a href="/edit/{{ acesso.ticket }}" class="button-send btn-auto btn-editar-link">
-                    <i class="fa-solid fa-pen-to-square"></i> Editar Solicitação
-                </a>
-            {% endif %}
+            <a href="/edit/{{ acesso.ticket }}" class="button-send btn-auto btn-editar-link">
+                <i class="fa-solid fa-pen-to-square"></i> Editar Solicitação
+            </a>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

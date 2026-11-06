@@ -148,7 +148,7 @@
                     {% else %}
                     <input type="hidden" name="autorizado" value="{{ acesso.autorizado }}">
                     <div style="margin-top: 10px; font-size: 12px; font-weight: bold; color: #555;">
-                        Status Atual: <span style="color: {% if acesso.autorizado == 'ACESSO AUTORIZADO' %}#16a34a{% elif acesso.autorizado == 'ACESSO NEGADO' %}#dc2626{% else %}#007bff{% endif %};">{{ acesso.autorizado }}</span>
+                        Status Atual: <span class="{% if acesso.autorizado == 'ACESSO AUTORIZADO' %}status-text-autorizado{% elif acesso.autorizado == 'ACESSO NEGADO' %}status-text-negado{% else %}status-text-analise{% endif %}">{{ acesso.autorizado }}</span>
                     </div>
                     {% endif %}
                 </div>
@@ -195,7 +195,8 @@
             </div>
 
             <div style="display: flex; gap: 10px;">
-                <button type="button" class="button-cancel" onclick="window.location.href = '/visualizar/{{ acesso.ticket }}'">
+                <!-- <button type="button" class="button-cancel" onclick="window.location.href = '/visualizar/{{ acesso.ticket }}'"> -->
+                <button type="button" class="button-cancel" onclick="window.location.href = '/'">
                     Cancelar
                 </button>
                 {% if session.isAdmin or acesso.autorizado != 'ACESSO AUTORIZADO' %}

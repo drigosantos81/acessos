@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+<title>Pagamentos | Início</title>
+<link rel="stylesheet" href="/css/pagamentos/stylePagamentos.css">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="header-page">
+        <h2>Solicitações de Pagamento</h2>
+        <!-- Botão que direciona para a nova rota do form -->
+        <a href="/pagamentos/form" class="button-send" style="text-decoration: none; width: auto;">
+            <i class="fa-solid fa-plus"></i> Cadastrar Pagamento
+        </a>
+    </div>
+
+    <hr style="margin-bottom: 20px;">
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Ticket</th>
+                    <th>Status</th>
+                    <th>Nº Nota/Fatura</th>
+                    <th>Empresa</th>
+                    <th>Data Vencimento</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Estado vazio até o banco de dados ser conectado -->
+                {% if pagamentos and pagamentos.length > 0 %}
+                {% for pag in pagamentos %}
+                <tr>
+                    <td>{{ pag.ticket }}</td>
+                    <td>{{ pag.status }}</td>
+                    <td>{{ pag.numero_nota_fatura }}</td>
+                    <td>{{ pag.empresa_nome }}</td>
+                    <td>{{ pag.data_vencimento }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 20px; color: #64748b;">
+                        Nenhum pagamento cadastrado.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

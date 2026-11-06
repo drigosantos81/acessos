@@ -1,28 +1,128 @@
-/* =========================================
-   MÓDULO DE AVARIAS
-========================================= */
+/* Container Principal do Formulário */
+.card-pagamentos {
+    background: white;
+    width: 96%;
+    max-width: 1200px;
+    padding: 25px 30px;
+    margin: 25px auto 15px auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
 
-.avarias-card-construcao {
-    text-align: center;
-    padding: 60px 20px;
+/* Grid de Duas Colunas - O segredo para o TAB funcionar perfeitamente */
+.grid-2-colunas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 40px;
+}
+
+.field-pag {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 22px;
+}
+
+.field-pag label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+/* Inputs e Selects */
+.field-pag input[type="text"],
+.field-pag input[type="date"],
+.field-pag select {
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
     background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
+    transition: border-color 0.2s;
+    height: 40px;
 }
 
-.avarias-icon {
-    font-size: 60px;
-    color: #00BEDD;
-    margin-bottom: 20px;
+.field-pag input:focus,
+.field-pag select:focus {
+    outline: none;
+    border-color: #00BEDD;
+    box-shadow: 0 0 0 1px #00BEDD;
 }
 
-.avarias-title {
-    color: #011C43;
-    margin-bottom: 10px;
+/* Container de Radio Buttons */
+.radio-pag {
+    display: flex;
+    gap: 15px;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    align-items: center;
+    height: 40px;
+    box-sizing: border-box;
 }
 
-.avarias-text {
-    color: #666;
-    font-size: 16px;
+.radio-pag label {
+    margin-bottom: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: normal;
+    color: #333;
+}
+
+.radio-pag input[type="radio"] {
+    margin: 0;
+}
+
+/* Responsividade: Muda para 1 coluna em telas de celular */
+@media (max-width: 768px) {
+    .grid-2-colunas {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+
+/* ==========================================
+   SUBMENU LATERAL (PAGAMENTOS)
+========================================== */
+.sidebar-menu .menu-item.active {
+    background-color: #00BEDD;
+}
+
+/* Garante que o menu principal ativo fique com a cor do Nunjucks */
+.sidebar-menu .menu-item.active>a {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* Formatação do fundo da lista do submenu quando está ativo */
+.sidebar-menu .menu-item.active ul {
+    background-color: #37475E;
+    /* Um tom um pouco mais escuro que a barra lateral original */
+    padding: 10px 0 10px 30px !important;
+    /* Espaçamento interno */
+    margin: 0 !important;
+    border-radius: 0 0 8px 8px;
+    /* Arredondamento embaixo */
+}
+
+/* Itens do submenu */
+.sidebar-menu .menu-item.active ul a {
+    color: #94a3b8 !important;
+    /* Cor de texto discreta */
+    font-weight: normal;
+    padding: 8px 10px;
+    border-left: none;
+    /* Remove a barra azul ao dar hover no submenu */
+    font-size: 11px;
+}
+
+.sidebar-menu .menu-item.active ul a:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.05);
+    /* Brilho leve no hover */
+    padding-left: 10px;
 }
