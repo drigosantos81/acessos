@@ -126,3 +126,54 @@
     /* Brilho leve no hover */
     padding-left: 10px;
 }
+
+/* ==========================================
+   DASHBOARD PAGAMENTOS
+========================================== */
+.dashboard-card {
+    text-align: center;
+    max-width: 800px;
+    padding: 40px;
+    margin: 25px auto;
+}
+
+.dashboard-header {
+    justify-content: space-between;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-novo-pagamento {
+    text-decoration: none;
+    width: auto;
+    font-size: 13px;
+}
+
+.chart-container {
+    width: 350px;
+    height: 350px;
+    margin: 0 auto;
+}
+
+/* ==========================================
+   BADGES DE STATUS (TABELAS DE PAGAMENTOS)
+========================================== */
+.status-pag {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 4px; /* Ajustado para 4px */
+    font-size: 11px;
+    font-weight: bold;
+    color: #ffffff; /* Letras brancas */
+    text-align: center;
+    min-width: 90px;
+}
+
+/* Cores específicas para cada status */
+.status-pag-solicitado { background-color: #007bff; }
+.status-pag-confirmado { background-color: #16a34a; }
+.status-pag-pendente   { background-color: #eab308; color: #000000 !important; } /* Força a letra preta apenas no amarelo */
+.status-pag-cancelado  { background-color: #dc2626; }

@@ -8,7 +8,7 @@
 {% block content %}
 <div class="card">
     <div class="header-page" style="display: flex; justify-content: space-between; align-items: flex-end;">
-        <h2>Cadastro de Pagamento</h2>
+        <h2>Novo Lançamento</h2>
         <span style="font-size: 14px; font-weight: bold; color: #435773; margin-bottom: 5px;">
             <i class="fa-solid fa-user"></i> {{ session.userName }}
         </span>
@@ -27,11 +27,9 @@
                 <label>Setor</label>
                 <select name="setor">
                     <option value="">Selecione...</option>
-                    <option value="FACILITIES">FACILITIES</option>
-                    <option value="ALMOXARIFADO">ALMOXARIFADO</option>
-                    <option value="ARMAZEM">ARMAZÉM</option>
-                    <option value="ENGENHARIA">ENGENHARIA</option>
-                    <option value="SMS">SMS</option>
+                    {% for s in setores %}
+                        <option value="{{ s.nome }}">{{ s.nome }}</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
@@ -42,10 +40,12 @@
         <div class="row" style="grid-template-columns: 1fr 1fr; gap: 20px;">
             <div class="field">
                 <label>Empresa *</label>
-                <select name="empresa" required>
+                <select name="empresa_id" required>
                     <option value="">Selecione...</option>
-                    <option value="Tecon Salvador">Tecon Salvador</option>
-                    <option value="CLS / Depot">CLS / Depot</option>
+                    {% for emp in empresas %}
+                        <!-- Agora o value captura o ID do banco (1 para Tecon, 2 para CLS) -->
+                        <option value="{{ emp.id }}">{{ emp.nome_fantasia }} ({{ emp.cnpj }})</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="field">
@@ -60,7 +60,7 @@
                 <input type="text" name="cnpj_nota" id="cnpj_input" placeholder="00.000.000/0000-00" maxlength="18" required>
             </div>
             <div class="field">
-                <label>Razão Social *</label>
+                <label>Fornecedor (Razão Social) *</label>
                 <input type="text" name="razao_social" required>
             </div>
         </div>
@@ -81,7 +81,6 @@
             </div>
         </div>
 
-        <!-- O Novo Campo Anexo entrou aqui, antes da Data de Emissão, pareando o Grid -->
         <div class="row" style="grid-template-columns: 1fr 1fr; gap: 20px;">
             <div class="field">
                 <label>Anexo (Nota / Fatura / Recibo)</label>
@@ -131,7 +130,7 @@
 
         <div class="form-actions" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px;">
             <button type="button" class="button-cancel" onclick="window.location.href = '/pagamentos'">Cancelar</button>
-            <button type="submit" class="button-send" style="width: auto; padding: 12px 25px;">Enviar Solicitação</button>
+            <button type="submit" class="button-send" style="width: auto; padding: 12px 25px;">Enviar</button>
         </div>
     </form>
 </div>
@@ -164,19 +163,16 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Garante que o estado inicial dos campos ocultos esteja correto
         togglePagamentos();
 
-        // Rastreador de erros silenciosos do HTML5
         const form = document.getElementById('formPagamento');
         form.addEventListener('invalid', function(event) {
-            event.preventDefault(); // Impede o balão nativo que some
+            event.preventDefault();
             const campo = event.target;
             alert(`ATENÇÃO: O campo obrigatório "${campo.previousElementSibling.innerText.replace('*', '').trim()}" precisa ser preenchido.`);
             campo.focus();
         }, true);
 
-        // Máscara CNPJ
         const cnpjInput = document.getElementById('cnpj_input');
         if(cnpjInput) {
             cnpjInput.addEventListener('input', function() {
@@ -189,7 +185,6 @@
             });
         }
 
-        // Máscara Moeda
         const valorInput = document.getElementById('valor_input');
         if(valorInput) {
             valorInput.addEventListener('input', function() {
@@ -203,7 +198,6 @@
             });
         }
 
-        // Máscara Mês
         const mesInput = document.getElementById('mes_input');
         if(mesInput) {
             mesInput.addEventListener('input', function() {

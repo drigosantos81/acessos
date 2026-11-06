@@ -3,9 +3,17 @@
     padding: 0;
 }
 
-.status-text-autorizado { color: #16a34a; }
-.status-text-negado { color: #dc2626; }
-.status-text-analise { color: #007bff; }
+.status-text-autorizado {
+    color: #16a34a;
+}
+
+.status-text-negado {
+    color: #dc2626;
+}
+
+.status-text-analise {
+    color: #007bff;
+}
 
 body {
     background: #f5f7fa;
@@ -863,28 +871,109 @@ input[type="radio"] {
     border: 1px solid #ddd;
 }
 
-.sidebar-menu .menu-item.active {
-    background-color: #00BEDD;
+/* ==========================================
+   MENU LATERAL E ESTILIZAÇÃO
+========================================== */
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
 }
 
-.sidebar-menu .menu-item.active a {
-    color: #ffffff;
-    font-weight: bold;
+/* O li não recebe borda ou fundo. Todo o efeito fica na tag <a> */
+.sidebar-menu li {
+    background-color: transparent !important;
+    border: none !important;
+    margin: 0;
+    padding: 0;
 }
 
-.sidebar-menu .menu-item.active a i {
-    color: #ffffff;
+.sidebar-menu li>a {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s, padding-left 0.2s;
+    font-size: 12px;
+    text-align: left;
+    border-left: 4px solid transparent;
+    /* Espaço invisível para a borda */
 }
 
-.menu-link-btn.active {
+.sidebar-menu li>a>i {
+    margin-right: 10px;
+    font-size: 14px;
+    width: 20px;
+    text-align: center;
+}
+
+/* HOVER: O que acontece quando passa o mouse num item inativo */
+.sidebar-menu li:not(.active)>a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #00BEDD;
+    padding-left: 20px;
+}
+
+/* ACTIVE: O que acontece quando o módulo está selecionado */
+.sidebar-menu .menu-item.active>a {
     background-color: #00BEDD !important;
     color: #ffffff !important;
-    border-color: #00BEDD !important;
+    font-weight: bold;
+    border-left: 4px solid #00BEDD !important;
 }
 
-.menu-link-btn.active i {
+.sidebar-menu .menu-item.active>a>i {
     color: #ffffff !important;
 }
+
+
+/* ==========================================
+   SUBMENU LATERAL (PAGAMENTOS, ETC)
+========================================== */
+.submenu-list {
+    list-style: none;
+    padding-left: 35px;
+    margin-top: 5px;
+    font-size: 11px;
+}
+
+.submenu-item {
+    margin-bottom: 12px;
+    margin-top: 8px;
+}
+
+/* A tag <a> do submenu tem regras diferentes para não herdar as bordas do menu principal */
+.submenu-link {
+    color: #cbd5e1 !important;
+    text-decoration: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    border-left: none !important;
+    padding: 8px 10px !important;
+    background-color: transparent !important;
+}
+
+.submenu-link>i {
+    font-size: 8px !important;
+    width: auto !important;
+    margin-right: 0 !important;
+}
+
+/* Quando o menu pai está ativo, a lista de submenu recebe este fundo */
+.sidebar-menu .menu-item.active .submenu-list {
+    background-color: #37475E;
+    padding: 10px 0 10px 30px !important;
+    margin: 0 !important;
+    border-radius: 0 0 8px 8px;
+}
+
+.sidebar-menu .menu-item.active .submenu-link:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
 
 /* ==========================================
    CORES DOS STATUS (ICONES E TEXTOS)
@@ -963,10 +1052,25 @@ td.autorizado i {
     font-size: 13px;
 }
 
-.badge-autorizado { background-color: #dcfce7; color: #16a34a; }
-.badge-negado     { background-color: #fee2e2; color: #dc2626; }
-.badge-pendente   { background-color: #fef9c3; color: #ca8a04; }
-.badge-analise    { background-color: #dbeafe; color: #2563eb; }
+.badge-autorizado {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.badge-negado {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.badge-pendente {
+    background-color: #fef9c3;
+    color: #ca8a04;
+}
+
+.badge-analise {
+    background-color: #dbeafe;
+    color: #2563eb;
+}
 
 /* Caixa de Informações de Rastreamento (Rodapé) */
 .tracking-box {
@@ -990,19 +1094,19 @@ td.autorizado i {
     padding-bottom: 5px;
 }
 
-.tracking-table td, 
+.tracking-table td,
 .tracking-table th {
     padding: 0 25px;
 }
 
 /* Remove o padding lateral das extremidades e adiciona a borda divisória */
-.tracking-table th:first-child, 
+.tracking-table th:first-child,
 .tracking-table td:first-child {
     padding-left: 0;
     padding-right: 25px;
 }
 
-.tracking-table th:not(:first-child), 
+.tracking-table th:not(:first-child),
 .tracking-table td:not(:first-child) {
     border-left: 2px solid #cbd5e1;
 }
@@ -1025,4 +1129,30 @@ td.autorizado i {
     display: inline-block;
     text-align: center;
     font-size: 14px;
+}
+
+/* Cor especial do Submenu quando selecionado */
+.sidebar-menu .menu-item.active .submenu-link.active-sub {
+    background-color: #8ED8BB !important;
+    color: #000000 !important;
+    /* Força a letra preta */
+    font-weight: bold !important;
+    border-radius: 4px;
+}
+
+.sidebar-menu .menu-item.active .submenu-link.active-sub i {
+    color: #000000 !important;
+    /* Força o ícone preto */
+}
+
+/* Badge (balãozinho vermelho) do submenu lateral */
+.badge-sub {
+    background-color: #e83f5b;
+    color: white !important;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 7px;
+    border-radius: 12px;
+    margin-left: auto;
+    /* Empurra o badge para a extrema direita */
 }

@@ -1,7 +1,7 @@
 export interface PagamentosTable {
     ticket?: number;
     user_id: number;
-    empresa?: string;
+    empresa_id: number;
     setor?: string;
     tipo_documento: string;
     contato_interno?: string;

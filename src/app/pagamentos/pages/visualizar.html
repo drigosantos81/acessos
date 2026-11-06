@@ -1,0 +1,140 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <title>Visualizar Pagamento #{{ pagamento.ticket }}</title>
+    <link rel="stylesheet" href="/css/acessos/styleAcessos.css">
+    <link rel="stylesheet" href="/css/pagamentos/stylePagamentos.css">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="view-header">
+        <h2>Detalhes do Pagamento #{{ pagamento.ticket }}</h2>
+        <span class="status-pag status-pag-{{ pagamento.status | lower | replace(' ', '') }}">
+            {{ pagamento.status }}
+        </span>
+    </div>
+    
+    <hr style="border-top: 1px solid #e2e8f0; margin-bottom: 20px;">
+
+    <!-- BLOCO 1: IDENTIFICAÇÃO -->
+    <div class="view-section-title">Dados da Empresa e Solicitação</div>
+    <div class="view-grid">
+        <div>
+            <div class="view-label">Empresa</div>
+            <div class="view-value">{{ pagamento.empresa_nome }}</div>
+        </div>
+        <div>
+            <div class="view-label">Setor</div>
+            <div class="view-value">{{ pagamento.setor | default('-') }}</div>
+        </div>
+        <div>
+            <div class="view-label">Contato Interno</div>
+            <div class="view-value">{{ pagamento.contato_interno }}</div>
+        </div>
+        <div>
+            <div class="view-label">Pedido de Compra</div>
+            <div class="view-value">{{ pagamento.pedido_compra }}</div>
+        </div>
+    </div>
+
+    <!-- BLOCO 2: FORNECEDOR E DOCUMENTO -->
+    <div class="view-section-title">Dados do Fornecedor e Documento</div>
+    <div class="view-grid">
+        <div>
+            <div class="view-label">Fornecedor (Razão Social)</div>
+            <div class="view-value">{{ pagamento.razao_social }}</div>
+        </div>
+        <div>
+            <div class="view-label">CNPJ</div>
+            <div class="view-value">{{ pagamento.cnpj_nota }}</div>
+        </div>
+        <div>
+            <div class="view-label">Tipo Documento</div>
+            <div class="view-value">{{ pagamento.tipo_documento }}</div>
+        </div>
+        <div>
+            <div class="view-label">Nº Documento</div>
+            <div class="view-value">{{ pagamento.numero_nota_fatura | default('-') }}</div>
+        </div>
+        <div>
+            <div class="view-label">Data de Emissão</div>
+            <div class="view-value">{{ pagamento.data_emissao_nota }}</div>
+        </div>
+    </div>
+
+    <!-- BLOCO 3: FINANCEIRO E SERVIÇO -->
+    <div class="view-section-title">Financeiro e Serviço</div>
+    <div class="view-grid">
+        <div>
+            <div class="view-label">Valor</div>
+            <div class="view-value">R$ {{ pagamento.valor | replace('.', ',') }}</div>
+        </div>
+        <div>
+            <div class="view-label">Data de Vencimento</div>
+            <div class="view-value">{{ pagamento.data_vencimento }}</div>
+        </div>
+        <div>
+            <div class="view-label">Tipo de Pagamento</div>
+            <div class="view-value">{{ pagamento.tipo_pagamento }}</div>
+        </div>
+        <div>
+            <div class="view-label">Serviço/Material Entregue?</div>
+            <div class="view-value">{{ pagamento.servico_material_entregue }}</div>
+        </div>
+        {% if pagamento.servico_material_entregue == 'SIM' %}
+        <div>
+            <div class="view-label">Mês Prestação</div>
+            <div class="view-value">{{ pagamento.mes_prestacao_servico }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- BLOCO 4: ANEXOS -->
+    <div class="view-section-title">Anexos</div>
+    <div class="view-grid">
+        <div>
+            <div class="view-label">Nota / Fatura / Recibo</div>
+            <div class="view-value">
+                {% if pagamento.anexo_nota_fatura %}
+                    <a href="/uploads/pagamentos/{{ pagamento.anexo_nota_fatura }}" target="_blank" style="color: #00BEDD; font-weight: bold; text-decoration: none;">
+                        <i class="fa-solid fa-file-pdf"></i> Visualizar Documento
+                    </a>
+                {% else %}
+                    -
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            <div class="view-label">Boleto</div>
+            <div class="view-value">
+                {% if pagamento.anexo_boleto %}
+                    <a href="/uploads/pagamentos/{{ pagamento.anexo_boleto }}" target="_blank" style="color: #00BEDD; font-weight: bold; text-decoration: none;">
+                        <i class="fa-solid fa-file-invoice"></i> Visualizar Boleto
+                    </a>
+                {% else %}
+                    -
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- RODAPÉ: RASTREAMENTO -->
+    <div class="tracking-box">
+        <table class="tracking-table">
+            <tr>
+                <th>Data de Abertura</th>
+                <th>Última Atualização</th>
+            </tr>
+            <tr>
+                <td>{{ pagamento.data_abertura | default('-') }}</td>
+                <td>{{ pagamento.updated_at | default('-') }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="view-actions">
+        <button class="button-cancel btn-voltar" onclick="history.back()">Voltar</button>
+    </div>
+</div>
+{% endblock %}

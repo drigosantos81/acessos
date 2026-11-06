@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     {% block head %}
-        <title>Portal de Atendimento</title>
+    <title>Portal de Atendimento</title>
     {% endblock %}
 
     <link rel="stylesheet" href="/css/acessos/styleAcessos.css">
@@ -34,30 +34,36 @@
             {% if session.isAdmin or (session.modulosPermitidos and 'pagamentos' in session.modulosPermitidos) %}
             <li class="menu-item {% if activeMenu == 'pagamentos' %}active{% endif %}">
                 <a href="/pagamentos"><i class="fa-solid fa-file-invoice-dollar"></i> PAGAMENTOS</a>
-                
-                <!-- SUBMENU DE PAGAMENTOS -->
-                <ul style="list-style: none; padding-left: 35px; margin-top: 5px; font-size: 11px;">
-                    <li style="margin-bottom: 12px; margin-top: 8px;">
-                        <a href="/pagamentos/tecon" style="color: #cbd5e1; text-decoration: none; display: flex; align-items: center; gap: 6px;">
-                            <i class="fa-solid fa-chevron-right" style="font-size: 8px;"></i> Tecon
+
+                <ul class="submenu-list">
+                    <li class="submenu-item">
+                        <a href="/pagamentos/tecon" class="submenu-link {% if activeSubMenu == 'tecon' %}active-sub{% endif %}">
+                            <i class="fa-solid fa-chevron-right"></i> Tecon(TCSV)
+                            {% if counts.pagamentos_tecon > 0 %}
+                                <span class="badge-sub">{{ counts.pagamentos_tecon }}</span>
+                            {% endif %}
                         </a>
                     </li>
-                    <li>
-                        <a href="/pagamentos/cls-depot" style="color: #cbd5e1; text-decoration: none; display: flex; align-items: center; gap: 6px;">
-                            <i class="fa-solid fa-chevron-right" style="font-size: 8px;"></i> CLS / Depot
+                    <li class="submenu-item">
+                        <a href="/pagamentos/cls-depot" class="submenu-link {% if activeSubMenu == 'cls' %}active-sub{% endif %}">
+                            <i class="fa-solid fa-chevron-right"></i> CLS / Depot
+                            {% if counts.pagamentos_cls > 0 %}
+                                <span class="badge-sub">{{ counts.pagamentos_cls }}</span>
+                            {% endif %}
                         </a>
                     </li>
                 </ul>
+                
+            </li>
+            {% endif %}
+
+            {% if session.isAdmin or (session.modulosPermitidos and 'fornecedores' in session.modulosPermitidos) %}
+            <li class="menu-item {% if activeMenu == 'fornecedores' %}active{% endif %}">
+                <a href="/fornecedores"><i class="fa-solid fa-fax"></i> CADASTRO FORNECEDOR</a>
             </li>
             {% endif %}
 
             {% if session.isAdmin or (session.modulosPermitidos and 'avarias' in session.modulosPermitidos) %}
-            <li class="menu-item {% if activeMenu == 'avarias' %}active{% endif %}">
-                <a href="/#"><i class="fa-solid fa-fax"></i> CADASTRO FORNECEDOR</a>
-            </li>
-            {% endif %}
-
-             {% if session.isAdmin or (session.modulosPermitidos and 'avarias' in session.modulosPermitidos) %}
             <li class="menu-item {% if activeMenu == 'avarias' %}active{% endif %}">
                 <a href="/avarias"><i class="fa-solid fa-car-burst"></i> AVARIAS</a>
             </li>
@@ -87,55 +93,55 @@
     </div>
 
     <div class="main-content">
-        
+
         <div class="menu">
 
             {% if activeMenu == 'acessos' %}
-                <div class="menu-links">
-                    <a href="/" class="menu-link-btn {% if activeTab == 'abertos' %}active{% endif %}">
-                        <i class="fa-solid fa-folder-open"></i> Solicitações
-                        {% if counts.abertos > 0 %}<span class="badge-counter">{{ counts.abertos }}</span>{% endif %}
-                    </a>
+            <div class="menu-links">
+                <a href="/" class="menu-link-btn {% if activeTab == 'abertos' %}active{% endif %}">
+                    <i class="fa-solid fa-folder-open"></i> Solicitações
+                    {% if counts.abertos > 0 %}<span class="badge-counter">{{ counts.abertos }}</span>{% endif %}
+                </a>
 
-                    {% if session.isAdmin %}
-                    <a href="/admin/edit" class="menu-link-btn {% if activeTab == 'edit' %}active{% endif %}">
-                        <i class="fa-solid fa-pen-to-square"></i> Edição Massiva
-                    </a>
-                    {% endif %}
+                {% if session.isAdmin %}
+                <a href="/admin/edit" class="menu-link-btn {% if activeTab == 'edit' %}active{% endif %}">
+                    <i class="fa-solid fa-pen-to-square"></i> Edição Massiva
+                </a>
+                {% endif %}
 
-                    <a href="/resolvidos" class="menu-link-btn {% if activeTab == 'resolvidos' %}active{% endif %}">
-                        <i class="fa-solid fa-check-double"></i> Pedidos Resolvidos
-                        {% if counts.resolvidos > 0 %}<span class="badge-counter">{{ counts.resolvidos }}</span>{% endif %}
-                    </a>
+                <a href="/resolvidos" class="menu-link-btn {% if activeTab == 'resolvidos' %}active{% endif %}">
+                    <i class="fa-solid fa-check-double"></i> Pedidos Resolvidos
+                    {% if counts.resolvidos > 0 %}<span class="badge-counter">{{ counts.resolvidos }}</span>{% endif %}
+                </a>
 
-                    <a href="/pendentes" class="menu-link-btn {% if activeTab == 'pendentes' %}active{% endif %}">
-                        <i class="fa-solid fa-triangle-exclamation"></i> Pedidos Pendentes
-                        {% if counts.pendentes > 0 %}<span class="badge-counter">{{ counts.pendentes }}</span>{% endif %}
-                    </a>
-                </div>
-            
+                <a href="/pendentes" class="menu-link-btn {% if activeTab == 'pendentes' %}active{% endif %}">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Pedidos Pendentes
+                    {% if counts.pendentes > 0 %}<span class="badge-counter">{{ counts.pendentes }}</span>{% endif %}
+                </a>
+            </div>
+
             {% elif activeMenu == 'form_acessos' %}
-                <div class="menu-links">
-                    <div class="menu-link-btn active" style="cursor: default; pointer-events: none;">
-                        <i class="fa-solid fa-folder-open"></i> Nova Solicitação
-                    </div>
+            <div class="menu-links">
+                <div class="menu-link-btn active" style="cursor: default; pointer-events: none;">
+                    <i class="fa-solid fa-folder-open"></i> Nova Solicitação
                 </div>
+            </div>
 
             {% elif activeMenu == 'pagamentos' %}
-                <div class="menu-links">
-                    <a href="/pagamentos" class="menu-link-btn active">
-                        <i class="fa-solid fa-file-invoice-dollar"></i> Módulo Pagamentos
-                    </a>
-                </div>
-            
+            <div class="menu-links">
+                <a href="/pagamentos" class="menu-link-btn active">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Módulo Pagamentos
+                </a>
+            </div>
+
             {% elif activeMenu == 'avarias' %}
-                <div class="menu-links">
-                    <a href="/avarias" class="menu-link-btn active">
-                        <i class="fa-solid fa-car-burst"></i> Módulo Avarias
-                    </a>
-                </div>
+            <div class="menu-links">
+                <a href="/avarias" class="menu-link-btn active">
+                    <i class="fa-solid fa-car-burst"></i> Módulo Avarias
+                </a>
+            </div>
             {% endif %}
-            
+
         </div>
 
         <!-- CONTEÚDO DA PÁGINA (MIOLO) -->

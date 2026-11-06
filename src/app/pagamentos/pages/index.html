@@ -1,20 +1,20 @@
 {% extends 'layout.html' %}
 
 {% block head %}
-<title>Pagamentos | Início</title>
-<link rel="stylesheet" href="/css/pagamentos/stylePagamentos.css">
+    <title>{{ titulo | default('Pagamentos') }}</title>
+    <link rel="stylesheet" href="/css/acessos/styleAcessos.css">
+    <link rel="stylesheet" href="/css/pagamentos/stylePagamentos.css">
 {% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="header-page">
-        <h2>Solicitações de Pagamento</h2>
-        <!-- Botão que direciona para a nova rota do form -->
+        <h2>{{ titulo | default('Solicitações de Pagamento') }}</h2>
         <a href="/pagamentos/form" class="button-send" style="text-decoration: none; width: auto;">
-            <i class="fa-solid fa-plus"></i> Cadastrar Pagamento
+            Cadastrar Pagamento
         </a>
     </div>
-
+    
     <hr style="margin-bottom: 20px;">
 
     <div class="table-container">
@@ -29,23 +29,27 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Estado vazio até o banco de dados ser conectado -->
                 {% if pagamentos and pagamentos.length > 0 %}
-                {% for pag in pagamentos %}
-                <tr>
-                    <td>{{ pag.ticket }}</td>
-                    <td>{{ pag.status }}</td>
-                    <td>{{ pag.numero_nota_fatura }}</td>
-                    <td>{{ pag.empresa_nome }}</td>
-                    <td>{{ pag.data_vencimento }}</td>
-                </tr>
-                {% endfor %}
+                    {% for pag in pagamentos %}
+                    <!-- O evento onclick transforma a linha inteira em um link -->
+                    <tr onclick="window.location.href='/pagamentos/visualizar/{{ pag.ticket }}'">
+                        <td style="font-weight: bold; color: #011C43;">{{ pag.ticket }}</td>
+                        <td>
+                            <span class="status-pag status-pag-{{ pag.status | lower | replace(' ', '') }}">
+                                {{ pag.status }}
+                            </span>
+                        </td>
+                        <td>{{ pag.numero_nota_fatura }}</td>
+                        <td>{{ pag.empresa_nome }}</td>
+                        <td>{{ pag.data_vencimento }}</td>
+                    </tr>
+                    {% endfor %}
                 {% else %}
-                <tr>
-                    <td colspan="5" style="text-align: center; padding: 20px; color: #64748b;">
-                        Nenhum pagamento cadastrado.
-                    </td>
-                </tr>
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px; color: #64748b; cursor: default;">
+                            Nenhum pagamento cadastrado para esta unidade.
+                        </td>
+                    </tr>
                 {% endif %}
             </tbody>
         </table>

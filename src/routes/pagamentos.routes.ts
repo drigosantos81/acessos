@@ -4,21 +4,16 @@ import { uploadPagamentos } from '../app/shared/middlewares/upload.js';
 
 const routes = Router();
 
-// Tabela Inicial
-routes.get('/', (req, res) => {
-    res.render('../../pagamentos/pages/index', { activeMenu: 'pagamentos' });
-});
+// Rota Principal (Dashboard)
+routes.get('/', PagamentosControllers.index);
+routes.get('/visualizar/:ticket', PagamentosControllers.viewOne);
 
-// Formulário de Cadastro (GET)
-routes.get('/form', (req, res) => {
-    res.render('../../pagamentos/pages/form', { activeMenu: 'pagamentos' });
-});
+// Rotas das Tabelas Filiais
+routes.get('/tecon', PagamentosControllers.listTecon);
+routes.get('/cls-depot', PagamentosControllers.listCls);
 
-// Processamento do Cadastro (POST) - Apenas UM redirect
+// Rotas de Cadastro
+routes.get('/form', PagamentosControllers.create);
 routes.post('/form', uploadPagamentos, PagamentosControllers.store);
-
-// Rotas do menu lateral
-routes.get('/tecon', (req, res) => res.redirect('/pagamentos'));
-routes.get('/cls-depot', (req, res) => res.redirect('/pagamentos'));
 
 export default routes;
