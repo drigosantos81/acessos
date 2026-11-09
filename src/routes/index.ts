@@ -3,6 +3,7 @@ import authRoutes from './auth.routes.js';
 import acessosRoutes from './acessos.routes.js';
 import avariasRoutes from './avarias.routes.js';
 import pagamentosRoutes from './pagamentos.routes.js';
+import fornecedorRoutes from './fornecedores.routes.js';
 
 // Middlewares
 import { onlyUsers, requireModulo } from '../app/shared/middlewares/session.js';
@@ -49,5 +50,6 @@ routes.post('/delete/:ticket', onlyUsers, FrontControllers.deleteEditOne);
 // Para manter a segurança, bloqueamos a base da rota aqui.
 routes.use('/avarias', onlyUsers, requireModulo('avarias'), avariasRoutes);
 routes.use('/pagamentos', onlyUsers, requireModulo('pagamentos'), pagamentosRoutes);
+routes.use(onlyUsers, fornecedorRoutes);
 
 export default routes;

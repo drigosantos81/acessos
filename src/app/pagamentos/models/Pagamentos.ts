@@ -28,12 +28,12 @@ class Pagamentos {
     }
 
     async getDashboardStats(userId: number, isAdmin: boolean) {
-        // Agora conta apenas os pagamentos do Tecon usando JOIN
+        // Conta apenas os pagamentos do Tecon para o Gráfico
         let query = `
             SELECT p.status, COUNT(*) as count 
             FROM pagamentos p
             JOIN empresa e ON p.empresa_id = e.id
-            WHERE e.nome_fantasia LIKE '%Tecon%'
+            WHERE e.nome_exibicao LIKE '%Tecon%'
         `;
         const params: any[] = [];
         
@@ -47,29 +47,14 @@ class Pagamentos {
         return Array.isArray(results) ? results : (results?.rows || []);
     }
 
-    // async getDashboardStats(userId: number, isAdmin: boolean) {
-    //     let query = `SELECT status, COUNT(*) as count FROM pagamentos`;
-    //     const params: any[] = [];
-        
-    //     if (!isAdmin) {
-    //         query += ` WHERE user_id = ?`;
-    //         params.push(userId);
-    //     }
-        
-    //     query += ` GROUP BY status`;
-    //     const results = await db.query(query, params);
-    //     return Array.isArray(results) ? results : (results?.rows || []);
-    // }
-
-    async getByEmpresa(nomeParcial: string, userId: number, isAdmin: boolean) {
-        // Usa JOIN para achar a empresa pelo nome, independente de qual ID ela recebeu no banco
+    async getByEmpresaId(empresaId: number, userId: number, isAdmin: boolean) {
         let query = `
-            SELECT p.ticket, p.status, p.numero_nota_fatura, e.nome_fantasia AS empresa_nome, p.data_vencimento
+            SELECT p.ticket, p.status, p.numero_nota_fatura, e.nome_exibicao AS empresa_nome, p.data_vencimento
             FROM pagamentos p
             JOIN empresa e ON p.empresa_id = e.id
-            WHERE e.nome_fantasia LIKE ?
+            WHERE p.empresa_id = ?
         `;
-        const params: any[] = [`%${nomeParcial}%`];
+        const params: any[] = [empresaId];
         
         if (!isAdmin) {
             query += ` AND p.user_id = ?`;
@@ -90,8 +75,13 @@ class Pagamentos {
         });
     }
 
-    async getEmpresas() {
-        const results = await db.query("SELECT * FROM empresa ORDER BY nome_fantasia ASC");
+    async getEmpresaById(id: number) {
+        const results = await db.query("SELECT * FROM empresa WHERE id = ?", [id]);
+        return Array.isArray(results) && results.length > 0 ? results[0] : (results?.rows ? results.rows[0] : null);
+    }
+
+    async getEmpresasAtivas() {
+        const results = await db.query("SELECT id, nome_exibicao, cnpj FROM empresa WHERE ativo = 1 ORDER BY nome_exibicao ASC");
         return Array.isArray(results) ? results : (results?.rows || []);
     }
 
@@ -102,7 +92,7 @@ class Pagamentos {
 
     async getByTicket(ticket: number) {
         const query = `
-            SELECT p.*, e.nome_fantasia AS empresa_nome 
+            SELECT p.*, e.nome_exibicao AS empresa_nome 
             FROM pagamentos p
             JOIN empresa e ON p.empresa_id = e.id
             WHERE p.ticket = ?
@@ -110,6 +100,5 @@ class Pagamentos {
         const results = await db.query(query, [ticket]);
         return Array.isArray(results) && results.length > 0 ? results[0] : (results?.rows ? results.rows[0] : null);
     }
-    
 }
 export default new Pagamentos();

@@ -1,179 +1,276 @@
-/* Container Principal do Formulário */
-.card-pagamentos {
-    background: white;
-    width: 96%;
-    max-width: 1200px;
-    padding: 25px 30px;
-    margin: 25px auto 15px auto;
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+/* ==========================================
+   TELA DE VISUALIZAÇÃO - ESTRUTURA GERAL
+========================================== */
+.view-page-card {
+    background-color: #f8fafc !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
 }
 
-/* Grid de Duas Colunas - O segredo para o TAB funcionar perfeitamente */
-.grid-2-colunas {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0 40px;
+/* ==========================================
+   CABEÇALHO DA TELA DE VISUALIZAÇÃO
+========================================== */
+/* Container que afasta o Título à esquerda e a Barra Cinza à direita */
+.view-header-page {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: nowrap;
 }
 
-.field-pag {
+.view-title {
+    margin: 0;
+    color: #011C43;
+    white-space: nowrap;
+}
+
+/* Barra cinza dinâmica alinhada à direita */
+.view-resumo-topo-inline {
+    display: inline-flex;
+    align-items: center;
+    background-color: #e2e8f0;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    margin: 0;
+    width: auto;
+    max-width: 100%;
+}
+
+.view-info-inline {
     display: flex;
     flex-direction: column;
-    margin-bottom: 22px;
+    padding: 0 15px;
 }
 
-.field-pag label {
-    font-size: 13px;
-    font-weight: bold;
-    color: #475569;
-    margin-bottom: 6px;
+/* O separador visual | entre as colunas */
+.border-right-divider {
+    border-right: 2px solid #cbd5e1;
 }
 
-/* Inputs e Selects */
-.field-pag input[type="text"],
-.field-pag input[type="date"],
-.field-pag select {
-    padding: 10px 12px;
-    border-radius: 6px;
-    border: 1px solid #cbd5e1;
-    font-size: 14px;
-    background-color: #ffffff;
-    transition: border-color 0.2s;
-    height: 40px;
+.view-info-inline:first-child {
+    padding-left: 0;
 }
 
-.field-pag input:focus,
-.field-pag select:focus {
-    outline: none;
-    border-color: #00BEDD;
-    box-shadow: 0 0 0 1px #00BEDD;
-}
-
-/* Container de Radio Buttons */
-.radio-pag {
-    display: flex;
-    gap: 15px;
-    padding: 10px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    background: #f8fafc;
-    align-items: center;
-    height: 40px;
-    box-sizing: border-box;
-}
-
-.radio-pag label {
-    margin-bottom: 0 !important;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: normal;
-    color: #333;
-}
-
-.radio-pag input[type="radio"] {
-    margin: 0;
-}
-
-/* Responsividade: Muda para 1 coluna em telas de celular */
-@media (max-width: 768px) {
-    .grid-2-colunas {
-        grid-template-columns: 1fr;
-        gap: 0;
+/* Responsividade do topo */
+@media (max-width: 1100px) {
+    .view-header-page {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .view-resumo-topo-inline {
+        width: 100%;
+        overflow-x: auto;
     }
 }
 
 /* ==========================================
-   SUBMENU LATERAL (PAGAMENTOS)
+   CARDS DE INFORMAÇÃO
 ========================================== */
-.sidebar-menu .menu-item.active {
-    background-color: #00BEDD;
+.view-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 20px 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
 }
 
-/* Garante que o menu principal ativo fique com a cor do Nunjucks */
-.sidebar-menu .menu-item.active>a {
-    color: #ffffff;
+.view-card h3 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 16px;
+    color: #011C43;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 10px;
     font-weight: bold;
 }
 
-/* Formatação do fundo da lista do submenu quando está ativo */
-.sidebar-menu .menu-item.active ul {
-    background-color: #37475E;
-    /* Um tom um pouco mais escuro que a barra lateral original */
-    padding: 10px 0 10px 30px !important;
-    /* Espaçamento interno */
-    margin: 0 !important;
-    border-radius: 0 0 8px 8px;
-    /* Arredondamento embaixo */
+.view-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
 }
 
-/* Itens do submenu */
-.sidebar-menu .menu-item.active ul a {
-    color: #94a3b8 !important;
-    /* Cor de texto discreta */
-    font-weight: normal;
-    padding: 8px 10px;
-    border-left: none;
-    /* Remove a barra azul ao dar hover no submenu */
+.view-info-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.view-info-label {
     font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 4px;
 }
 
-.sidebar-menu .menu-item.active ul a:hover {
-    color: #ffffff !important;
-    background-color: rgba(255, 255, 255, 0.05);
-    /* Brilho leve no hover */
-    padding-left: 10px;
+.view-info-value {
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+/* Espaçamentos e Destaques */
+.mb-0 { margin-bottom: 0 !important; }
+.mt-5 { margin-top: 5px; }
+.bg-light-gray { background-color: #f1f5f9; }
+.value-destaque { font-weight: bold; font-size: 16px; }
+.border-left-divider { border-left: 2px solid #cbd5e1; padding-left: 20px; }
+.icon-pdf { font-size: 18px; }
+
+/* Base da tela (Datas à esquerda com espaço livre) */
+.view-grid-left {
+    display: flex;
+    gap: 0;
+    justify-content: flex-start;
+    width: 100%;
 }
 
 /* ==========================================
-   DASHBOARD PAGAMENTOS
+   BOTÕES PADRONIZADOS
 ========================================== */
-.dashboard-card {
-    text-align: center;
-    max-width: 800px;
-    padding: 40px;
-    margin: 25px auto;
+.view-actions-container {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-start; /* Alinha os botões lado a lado por padrão */
+    gap: 15px; /* Espaço entre os botões */
 }
 
-.dashboard-header {
-    justify-content: space-between;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 15px;
-    margin-bottom: 30px;
-    display: flex;
+.btn-action-padrao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 25px;
+    width: 160px; /* Tamanho fixo para garantir que todos os botões sejam idênticos */
+    font-weight: bold;
+    font-size: 14px;
+    font-family: inherit;
+    text-decoration: none;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    box-sizing: border-box; /* Garante que padding e width não conflitem */
+}
+
+.btn-action-padrao:hover {
+    opacity: 0.85;
+}
+
+.btn-voltar { background-color: #e2e8f0; color: #1e293b; }
+.btn-editar { background-color: #FCBC88; color: #ffffff; }
+
+/* ==========================================
+   MODAL DE VISUALIZAÇÃO DE ANEXOS (PDF)
+========================================== */
+.anexo-link {
+    color: #00BEDD;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.anexo-link:hover {
+    color: #011C43;
+}
+
+.modal-overlay-pdf {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    justify-content: center;
     align-items: center;
 }
 
-.btn-novo-pagamento {
-    text-decoration: none;
-    width: auto;
-    font-size: 13px;
+.modal-overlay-pdf.active {
+    display: flex;
 }
 
-.chart-container {
-    width: 350px;
-    height: 350px;
-    margin: 0 auto;
+.modal-content-pdf {
+    width: 85%;
+    max-width: 1200px;
+    height: 90vh;
+    background: #fff;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.modal-header-pdf {
+    background: #011C43;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header-pdf h3 {
+    margin: 0;
+    color: white;
+    font-size: 16px;
+    border: none;
+    padding-bottom: 0;
+}
+
+.btn-close-pdf {
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-body-pdf {
+    flex: 1;
+    padding: 0;
+    background: #e2e8f0;
+}
+
+.modal-body-pdf iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
 }
 
 /* ==========================================
-   BADGES DE STATUS (TABELAS DE PAGAMENTOS)
+   BADGES DE STATUS E DASHBOARD (Mantidos das iterações anteriores)
 ========================================== */
 .status-pag {
     display: inline-block;
     padding: 5px 12px;
-    border-radius: 4px; /* Ajustado para 4px */
+    border-radius: 4px;
     font-size: 11px;
     font-weight: bold;
-    color: #ffffff; /* Letras brancas */
+    color: #ffffff;
     text-align: center;
     min-width: 90px;
+    max-width: 140px; 
+    white-space: nowrap;
 }
 
-/* Cores específicas para cada status */
 .status-pag-solicitado { background-color: #007bff; }
 .status-pag-confirmado { background-color: #16a34a; }
-.status-pag-pendente   { background-color: #eab308; color: #000000 !important; } /* Força a letra preta apenas no amarelo */
-.status-pag-cancelado  { background-color: #dc2626; }
+.status-pag-pendente { background-color: #eab308; color: #000000 !important; }
+.status-pag-cancelado { background-color: #dc2626; }
+
+.dashboard-card { text-align: center; max-width: 800px; padding: 40px; margin: 25px auto; }
+.dashboard-header { justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 30px; display: flex; align-items: center; }
+.btn-novo-pagamento { text-decoration: none; width: auto; font-size: 13px; }
+.chart-container { width: 350px; height: 350px; margin: 0 auto; }

@@ -30,36 +30,33 @@ class PagamentoControllers {
         }
     }
 
-    async listTecon(req: Request, res: Response) {
-        const userId = req.session.userId!;
-        const isAdmin = req.session.isAdmin!;
-        // Passamos 'Tecon' para o LIKE do banco achar a empresa correta
-        const pagamentos = await Pagamentos.getByEmpresa('Tecon', userId, isAdmin);
+    // Função única e dinâmica que serve para Tecon, CLS e qualquer outra
+    async listByEmpresa(req: Request, res: Response) {
+        try {
+            const empresaId = Number(req.params.id);
+            const userId = req.session.userId!;
+            const isAdmin = req.session.isAdmin!;
 
-        return res.render('../../pagamentos/pages/index', {
-            pagamentos,
-            activeMenu: 'pagamentos',
-            activeSubMenu: 'tecon', // Variável para colorir o submenu
-            titulo: 'Pagamentos - Tecon'
-        });
-    }
+            const empresa = await Pagamentos.getEmpresaById(empresaId);
+            if (!empresa) return res.status(404).send("Empresa não encontrada.");
 
-    async listCls(req: Request, res: Response) {
-        const userId = req.session.userId!;
-        const isAdmin = req.session.isAdmin!;
-        // Passamos 'CLS' para o LIKE achar a empresa correta
-        const pagamentos = await Pagamentos.getByEmpresa('CLS', userId, isAdmin);
+            const pagamentos = await Pagamentos.getByEmpresaId(empresaId, userId, isAdmin);
 
-        return res.render('../../pagamentos/pages/index', {
-            pagamentos,
-            activeMenu: 'pagamentos',
-            activeSubMenu: 'cls', // Variável para colorir o submenu
-            titulo: 'Pagamentos - CLS / Depot'
-        });
+            return res.render('../../pagamentos/pages/index', {
+                pagamentos,
+                activeMenu: 'pagamentos',
+                activeSubMenu: empresaId, // Pinta de verde o menu que tiver este ID
+                titulo: `Pagamentos - ${empresa.nome_exibicao}`
+            });
+        } catch (error) {
+            console.error("Erro ao listar por empresa:", error);
+            return res.status(500).send("Erro ao carregar a lista.");
+        }
     }
 
     async create(req: Request, res: Response) {
-        const empresas = await Pagamentos.getEmpresas();
+        // Busca apenas as empresas ativas (ativo = 1) para o formulário
+        const empresas = await Pagamentos.getEmpresasAtivas();
         const setores = await Pagamentos.getSetores();
         return res.render('../../pagamentos/pages/form', { activeMenu: 'pagamentos', empresas, setores });
     }
@@ -115,7 +112,7 @@ class PagamentoControllers {
 
             if (!pagamento) return res.status(404).send("Pagamento não encontrado.");
 
-            // Formatação rápida das datas para exibição visual
+            // 1. Formatação de Datas Simples (YYYY-MM-DD para DD/MM/YYYY)
             const formataData = (d: string) => {
                 if (!d || !d.includes('-')) return d;
                 const [ano, mes, dia] = d.split('-');
@@ -123,6 +120,25 @@ class PagamentoControllers {
             };
             pagamento.data_emissao_nota = formataData(pagamento.data_emissao_nota);
             pagamento.data_vencimento = formataData(pagamento.data_vencimento);
+
+            // 2. Formatação de Datas Completas com Hora (YYYY-MM-DD HH:mm:ss)
+            const formataDataHora = (d: string) => {
+                if (!d) return '-';
+                const parts = d.split(' ');
+                if (parts.length !== 2) return d;
+                const dataFormatada = formataData(parts[0]);
+                const horaCortada = parts[1].substring(0, 5); // Pega apenas HH:mm
+                return `${dataFormatada} | ${horaCortada}h`;
+            };
+            pagamento.data_abertura_br = formataDataHora(pagamento.data_abertura);
+            pagamento.updated_at_br = formataDataHora(pagamento.updated_at);
+
+            // 3. Formatação do Valor Financeiro (Garante 2 casas decimais, ex: 520,50)
+            if (pagamento.valor !== undefined && pagamento.valor !== null) {
+                pagamento.valorF = Number(pagamento.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } else {
+                pagamento.valorF = '0,00';
+            }
 
             return res.render('../../pagamentos/pages/visualizar', {
                 pagamento,
@@ -133,6 +149,5 @@ class PagamentoControllers {
             return res.status(500).send("Erro ao carregar o registro.");
         }
     }
-
 }
 export default new PagamentoControllers();

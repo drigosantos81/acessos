@@ -4,6 +4,7 @@
     <title>Dashboard de Pagamentos</title>
     <link rel="stylesheet" href="/css/acessos/styleAcessos.css">
     <link rel="stylesheet" href="/css/pagamentos/stylePagamentos.css">
+    <!-- Chart.js continua no head por ser uma biblioteca externa -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
@@ -12,69 +13,21 @@
     
     <div class="header-page dashboard-header">
         <h2>Painel de Pagamentos (Tecon)</h2>
-        <a href="/pagamentos/form" class="button-send btn-novo-pagamento">
-            Novo Pagamento
-        </a>
+        <a href="/pagamentos/form" class="button-send btn-novo-pagamento">Novo Pagamento</a>
     </div>
 
     <div class="chart-container">
-        <canvas id="myChart"></canvas>
+        <!-- O JS buscará os dados diretamente nestes atributos -->
+        <canvas id="myChart" 
+            data-solicitado="{{ stats.solicitado | default(0) }}"
+            data-pendente="{{ stats.pendente | default(0) }}"
+            data-confirmado="{{ stats.confirmado | default(0) }}"
+            data-cancelado="{{ stats.cancelado | default(0) }}">
+        </canvas>
     </div>
 
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const ctx = document.getElementById('myChart');
-
-        if (ctx) {
-            // O Nunjucks injeta os valores diretamente no Javascript
-            const statsData = {
-                solicitado: {{ stats.solicitado | default(0) }},
-                pendente: {{ stats.pendente | default(0) }},
-                confirmado: {{ stats.confirmado | default(0) }},
-                cancelado: {{ stats.cancelado | default(0) }}
-            };
-
-            const total = statsData.solicitado + statsData.pendente + statsData.confirmado + statsData.cancelado;
-
-            if (total === 0) {
-                const container = ctx.parentElement;
-                container.innerHTML = '<p style="color: #64748b; margin-top: 150px; font-size: 15px; font-weight: bold;">Nenhum pagamento registrado no Tecon.</p>';
-                return;
-            }
-
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Solicitado', 'Pendente', 'Confirmado', 'Cancelado'],
-                    datasets: [{
-                        data: [
-                            statsData.solicitado, 
-                            statsData.pendente, 
-                            statsData.confirmado, 
-                            statsData.cancelado
-                        ],
-                        backgroundColor: ['#007bff', '#eab308', '#16a34a', '#dc2626'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                font: { size: 13 }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    });
-</script>
+<!-- Chamada do arquivo JS externo -->
+<script src="/scripts/scriptPagamentos.js"></script>
 {% endblock %}

@@ -9,8 +9,7 @@ routes.get('/', PagamentosControllers.index);
 routes.get('/visualizar/:ticket', PagamentosControllers.viewOne);
 
 // Rotas das Tabelas Filiais
-routes.get('/tecon', PagamentosControllers.listTecon);
-routes.get('/cls-depot', PagamentosControllers.listCls);
+routes.get('/empresa/:id', PagamentosControllers.listByEmpresa)
 
 // Rotas de Cadastro
 routes.get('/form', PagamentosControllers.create);

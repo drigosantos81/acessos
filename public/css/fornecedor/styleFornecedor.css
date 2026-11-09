@@ -1,0 +1,61 @@
+/* ==========================================
+   PÁGINA: EM CONSTRUÇÃO
+========================================== */
+.construcao-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin: 20px;
+    padding: 50px 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.construcao-icon {
+    font-size: 70px;
+    color: #f59e0b;
+    /* Laranja/Amarelo de atenção */
+    margin-bottom: 25px;
+}
+
+.construcao-title {
+    font-size: 26px;
+    color: #011C43;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.construcao-text {
+    font-size: 16px;
+    color: #64748b;
+    margin-bottom: 35px;
+    max-width: 550px;
+    line-height: 1.5;
+}
+
+/* Botão Voltar (Independente de outros arquivos CSS) */
+.btn-voltar-construcao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 30px;
+    background-color: #e2e8f0;
+    color: #1e293b;
+    font-weight: bold;
+    font-size: 14px;
+    text-decoration: none;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-voltar-construcao:hover {
+    background-color: #cbd5e1;
+}

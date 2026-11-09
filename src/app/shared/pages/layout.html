@@ -36,22 +36,19 @@
                 <a href="/pagamentos"><i class="fa-solid fa-file-invoice-dollar"></i> PAGAMENTOS</a>
 
                 <ul class="submenu-list">
+                    <!-- Loop dinâmico que lê o array enviado pelo middleware -->
+                    {% for emp in counts.empresas_pagamentos %}
                     <li class="submenu-item">
-                        <a href="/pagamentos/tecon" class="submenu-link {% if activeSubMenu == 'tecon' %}active-sub{% endif %}">
-                            <i class="fa-solid fa-chevron-right"></i> Tecon(TCSV)
-                            {% if counts.pagamentos_tecon > 0 %}
-                                <span class="badge-sub">{{ counts.pagamentos_tecon }}</span>
+                        <a href="/pagamentos/empresa/{{ emp.id }}" class="submenu-link {% if activeSubMenu == emp.id %}active-sub{% endif %}">
+                            <i class="fa-solid fa-chevron-right"></i> {{ emp.nome_exibicao }}
+                            
+                            <!-- Só exibe o badge vermelho se houver pagamentos Pendentes ou Solicitados -->
+                            {% if emp.qtd > 0 %}
+                                <span class="badge-sub">{{ emp.qtd }}</span>
                             {% endif %}
                         </a>
                     </li>
-                    <li class="submenu-item">
-                        <a href="/pagamentos/cls-depot" class="submenu-link {% if activeSubMenu == 'cls' %}active-sub{% endif %}">
-                            <i class="fa-solid fa-chevron-right"></i> CLS / Depot
-                            {% if counts.pagamentos_cls > 0 %}
-                                <span class="badge-sub">{{ counts.pagamentos_cls }}</span>
-                            {% endif %}
-                        </a>
-                    </li>
+                    {% endfor %}
                 </ul>
                 
             </li>

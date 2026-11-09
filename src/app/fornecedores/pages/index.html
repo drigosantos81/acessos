@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <title>Cadastro de Fornecedor - Em Construção</title>
+    <!-- Importa o CSS exclusivo desta página -->
+    <link rel="stylesheet" href="/css/fornecedor/styleFornecedor.css">
+{% endblock %}
+
+{% block content %}
+<div class="construcao-container">
+    
+    <!-- Ícone animado ou estático do FontAwesome -->
+    <i class="fa-solid fa-person-digging construcao-icon"></i>
+    
+    <h2 class="construcao-title">Módulo em Construção</h2>
+    
+    <p class="construcao-text">
+        A área de <strong>Cadastro de Fornecedores</strong> está sendo desenvolvida no momento. 
+        Em breve você poderá gerenciar todos os dados das empresas parceiras diretamente por aqui.
+    </p>
+    
+    <button class="btn-voltar-construcao" onclick="history.back()">
+        <i class="fa-solid fa-arrow-left"></i> Voltar
+    </button>
+    
+</div>
+{% endblock %}

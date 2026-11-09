@@ -44,7 +44,7 @@
                     <option value="">Selecione...</option>
                     {% for emp in empresas %}
                         <!-- Agora o value captura o ID do banco (1 para Tecon, 2 para CLS) -->
-                        <option value="{{ emp.id }}">{{ emp.nome_fantasia }} ({{ emp.cnpj }})</option>
+                        <option value="{{ emp.id }}">{{ emp.nome_exibicao }} ({{ emp.cnpj }})</option>
                     {% endfor %}
                 </select>
             </div>
