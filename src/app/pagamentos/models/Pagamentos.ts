@@ -15,7 +15,7 @@ class Pagamentos {
                 data_abertura, updated_at, anexo_nota_fatura, anexo_boleto
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        
+
         const values = [
             data.user_id, data.empresa_id, data.setor, data.tipo_documento, data.contato_interno,
             data.pedido_compra, data.numero_nota_fatura, data.cnpj_nota, data.razao_social,
@@ -27,42 +27,76 @@ class Pagamentos {
         return await db.query(query, values);
     }
 
+    // Atualizado para pegar TODAS as empresas
     async getDashboardStats(userId: number, isAdmin: boolean) {
-        // Conta apenas os pagamentos do Tecon para o Gráfico
-        let query = `
-            SELECT p.status, COUNT(*) as count 
-            FROM pagamentos p
-            JOIN empresa e ON p.empresa_id = e.id
-            WHERE e.nome_exibicao LIKE '%Tecon%'
-        `;
+        let query = `SELECT status, COUNT(*) as count FROM pagamentos WHERE 1=1`;
         const params: any[] = [];
-        
+
         if (!isAdmin) {
-            query += ` AND p.user_id = ?`;
+            query += ` AND user_id = ?`;
             params.push(userId);
         }
-        
-        query += ` GROUP BY p.status`;
+
+        query += ` GROUP BY status`;
         const results = await db.query(query, params);
         return Array.isArray(results) ? results : (results?.rows || []);
     }
 
+    // Nova função para listar por Status Global (Pendentes ou Concluídos)
+    async getByStatus(statusList: string[], userId: number, isAdmin: boolean) {
+        let query = `
+            SELECT p.ticket, p.status, p.numero_nota_fatura, p.razao_social, 
+                   p.data_vencimento, p.anexo_nota_fatura, p.anexo_boleto, 
+                   e.nome_exibicao AS empresa_nome, e.id AS empresa_id
+            FROM pagamentos p
+            JOIN empresa e ON p.empresa_id = e.id
+            WHERE p.status IN (${statusList.map(() => '?').join(',')})
+        `;
+        const params: any[] = [...statusList];
+
+        if (!isAdmin) {
+            query += ` AND p.user_id = ?`;
+            params.push(userId);
+        }
+
+        query += ` ORDER BY p.ticket DESC`;
+
+        const results = await db.query(query, params);
+        const pagamentos = Array.isArray(results) ? results : (results?.rows || []);
+
+        return pagamentos.map((pag: any) => {
+            if (pag.data_vencimento && pag.data_vencimento.includes('-')) {
+                const [ano, mes, dia] = pag.data_vencimento.split('-');
+                pag.data_vencimento = `${dia}/${mes}/${ano}`;
+            }
+            return pag;
+        });
+    }
+
     async getByEmpresaId(empresaId: number, userId: number, isAdmin: boolean) {
         let query = `
-            SELECT p.ticket, p.status, p.numero_nota_fatura, e.nome_exibicao AS empresa_nome, p.data_vencimento
+            SELECT
+                p.ticket,
+                p.status, 
+                p.numero_nota_fatura, 
+                e.nome_exibicao AS empresa_nome, 
+                p.data_vencimento, 
+                p.razao_social, 
+                p.anexo_nota_fatura, 
+                p.anexo_boleto
             FROM pagamentos p
             JOIN empresa e ON p.empresa_id = e.id
             WHERE p.empresa_id = ?
         `;
         const params: any[] = [empresaId];
-        
+
         if (!isAdmin) {
             query += ` AND p.user_id = ?`;
             params.push(userId);
         }
-        
+
         query += ` ORDER BY p.ticket DESC`;
-        
+
         const results = await db.query(query, params);
         const pagamentos = Array.isArray(results) ? results : (results?.rows || []);
 

@@ -55,7 +55,7 @@
             {% endif %}
 
             {% if session.isAdmin or (session.modulosPermitidos and 'fornecedores' in session.modulosPermitidos) %}
-            <li class="menu-item {% if activeMenu == 'fornecedores' %}active{% endif %}">
+            <li class="menu-item {% if activeMenu == 'fornecedores' or activeMenu == 'cad_fornecedor' %}active{% endif %}">
                 <a href="/fornecedores"><i class="fa-solid fa-fax"></i> CADASTRO FORNECEDOR</a>
             </li>
             {% endif %}
@@ -126,8 +126,15 @@
 
             {% elif activeMenu == 'pagamentos' %}
             <div class="menu-links">
-                <a href="/pagamentos" class="menu-link-btn active">
-                    <i class="fa-solid fa-file-invoice-dollar"></i> Módulo Pagamentos
+                <!-- Abas exclusivas do Módulo Pagamentos com as devidas verificações de active -->
+                <a href="/pagamentos" class="menu-link-btn {% if topMenu == 'painel' or not topMenu %}active{% endif %}">
+                    <i class="fa-solid fa-chart-pie"></i> Painel
+                </a>
+                <a href="/pagamentos/pendentes" class="menu-link-btn {% if topMenu == 'pendentes' %}active{% endif %}">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Pendentes
+                </a>
+                <a href="/pagamentos/concluidos" class="menu-link-btn {% if topMenu == 'concluidos' %}active{% endif %}">
+                    <i class="fa-solid fa-check-double"></i> Concluídos
                 </a>
             </div>
 

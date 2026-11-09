@@ -22,7 +22,8 @@ class PagamentoControllers {
 
             return res.render('../../pagamentos/pages/dashboard', {
                 stats,
-                activeMenu: 'pagamentos'
+                activeMenu: 'pagamentos',
+                topMenu: 'painel'
             });
         } catch (error) {
             console.error("Erro ao carregar dashboard:", error);
@@ -148,6 +149,34 @@ class PagamentoControllers {
             console.error("Erro ao visualizar:", error);
             return res.status(500).send("Erro ao carregar o registro.");
         }
+    }
+
+    // Rota: Pendentes
+    async listPendentes(req: Request, res: Response) {
+        const userId = req.session.userId!;
+        const isAdmin = req.session.isAdmin!;
+        const pagamentos = await Pagamentos.getByStatus(['SOLICITADO', 'PENDENTE'], userId, isAdmin);
+        const empresas = await Pagamentos.getEmpresasAtivas();
+
+        return res.render('../../pagamentos/pages/index', {
+            pagamentos, empresas,
+            activeMenu: 'pagamentos', topMenu: 'pendentes',
+            titulo: 'Pagamentos - Pendentes'
+        });
+    }
+
+    // Rota: Concluídos
+    async listConcluidos(req: Request, res: Response) {
+        const userId = req.session.userId!;
+        const isAdmin = req.session.isAdmin!;
+        const pagamentos = await Pagamentos.getByStatus(['CONFIRMADO', 'CANCELADO'], userId, isAdmin);
+        const empresas = await Pagamentos.getEmpresasAtivas();
+
+        return res.render('../../pagamentos/pages/index', {
+            pagamentos, empresas,
+            activeMenu: 'pagamentos', topMenu: 'concluidos',
+            titulo: 'Pagamentos - Concluídos'
+        });
     }
 }
 export default new PagamentoControllers();

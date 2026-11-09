@@ -88,3 +88,72 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+// Ordenação e Filtros
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // --- 1. FILTRO DE CHECKBOXES POR EMPRESA ---
+    const checkboxes = document.querySelectorAll('.filtro-empresa-cb');
+    const rows = document.querySelectorAll('#tabelaPagamentos tbody tr');
+
+    function aplicarFiltro() {
+        if(rows.length === 0 || !rows[0].hasAttribute('data-empresa')) return;
+        const permitidos = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+        rows.forEach(row => {
+            const empresaId = row.getAttribute('data-empresa');
+            row.style.display = permitidos.includes(empresaId) ? '' : 'none';
+        });
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener('change', aplicarFiltro));
+
+
+    // --- 2. ORDENAÇÃO DE TABELAS (SETAS) ---
+    const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+
+    // Converte datas PT-BR (DD/MM/YYYY) para sortable YYYYMMDD
+    const parseData = (val) => {
+        if(!val.includes('/')) return val;
+        const [d, m, y] = val.split('/');
+        return `${y}${m}${d}`;
+    };
+
+    const comparer = (idx, asc, type) => (a, b) => {
+        const v1 = getCellValue(asc ? a : b, idx).trim();
+        const v2 = getCellValue(asc ? b : a, idx).trim();
+        
+        if (type === 'numeric') {
+            return v1 - v2;
+        } else if (type === 'date') {
+            return parseData(v1).localeCompare(parseData(v2));
+        } else {
+            return v1.localeCompare(v2);
+        }
+    };
+
+    document.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', function() {
+        const table = th.closest('table');
+        const tbody = table.querySelector('tbody');
+        // Pega o tipo de ordenação no HTML (numeric, text, date)
+        const type = this.getAttribute('data-sort') || 'text';
+        
+        // Define direção
+        const asc = !this.classList.contains('asc');
+        
+        // Limpa classes e ícones de todos os THs
+        table.querySelectorAll('th.sortable').forEach(header => {
+            header.classList.remove('asc', 'desc');
+            header.querySelector('i').className = 'fa-solid fa-sort'; // ícone neutro
+        });
+
+        // Aplica classe e ícone no TH clicado
+        this.classList.add(asc ? 'asc' : 'desc');
+        this.querySelector('i').className = asc ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down';
+
+        // Ordena as linhas
+        Array.from(tbody.querySelectorAll('tr'))
+            .sort(comparer(Array.from(th.parentNode.children).indexOf(th), asc, type))
+            .forEach(tr => tbody.appendChild(tr));
+    }));
+
+});

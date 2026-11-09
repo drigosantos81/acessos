@@ -7,6 +7,8 @@ const routes = Router();
 // Rota Principal (Dashboard)
 routes.get('/', PagamentosControllers.index);
 routes.get('/visualizar/:ticket', PagamentosControllers.viewOne);
+routes.get('/pendentes', PagamentosControllers.listPendentes);
+routes.get('/concluidos', PagamentosControllers.listConcluidos);
 
 // Rotas das Tabelas Filiais
 routes.get('/empresa/:id', PagamentosControllers.listByEmpresa)

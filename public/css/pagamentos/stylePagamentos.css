@@ -61,6 +61,7 @@
         flex-direction: column;
         align-items: flex-start;
     }
+
     .view-resumo-topo-inline {
         width: 100%;
         overflow-x: auto;
@@ -115,12 +116,31 @@
 }
 
 /* Espaçamentos e Destaques */
-.mb-0 { margin-bottom: 0 !important; }
-.mt-5 { margin-top: 5px; }
-.bg-light-gray { background-color: #f1f5f9; }
-.value-destaque { font-weight: bold; font-size: 16px; }
-.border-left-divider { border-left: 2px solid #cbd5e1; padding-left: 20px; }
-.icon-pdf { font-size: 18px; }
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mt-5 {
+    margin-top: 5px;
+}
+
+.bg-light-gray {
+    background-color: #f1f5f9;
+}
+
+.value-destaque {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.border-left-divider {
+    border-left: 2px solid #cbd5e1;
+    padding-left: 20px;
+}
+
+.icon-pdf {
+    font-size: 18px;
+}
 
 /* Base da tela (Datas à esquerda com espaço livre) */
 .view-grid-left {
@@ -136,8 +156,10 @@
 .view-actions-container {
     margin-top: 25px;
     display: flex;
-    justify-content: flex-start; /* Alinha os botões lado a lado por padrão */
-    gap: 15px; /* Espaço entre os botões */
+    justify-content: flex-start;
+    /* Alinha os botões lado a lado por padrão */
+    gap: 15px;
+    /* Espaço entre os botões */
 }
 
 .btn-action-padrao {
@@ -146,7 +168,8 @@
     justify-content: center;
     gap: 8px;
     padding: 10px 25px;
-    width: 160px; /* Tamanho fixo para garantir que todos os botões sejam idênticos */
+    width: 160px;
+    /* Tamanho fixo para garantir que todos os botões sejam idênticos */
     font-weight: bold;
     font-size: 14px;
     font-family: inherit;
@@ -155,15 +178,32 @@
     border: none;
     cursor: pointer;
     transition: opacity 0.2s;
-    box-sizing: border-box; /* Garante que padding e width não conflitem */
+    box-sizing: border-box;
+    /* Garante que padding e width não conflitem */
 }
 
 .btn-action-padrao:hover {
     opacity: 0.85;
 }
 
-.btn-voltar { background-color: #e2e8f0; color: #1e293b; }
-.btn-editar { background-color: #FCBC88; color: #ffffff; }
+.btn-voltar {
+    background-color: #e2e8f0;
+    color: #1e293b;
+}
+
+.btn-editar {
+    background-color: #FCBC88;
+    color: #ffffff;
+}
+
+.btn-novo { 
+    background-color: #00BEDD; 
+    color: #ffffff; 
+}
+
+.btn-novo:hover { 
+    background-color: #009ab3; 
+}
 
 /* ==========================================
    MODAL DE VISUALIZAÇÃO DE ANEXOS (PDF)
@@ -187,8 +227,10 @@
 .modal-overlay-pdf {
     display: none;
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.7);
     z-index: 9999;
     justify-content: center;
@@ -208,7 +250,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 .modal-header-pdf {
@@ -261,16 +303,163 @@
     color: #ffffff;
     text-align: center;
     min-width: 90px;
-    max-width: 140px; 
+    max-width: 140px;
     white-space: nowrap;
 }
 
-.status-pag-solicitado { background-color: #007bff; }
-.status-pag-confirmado { background-color: #16a34a; }
-.status-pag-pendente { background-color: #eab308; color: #000000 !important; }
-.status-pag-cancelado { background-color: #dc2626; }
+.status-pag-solicitado {
+    background-color: #007bff;
+}
 
-.dashboard-card { text-align: center; max-width: 800px; padding: 40px; margin: 25px auto; }
-.dashboard-header { justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 30px; display: flex; align-items: center; }
-.btn-novo-pagamento { text-decoration: none; width: auto; font-size: 13px; }
-.chart-container { width: 350px; height: 350px; margin: 0 auto; }
+.status-pag-confirmado {
+    background-color: #16a34a;
+}
+
+.status-pag-pendente {
+    background-color: #eab308;
+    color: #000000 !important;
+}
+
+.status-pag-cancelado {
+    background-color: #dc2626;
+}
+
+.dashboard-card {
+    text-align: center;
+    max-width: 800px;
+    padding: 40px;
+    margin: 25px auto;
+}
+
+.dashboard-header {
+    justify-content: space-between;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-novo-pagamento {
+    text-decoration: none;
+    width: auto;
+    font-size: 13px;
+}
+
+.chart-container {
+    width: 350px;
+    height: 350px;
+    margin: 0 auto;
+}
+
+/* Menu Superior de Abas */
+.top-menu-pagamentos {
+    display: flex;
+    gap: 20px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+.top-menu-pagamentos a {
+    text-decoration: none;
+    color: #64748b;
+    font-weight: bold;
+    font-size: 15px;
+    padding: 5px 10px;
+    transition: color 0.2s;
+}
+
+.top-menu-pagamentos a:hover {
+    color: #011C43;
+}
+
+.top-menu-pagamentos a.active {
+    color: #00BEDD;
+    border-bottom: 3px solid #00BEDD;
+    padding-bottom: 8px;
+}
+
+/* Filtros de Empresa */
+.filtros-empresa-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 15px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.checkbox-group {
+    display: flex;
+    gap: 20px;
+}
+
+.checkbox-group label {
+    cursor: pointer;
+    font-size: 14px;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Ordenação de Tabela (Setas) */
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+th.sortable:hover {
+    background-color: #f1f5f9;
+}
+
+th.sortable i {
+    color: #cbd5e1;
+    margin-left: 5px;
+    font-size: 12px;
+}
+
+th.sortable.asc i {
+    color: #00BEDD;
+}
+
+/* fa-sort-up via JS */
+th.sortable.desc i {
+    color: #00BEDD;
+}
+
+/* fa-sort-down via JS */
+
+/* ==========================================
+   MENU SUPERIOR (BARRA ESCURA DO LAYOUT)
+========================================== */
+.btn-topo-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 15px;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
+    background-color: transparent; /* Fundo invisível por padrão */
+}
+
+/* Efeito ao passar o mouse */
+.btn-topo-header:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* A classe active deixa o botão com a cor azul ciano destacada */
+.btn-topo-header.active {
+    background-color: #00BEDD; /* Azul claro do sistema */
+    color: #ffffff;
+}
+
+.btn-topo-header i {
+    font-size: 16px;
+}
