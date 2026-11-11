@@ -1,6 +1,6 @@
 /* =========================================================================
    MÓDULO DE ENVIO DE E-MAILS (Descomente quando tiver as credenciais SMTP)
-   =========================================================================
+   =========================================================================*/
 
 import nodemailer from 'nodemailer';
 
@@ -39,4 +39,3 @@ export async function sendStatusChangeEmail(toEmail: string, userName: string, t
         console.error("Erro ao enviar e-mail:", error);
     }
 }
-========================================================================= */

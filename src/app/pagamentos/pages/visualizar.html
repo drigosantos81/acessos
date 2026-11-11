@@ -42,6 +42,17 @@
         </div>
     </div>
 
+    <!-- CARD 0: Dados do Solicitante -->
+    <div class="view-card" style="padding: 15px 25px; margin-bottom: 20px; background-color: #f1f5f9;">
+        <div style="font-size: 14px; color: #1e293b;">
+            <strong>Solicitante</strong> &nbsp;|&nbsp; 
+            {{ pagamento.user_nome }} &nbsp;|&nbsp; 
+            {{ pagamento.user_email }} &nbsp;|&nbsp; 
+            {{ pagamento.user_telefone | default('Sem telefone') }} &nbsp;|&nbsp; 
+            {{ pagamento.user_empresa | default('Wilson Sons') }}
+        </div>
+    </div>
+
     <!-- CARD 1: Dados da Empresa -->
     <div class="view-card">
         <h3>Dados da Empresa</h3>

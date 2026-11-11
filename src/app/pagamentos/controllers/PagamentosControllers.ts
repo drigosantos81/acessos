@@ -2,6 +2,16 @@ import { Request, Response } from 'express';
 import Pagamentos from '../models/Pagamentos.js';
 import { PagamentosTable } from '../interfaces/PagamentosTable.js';
 
+// Função auxiliar (Fora da classe para evitar erro de escopo "this")
+function formatarLista(pagamentos: any[]) {
+    return pagamentos.map(pag => {
+        pag.valorF = pag.valor !== null && pag.valor !== undefined 
+            ? Number(pag.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) 
+            : '0,00';
+        return pag;
+    });
+}
+
 class PagamentoControllers {
 
     async index(req: Request, res: Response) {
@@ -21,9 +31,7 @@ class PagamentoControllers {
             });
 
             return res.render('../../pagamentos/pages/dashboard', {
-                stats,
-                activeMenu: 'pagamentos',
-                topMenu: 'painel'
+                stats, activeMenu: 'pagamentos', topMenu: 'painel'
             });
         } catch (error) {
             console.error("Erro ao carregar dashboard:", error);
@@ -31,7 +39,6 @@ class PagamentoControllers {
         }
     }
 
-    // Função única e dinâmica que serve para Tecon, CLS e qualquer outra
     async listByEmpresa(req: Request, res: Response) {
         try {
             const empresaId = Number(req.params.id);
@@ -41,12 +48,11 @@ class PagamentoControllers {
             const empresa = await Pagamentos.getEmpresaById(empresaId);
             if (!empresa) return res.status(404).send("Empresa não encontrada.");
 
-            const pagamentos = await Pagamentos.getByEmpresaId(empresaId, userId, isAdmin);
+            let pagamentos = await Pagamentos.getByEmpresaId(empresaId, userId, isAdmin);
+            pagamentos = formatarLista(pagamentos);
 
             return res.render('../../pagamentos/pages/index', {
-                pagamentos,
-                activeMenu: 'pagamentos',
-                activeSubMenu: empresaId, // Pinta de verde o menu que tiver este ID
+                pagamentos, activeMenu: 'pagamentos', activeSubMenu: empresaId,
                 titulo: `Pagamentos - ${empresa.nome_exibicao}`
             });
         } catch (error) {
@@ -55,10 +61,46 @@ class PagamentoControllers {
         }
     }
 
-    async create(req: Request, res: Response) {
-        // Busca apenas as empresas ativas (ativo = 1) para o formulário
+    async listPendentes(req: Request, res: Response) {
+        const userId = req.session.userId!;
+        const isAdmin = req.session.isAdmin!;
+        
+        let pagamentos = await Pagamentos.getByStatus(['SOLICITADO', 'PENDENTE'], userId, isAdmin);
+        pagamentos = formatarLista(pagamentos);
+        
         const empresas = await Pagamentos.getEmpresasAtivas();
+
+        return res.render('../../pagamentos/pages/index', {
+            pagamentos, empresas, activeMenu: 'pagamentos', topMenu: 'pendentes',
+            titulo: 'Pagamentos - Pendentes'
+        });
+    }
+
+    async listConcluidos(req: Request, res: Response) {
+        const userId = req.session.userId!;
+        const isAdmin = req.session.isAdmin!;
+        
+        let pagamentos = await Pagamentos.getByStatus(['CONFIRMADO', 'CANCELADO'], userId, isAdmin);
+        pagamentos = formatarLista(pagamentos);
+        
+        const empresas = await Pagamentos.getEmpresasAtivas();
+
+        return res.render('../../pagamentos/pages/index', {
+            pagamentos, empresas, activeMenu: 'pagamentos', topMenu: 'concluidos',
+            titulo: 'Pagamentos - Concluídos'
+        });
+    }
+
+    async create(req: Request, res: Response) {
+        const empresasRaw = await Pagamentos.getEmpresasAtivas();
         const setores = await Pagamentos.getSetores();
+
+        const empresas = empresasRaw.map((emp: any) => {
+            let cnpj = emp.cnpj;
+            if (cnpj && cnpj.length === 14) cnpj = cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+            return { ...emp, cnpj };
+        });
+
         return res.render('../../pagamentos/pages/form', { activeMenu: 'pagamentos', empresas, setores });
     }
 
@@ -72,7 +114,8 @@ class PagamentoControllers {
 
             let valorLimpo = 0;
             if (body.valor) {
-                const stringValor = body.valor.replace('R$', '').trim().replace(/\./g, '').replace(',', '.');
+                let stringValor = body.valor.replace(/[R$\s.]/g, '');
+                stringValor = stringValor.replace(',', '.');
                 valorLimpo = parseFloat(stringValor);
             }
 
@@ -113,7 +156,6 @@ class PagamentoControllers {
 
             if (!pagamento) return res.status(404).send("Pagamento não encontrado.");
 
-            // 1. Formatação de Datas Simples (YYYY-MM-DD para DD/MM/YYYY)
             const formataData = (d: string) => {
                 if (!d || !d.includes('-')) return d;
                 const [ano, mes, dia] = d.split('-');
@@ -122,61 +164,101 @@ class PagamentoControllers {
             pagamento.data_emissao_nota = formataData(pagamento.data_emissao_nota);
             pagamento.data_vencimento = formataData(pagamento.data_vencimento);
 
-            // 2. Formatação de Datas Completas com Hora (YYYY-MM-DD HH:mm:ss)
             const formataDataHora = (d: string) => {
                 if (!d) return '-';
                 const parts = d.split(' ');
                 if (parts.length !== 2) return d;
-                const dataFormatada = formataData(parts[0]);
-                const horaCortada = parts[1].substring(0, 5); // Pega apenas HH:mm
-                return `${dataFormatada} | ${horaCortada}h`;
+                return `${formataData(parts[0])} | ${parts[1].substring(0, 5)}h`;
             };
             pagamento.data_abertura_br = formataDataHora(pagamento.data_abertura);
             pagamento.updated_at_br = formataDataHora(pagamento.updated_at);
 
-            // 3. Formatação do Valor Financeiro (Garante 2 casas decimais, ex: 520,50)
             if (pagamento.valor !== undefined && pagamento.valor !== null) {
                 pagamento.valorF = Number(pagamento.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             } else {
                 pagamento.valorF = '0,00';
             }
 
-            return res.render('../../pagamentos/pages/visualizar', {
-                pagamento,
-                activeMenu: 'pagamentos'
-            });
+            return res.render('../../pagamentos/pages/visualizar', { pagamento, activeMenu: 'pagamentos' });
         } catch (error) {
             console.error("Erro ao visualizar:", error);
             return res.status(500).send("Erro ao carregar o registro.");
         }
     }
 
-    // Rota: Pendentes
-    async listPendentes(req: Request, res: Response) {
-        const userId = req.session.userId!;
-        const isAdmin = req.session.isAdmin!;
-        const pagamentos = await Pagamentos.getByStatus(['SOLICITADO', 'PENDENTE'], userId, isAdmin);
-        const empresas = await Pagamentos.getEmpresasAtivas();
+    async edit(req: Request, res: Response) {
+        try {
+            const ticket = Number(req.params.ticket);
+            const pagamento = await Pagamentos.getByTicket(ticket);
 
-        return res.render('../../pagamentos/pages/index', {
-            pagamentos, empresas,
-            activeMenu: 'pagamentos', topMenu: 'pendentes',
-            titulo: 'Pagamentos - Pendentes'
-        });
+            if (!pagamento) return res.status(404).send("Pagamento não encontrado.");
+
+            if (pagamento.valor !== null && pagamento.valor !== undefined) {
+                pagamento.valorFormInput = "R$ " + Number(pagamento.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            const empresasRaw = await Pagamentos.getEmpresasAtivas();
+            const setores = await Pagamentos.getSetores();
+            const empresas = empresasRaw.map((emp: any) => {
+                let cnpj = emp.cnpj;
+                if (cnpj && cnpj.length === 14) cnpj = cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+                return { ...emp, cnpj };
+            });
+
+            return res.render('../../pagamentos/pages/edit', {
+                activeMenu: 'pagamentos', pagamento, empresas, setores
+            });
+        } catch (error) {
+            console.error("Erro ao carregar edição:", error);
+            return res.status(500).send("Erro ao carregar página de edição.");
+        }
     }
 
-    // Rota: Concluídos
-    async listConcluidos(req: Request, res: Response) {
-        const userId = req.session.userId!;
-        const isAdmin = req.session.isAdmin!;
-        const pagamentos = await Pagamentos.getByStatus(['CONFIRMADO', 'CANCELADO'], userId, isAdmin);
-        const empresas = await Pagamentos.getEmpresasAtivas();
+    async update(req: Request, res: Response) {
+        try {
+            const ticket = Number(req.params.ticket);
+            const body = req.body;
+            const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-        return res.render('../../pagamentos/pages/index', {
-            pagamentos, empresas,
-            activeMenu: 'pagamentos', topMenu: 'concluidos',
-            titulo: 'Pagamentos - Concluídos'
-        });
+            const nomeBoleto = files && files['anexo_boleto'] ? files['anexo_boleto'][0].filename : null;
+            const nomeNota = files && files['anexo_nota_fatura'] ? files['anexo_nota_fatura'][0].filename : null;
+
+            let valorLimpo = 0;
+            if (body.valor) {
+                let stringValor = body.valor.replace(/[R$\s.]/g, '');
+                stringValor = stringValor.replace(',', '.');
+                valorLimpo = parseFloat(stringValor);
+            }
+
+            const statusAtualizado = body.status ? body.status : body.status_original;
+
+            const data: any = {
+                empresa_id: Number(body.empresa_id),
+                setor: body.setor,
+                tipo_documento: body.tipo_documento,
+                contato_interno: body.contato_interno,
+                pedido_compra: body.pedido_compra,
+                cnpj_nota: body.cnpj_nota,
+                razao_social: body.razao_social,
+                numero_nota_fatura: body.numero_nota_fatura,
+                data_emissao_nota: body.data_emissao_nota,
+                data_vencimento: body.data_vencimento,
+                valor: valorLimpo,
+                tipo_pagamento: body.tipo_pagamento,
+                servico_material_entregue: body.servico_material_entregue,
+                mes_prestacao_servico: body.mes_prestacao_servico,
+                status: statusAtualizado,
+                observacao: body.observacao,
+                anexo_boleto: nomeBoleto,
+                anexo_nota_fatura: nomeNota
+            };
+
+            await Pagamentos.update(ticket, data);
+            return res.redirect(`/pagamentos/visualizar/${ticket}`);
+        } catch (error) {
+            console.error("Erro ao atualizar pagamento:", error);
+            return res.status(500).send("Erro ao atualizar solicitação.");
+        }
     }
 }
 export default new PagamentoControllers();

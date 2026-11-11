@@ -1,0 +1,189 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <title>Editar Pagamento #{{ pagamento.ticket }}</title>
+    <link rel="stylesheet" href="/css/acessos/styleAcessos.css">
+    <link rel="stylesheet" href="/css/pagamentos/stylePagamentos.css">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="header-page form-header">
+        <h2>Editar Pagamento #{{ pagamento.ticket }}</h2>
+        <span class="user-badge">
+            <i class="fa-solid fa-user"></i> {{ session.userName }}
+        </span>
+    </div>
+    <hr class="divider-header">
+
+    <form id="formPagamento" method="POST" action="/pagamentos/editar/{{ pagamento.ticket }}" enctype="multipart/form-data">
+        
+        <!-- Mantém o status original oculto caso não seja alterado (para usuários não-admin) -->
+        <input type="hidden" name="status_original" value="{{ pagamento.status }}">
+
+        {% if session.isAdmin %}
+        <!-- GRUPO ADMIN: STATUS E OBSERVAÇÃO -->
+        <div class="grid-2-colunas" style="background-color: #f1f5f9; padding: 20px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 25px;">
+            <div class="field field-pag">
+                <label>Status do Pagamento</label>
+                <select name="status" id="status_select" onchange="toggleObservacao()" style="border-color: #011C43; font-weight: bold;">
+                    <option value="SOLICITADO" {% if pagamento.status == 'SOLICITADO' %}selected{% endif %}>SOLICITADO</option>
+                    <option value="PENDENTE" {% if pagamento.status == 'PENDENTE' %}selected{% endif %}>PENDENTE</option>
+                    <option value="CONFIRMADO" {% if pagamento.status == 'CONFIRMADO' %}selected{% endif %}>CONFIRMADO</option>
+                    <option value="CANCELADO" {% if pagamento.status == 'CANCELADO' %}selected{% endif %}>CANCELADO</option>
+                </select>
+            </div>
+            
+            <div class="field field-pag" id="box_observacao" style="display: none;">
+                <label>Observação (Obrigatório para Pendente/Cancelado)</label>
+                <input type="text" name="observacao" id="observacao_input" value="{{ pagamento.observacao | default('') }}" placeholder="Motivo da pendência ou cancelamento...">
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- GRUPO 1: SOLICITANTE, EMPRESA E PEDIDO -->
+        <div class="grid-2-colunas">
+            <div class="field field-pag">
+                <label>Nome Contato Wilson Sons *</label>
+                <input type="text" name="contato_interno" value="{{ pagamento.contato_interno }}" required>
+            </div>
+            <div class="field field-pag">
+                <label>Setor</label>
+                <select name="setor">
+                    <option value="">Selecione...</option>
+                    {% for s in setores %}
+                        <option value="{{ s.nome }}" {% if pagamento.setor == s.nome %}selected{% endif %}>{{ s.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="grid-2-colunas">
+            <div class="field field-pag">
+                <label>Empresa *</label>
+                <select name="empresa_id" required>
+                    <option value="">Selecione...</option>
+                    {% for emp in empresas %}
+                        <option value="{{ emp.id }}" {% if pagamento.empresa_id == emp.id %}selected{% endif %}>{{ emp.nome_exibicao }} ({{ emp.cnpj }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field field-pag">
+                <label>Pedido *</label>
+                <input type="text" name="pedido_compra" value="{{ pagamento.pedido_compra }}" required>
+            </div>
+        </div>
+
+        <hr class="divider-section">
+
+        <!-- GRUPO 2: DADOS DO PAGAMENTO -->
+        <div class="grid-2-colunas">
+            <div class="field field-pag">
+                <label>CNPJ *</label>
+                <input type="text" name="cnpj_nota" id="cnpj_input" value="{{ pagamento.cnpj_nota }}" maxlength="18" required>
+            </div>
+            <div class="field field-pag">
+                <label>Fornecedor (Razão Social) *</label>
+                <input type="text" name="razao_social" value="{{ pagamento.razao_social }}" required>
+            </div>
+        </div>
+
+        <div class="grid-2-colunas">
+            <div class="field field-pag">
+                <label>Tipo Documento *</label>
+                <select name="tipo_documento" required>
+                    <option value="NOTA FISCAL" {% if pagamento.tipo_documento == 'NOTA FISCAL' %}selected{% endif %}>Nota Fiscal</option>
+                    <option value="FATURA" {% if pagamento.tipo_documento == 'FATURA' %}selected{% endif %}>Fatura</option>
+                    <option value="RECIBO" {% if pagamento.tipo_documento == 'RECIBO' %}selected{% endif %}>Recibo</option>
+                </select>
+            </div>
+            <div class="field field-pag">
+                <label>Número Documento</label>
+                <input type="text" name="numero_nota_fatura" value="{{ pagamento.numero_nota_fatura }}">
+            </div>
+        </div>
+
+        <div class="grid-2-colunas">
+            <div class="field field-pag">
+                <label>Substituir Anexo (Opcional)</label>
+                <input type="file" name="anexo_nota_fatura" class="input-file">
+                {% if pagamento.anexo_nota_fatura %}
+                    <small style="color: #64748b; margin-top: 5px;">Arquivo atual: {{ pagamento.anexo_nota_fatura }}</small>
+                {% endif %}
+            </div>
+            <div class="field field-pag">
+                <label>Data de Emissão *</label>
+                <input type="date" name="data_emissao_nota" value="{{ pagamento.data_emissao_nota }}" required>
+            </div>
+        </div>
+
+        <div class="grid-2-colunas">
+            <div class="field field-pag">
+                <label>Valor *</label>
+                <input type="text" name="valor" id="valor_input" value="{{ pagamento.valorFormInput }}" required>
+            </div>
+            <div class="field field-pag">
+                <label>Data Vencimento *</label>
+                <!-- Na edição, removemos o "min=hoje" para permitir salvar datas passadas se necessário -->
+                <input type="date" name="data_vencimento" id="data_vencimento" value="{{ pagamento.data_vencimento }}" required>
+            </div>
+        </div>
+
+        <div class="grid-2-colunas">
+            <div class="field field-pag">
+                <label>Tipo Pagamento</label>
+                <div class="radio radio-pag">
+                    <label><input type="radio" name="tipo_pagamento" value="TED" {% if pagamento.tipo_pagamento == 'TED' %}checked{% endif %} onchange="togglePagamentos()"> TED</label>
+                    <label><input type="radio" name="tipo_pagamento" value="Boleto" {% if pagamento.tipo_pagamento == 'Boleto' %}checked{% endif %} onchange="togglePagamentos()"> Boleto</label>
+                </div>
+                <div id="box_boleto" class="box-condicional">
+                    <label class="label-condicional">Substituir Boleto (Opcional)</label>
+                    <input type="file" name="anexo_boleto" id="input_boleto" class="input-file">
+                </div>
+            </div>
+            <div class="field field-pag">
+                <label>O Serviço/Material foi entregue na data completa? *</label>
+                <div class="radio radio-pag">
+                    <label><input type="radio" name="servico_material_entregue" value="SIM" {% if pagamento.servico_material_entregue == 'SIM' %}checked{% endif %} onchange="togglePagamentos()"> SIM</label>
+                    <label><input type="radio" name="servico_material_entregue" value="NAO" {% if pagamento.servico_material_entregue == 'NAO' %}checked{% endif %} onchange="togglePagamentos()"> NÃO</label>
+                </div>
+                <div id="box_mes" class="box-condicional" style="display: none; border: none; background: transparent;">
+                    <label class="label-condicional">Mês (MM/AAAA) *</label>
+                    <input type="text" name="mes_prestacao_servico" id="mes_input" value="{{ pagamento.mes_prestacao_servico }}" maxlength="7">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions form-footer">
+            <button type="button" class="button-cancel btn-action-padrao btn-voltar" onclick="window.history.back()">Cancelar</button>
+            <button type="submit" class="button-send btn-action-padrao btn-editar">Atualizar</button>
+        </div>
+    </form>
+</div>
+
+<script src="/scripts/scriptPagamentos.js"></script>
+
+<script>
+    // Lógica do Status e Observação (Específico da Edição)
+    function toggleObservacao() {
+        const statusSelect = document.getElementById('status_select');
+        const obsBox = document.getElementById('box_observacao');
+        const obsInput = document.getElementById('observacao_input');
+        
+        if (statusSelect && obsBox && obsInput) {
+            if (statusSelect.value === 'PENDENTE' || statusSelect.value === 'CANCELADO') {
+                obsBox.style.display = 'block';
+                obsInput.setAttribute('required', 'true');
+            } else {
+                obsBox.style.display = 'none';
+                obsInput.removeAttribute('required');
+                obsInput.value = ''; // Limpa se mudar para status normal
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        toggleObservacao(); // Roda ao carregar a página
+    });
+</script>
+{% endblock %}

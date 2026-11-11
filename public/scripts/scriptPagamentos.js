@@ -157,3 +157,130 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
 
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- 1. BLOQUEIO DE DATA ANTERIOR A HOJE ---
+    const dataVencimentoInput = document.getElementById('data_vencimento');
+    if (dataVencimentoInput) {
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        
+        // Define o atributo "min" para a data de hoje no formato YYYY-MM-DD
+        dataVencimentoInput.setAttribute('min', `${ano}-${mes}-${dia}`);
+    }
+
+    // --- 2. ALERTAS DE CAMPOS OBRIGATÓRIOS (Mesmo padrão de Acessos) ---
+    const formPagamento = document.getElementById('formPagamento');
+    if (formPagamento) {
+        formPagamento.addEventListener('submit', function (event) {
+            let temErro = false;
+            
+            // Pega todos os inputs e selects com atributo "required"
+            const camposObrigatorios = formPagamento.querySelectorAll('[required]');
+            
+            camposObrigatorios.forEach(campo => {
+                if (campo.value.trim() === "") {
+                    campo.classList.add('input-error'); // Adiciona borda vermelha (certifique-se de ter essa classe no CSS)
+                    temErro = true;
+                } else {
+                    campo.classList.remove('input-error');
+                }
+            });
+
+            if (temErro) {
+                event.preventDefault(); // Impede o envio do form
+                
+                // Remove alertas antigos
+                const msgAntigas = document.querySelectorAll('.messages');
+                msgAntigas.forEach(m => m.remove());
+                
+                // Cria e exibe a faixa vermelha de erro no topo da página
+                const divMsg = document.createElement('div');
+                divMsg.classList.add('messages', 'error');
+                divMsg.textContent = "Existem campos obrigatórios vazios.";
+                document.body.prepend(divMsg);
+            }
+        });
+    }
+});
+
+// --- 1. TOGGLE PARA O FORMULÁRIO ---
+window.togglePagamentos = function() {
+    const tipoBoleto = document.querySelector('input[name="tipo_pagamento"][value="Boleto"]')?.checked;
+    const boxBoleto = document.getElementById('box_boleto');
+    const inputBoleto = document.getElementById('input_boleto');
+    
+    if (boxBoleto && inputBoleto) {
+        if (tipoBoleto) {
+            boxBoleto.style.display = 'block';
+            inputBoleto.setAttribute('required', 'true');
+        } else {
+            boxBoleto.style.display = 'none';
+            inputBoleto.removeAttribute('required');
+            inputBoleto.value = "";
+        }
+    }
+
+    const entregueSim = document.querySelector('input[name="servico_material_entregue"][value="SIM"]')?.checked;
+    const boxMes = document.getElementById('box_mes');
+    const inputMes = document.getElementById('mes_input');
+    
+    if (boxMes && inputMes) {
+        if (entregueSim) {
+            boxMes.style.display = 'block';
+            inputMes.setAttribute('required', 'true');
+        } else {
+            boxMes.style.display = 'none';
+            inputMes.removeAttribute('required');
+            inputMes.value = "";
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Inicializa o estado dos inputs condicionais se estivermos na página do form
+    if(document.getElementById('formPagamento')) {
+        window.togglePagamentos();
+    }
+
+    // --- 2. MÁSCARAS DO FORMULÁRIO ---
+    const cnpjInput = document.getElementById('cnpj_input');
+    if(cnpjInput) {
+        cnpjInput.addEventListener('input', function() {
+            let v = this.value.replace(/\D/g, "");
+            v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+            v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+            v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
+            v = v.replace(/(\d{4})(\d)/, "$1-$2");
+            this.value = v;
+        });
+    }
+
+    const valorInput = document.getElementById('valor_input');
+    if(valorInput) {
+        valorInput.addEventListener('input', function() {
+            let v = this.value.replace(/\D/g, "");
+            if(v) {
+                v = (parseInt(v) / 100).toFixed(2) + '';
+                v = v.replace(".", ",");
+                v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+                this.value = "R$ " + v;
+            }
+        });
+    }
+
+    const mesInput = document.getElementById('mes_input');
+    if(mesInput) {
+        mesInput.addEventListener('input', function() {
+            let v = this.value.replace(/\D/g, "");
+            if (v.length > 2) { v = v.substring(0,2) + "/" + v.substring(2,6); }
+            this.value = v;
+        });
+    }
+
+    // ... [MANTENHA OS DEMAIS EVENT LISTENERS AQUI] ...
+});

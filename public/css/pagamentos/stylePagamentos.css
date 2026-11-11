@@ -463,3 +463,122 @@ th.sortable.desc i {
 .btn-topo-header i {
     font-size: 16px;
 }
+
+/* ==========================================
+   FORMULÁRIO DE CADASTRO
+========================================== */
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.user-badge {
+    font-size: 14px;
+    font-weight: bold;
+    color: #435773;
+    margin-bottom: 5px;
+}
+
+.divider-header {
+    margin-bottom: 25px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.divider-section {
+    margin: 25px 0;
+    border-top: 2px solid #cbd5e1;
+}
+
+.input-file {
+    width: 95%;
+    background: white;
+}
+
+.box-condicional {
+    display: none;
+    margin-top: 10px;
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px dashed #cbd5e1;
+}
+
+.label-condicional {
+    font-size: 12px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-footer {
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    display: flex;
+    gap: 15px;
+}
+
+/* ==========================================
+   FORMULÁRIO DE CADASTRO
+========================================== */
+.card {
+    background: white;
+    width: 96%;
+    max-width: 1000px; /* Impede que expanda demais em telas grandes */
+    margin: 25px auto; /* Centraliza horizontalmente */
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.grid-2-colunas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 30px;
+    margin-bottom: 15px;
+}
+
+.field-pag {
+    display: flex;
+    flex-direction: column;
+}
+
+.field-pag label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.field-pag input[type="text"],
+.field-pag input[type="date"],
+.field-pag select,
+.input-file {
+    width: 100%; /* Garante que todos ocupem o mesmo espaço */
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+    background-color: #ffffff;
+    box-sizing: border-box; /* O padding não soma à largura */
+    height: 40px;
+}
+
+.radio-pag {
+    display: flex;
+    gap: 15px;
+    padding: 0 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    align-items: center;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+/* Responsividade do Formulário para Celulares */
+@media (max-width: 768px) {
+    .grid-2-colunas {
+        grid-template-columns: 1fr;
+    }
+}
