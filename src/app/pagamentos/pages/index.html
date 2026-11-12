@@ -7,24 +7,20 @@
 {% endblock %}
 
 {% block content %}
-<div class="card view-page-card" style="padding: 20px !important;">
+<div class="card view-page-card">
     
-    <!-- TÍTULO E BOTÃO NOVO PADRONIZADO -->
-    <div class="header-page view-header-page" style="margin-bottom: 25px;">
+    <div class="header-page view-header-page">
         <h2 class="view-title">{{ titulo }}</h2>
-        <a href="/pagamentos/form" class="btn-action-padrao btn-novo">
-            <i class="fa-solid fa-plus"></i> Novo
-        </a>
+        <a href="/pagamentos/form" class="btn-action-padrao btn-novo">Novo</a>
     </div>
 
-    <!-- FILTRO DE EMPRESAS (Aparece apenas nas abas globais de Pendentes/Concluídos) -->
     {% if topMenu == 'pendentes' or topMenu == 'concluidos' %}
-    <div class="filtros-empresa-container" style="margin-bottom: 20px;">
+    <div class="filtros-empresa-container" style="margin-bottom: 20px; padding: 10px 15px;">
         <strong>Filtrar por Empresa:</strong>
         <div class="checkbox-group">
             {% for emp in empresas %}
             <label>
-                <input type="checkbox" class="filtro-empresa-cb" value="{{ emp.id }}" checked>
+                <input type="checkbox" class="filtro-empresa-cb" value="{{ emp.id }}" onchange="aplicarFiltroDataGlobal()" {% if emp.id in empresasArr %}checked{% endif %}>
                 {{ emp.nome_exibicao }}
             </label>
             {% endfor %}
@@ -32,54 +28,53 @@
     </div>
     {% endif %}
 
-    <!-- TABELA -->
-    <div class="table-container">
+    <div class="view-card" style="padding: 15px; border-radius: 8px;">
         <table class="table" id="tabelaPagamentos">
             <thead>
                 <tr>
-                    <th class="sortable" data-sort="numeric">Ticket <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable" data-sort="numeric"># <i class="fa-solid fa-sort"></i></th>
                     <th class="sortable" data-sort="text">Status <i class="fa-solid fa-sort"></i></th>
-                    <th class="sortable" data-sort="text">Nº Nota/Fatura <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable" data-sort="text">Documento <i class="fa-solid fa-sort"></i></th>
                     <th class="sortable" data-sort="text">Fornecedor <i class="fa-solid fa-sort"></i></th>
-                    <th class="sortable" data-sort="date">Data Vencimento <i class="fa-solid fa-sort"></i></th>
+                    <th class="sortable" data-sort="date">Vencimento <i class="fa-solid fa-sort"></i></th>
                     <th class="sortable" data-sort="text">Solicitante <i class="fa-solid fa-sort"></i></th>
                     <th class="sortable" data-sort="numeric">Valor <i class="fa-solid fa-sort"></i></th>
                     <th>Documento</th>
+                    <th class="sortable" data-sort="date">Data Solicitação <i class="fa-solid fa-sort"></i></th>
                 </tr>
             </thead>
             <tbody>
                 {% for pag in pagamentos %}
-                <!-- data-empresa usado para o filtro JS de checkboxes -->
-                <tr data-empresa="{{ pag.empresa_id }}" style="cursor: pointer;" onclick="window.location.href='/pagamentos/visualizar/{{ pag.ticket }}'">
-                    <td>{{ pag.ticket }}</td>
-                    <td><span class="status-pag status-pag-{{ pag.status | lower | replace(' ', '') }}">{{ pag.status }}</span></td>
-                    <td>{{ pag.numero_nota_fatura | default('-') }}</td>
-                    <td>{{ pag.razao_social | default('-') }}</td>
-                    <td>{{ pag.data_vencimento }}</td>
-                    <td>{{ pag.user_nome }}</td>
-                    <td>R$ {{ pag.valor | default('0,00') }}</td>
-                    <td onclick="event.stopPropagation();"> <!-- Evita clique na linha ao clicar no PDF -->
-                        {% if pag.anexo_nota_fatura %}
-                            <span class="anexo-link btn-open-pdf" data-url="/uploads/{{ pag.anexo_nota_fatura }}" title="Nota Fiscal">
-                                <i class="fa-solid fa-file-pdf icon-pdf"></i>
-                            </span>
-                        {% endif %}
-                        {% if pag.anexo_boleto %}
-                            <span class="anexo-link btn-open-pdf" data-url="/uploads/{{ pag.anexo_boleto }}" title="Boleto" style="margin-left: 10px;">
-                                <i class="fa-solid fa-file-invoice icon-pdf"></i>
-                            </span>
-                        {% endif %}
-                    </td>
-                </tr>
+                    <tr data-empresa="{{ pag.empresa_id }}" data-pedido="{{ pag.pedido_compra | default('') }}" style="cursor: pointer;" onclick="window.location.href='/pagamentos/visualizar/{{ pag.ticket }}'">
+                        <td>{{ pag.ticket }}</td>
+                        <td><span class="status-pag status-pag-{{ pag.status | lower | replace(' ', '') }}">{{ pag.status }}</span></td>
+                        <td>{{ pag.numero_nota_fatura | default('-') }}</td>
+                        <td>{{ pag.razao_social | default('-') }}</td>
+                        <td>{{ pag.data_vencimento }}</td>
+                        <td>{{ pag.user_nome }}</td>
+                        <td>R$ {{ pag.valorF }}</td>
+                        <td onclick="event.stopPropagation();">
+                            {% if pag.anexo_nota_fatura %}
+                                <span class="anexo-link btn-open-pdf" data-url="/uploads/{{ pag.anexo_nota_fatura }}" title="Nota Fiscal">
+                                    <i class="fa-solid fa-file-pdf icon-pdf"></i>
+                                </span>
+                            {% endif %}
+                            {% if pag.anexo_boleto %}
+                                <span class="anexo-link btn-open-pdf" data-url="/uploads/{{ pag.anexo_boleto }}" title="Boleto" style="margin-left: 10px;">
+                                    <i class="fa-solid fa-file-invoice icon-pdf"></i>
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ pag.data_abertura_curta }}</td>
+                    </tr>
                 {% else %}
-                <tr><td colspan="6" style="text-align: center;">Nenhum registro encontrado.</td></tr>
+                <tr class="colspan-row"><td colspan="9" style="text-align: center;">Nenhum registro encontrado neste período.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
 
-<!-- MODAL DE VISUALIZAÇÃO DE ANEXOS -->
 <div id="modalVisualizadorPdf" class="modal-overlay-pdf">
     <div class="modal-content-pdf">
         <div class="modal-header-pdf">

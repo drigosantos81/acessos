@@ -16,7 +16,8 @@
     </div>
     <hr class="divider-header">
 
-    <form id="formPagamento" method="POST" action="/pagamentos/editar/{{ pagamento.ticket }}" enctype="multipart/form-data">
+    <!-- Adicionado o atributo NOVALIDATE aqui também -->
+    <form id="formPagamento" method="POST" action="/pagamentos/editar/{{ pagamento.ticket }}" enctype="multipart/form-data" novalidate>
         
         <!-- Mantém o status original oculto caso não seja alterado (para usuários não-admin) -->
         <input type="hidden" name="status_original" value="{{ pagamento.status }}">
@@ -112,7 +113,7 @@
                 {% endif %}
             </div>
             <div class="field field-pag">
-                <label>Data de Emissão *</label>
+                <label>Data da Emissão *</label>
                 <input type="date" name="data_emissao_nota" value="{{ pagamento.data_emissao_nota }}" required>
             </div>
         </div>
@@ -123,8 +124,7 @@
                 <input type="text" name="valor" id="valor_input" value="{{ pagamento.valorFormInput }}" required>
             </div>
             <div class="field field-pag">
-                <label>Data Vencimento *</label>
-                <!-- Na edição, removemos o "min=hoje" para permitir salvar datas passadas se necessário -->
+                <label>Data do Vencimento *</label>
                 <input type="date" name="data_vencimento" id="data_vencimento" value="{{ pagamento.data_vencimento }}" required>
             </div>
         </div>
@@ -142,14 +142,14 @@
                 </div>
             </div>
             <div class="field field-pag">
-                <label>O Serviço/Material foi entregue na data completa? *</label>
+                <label>O Serviço/Material foi entregue? *</label>
                 <div class="radio radio-pag">
                     <label><input type="radio" name="servico_material_entregue" value="SIM" {% if pagamento.servico_material_entregue == 'SIM' %}checked{% endif %} onchange="togglePagamentos()"> SIM</label>
                     <label><input type="radio" name="servico_material_entregue" value="NAO" {% if pagamento.servico_material_entregue == 'NAO' %}checked{% endif %} onchange="togglePagamentos()"> NÃO</label>
                 </div>
-                <div id="box_mes" class="box-condicional" style="display: none; border: none; background: transparent;">
-                    <label class="label-condicional">Mês (MM/AAAA) *</label>
-                    <input type="text" name="mes_prestacao_servico" id="mes_input" value="{{ pagamento.mes_prestacao_servico }}" maxlength="7">
+                <div id="box_mes" class="box-condicional" style="display: none; border: none; background: transparent; padding-left: 0;">
+                    <label class="label-condicional">Data *</label>
+                    <input type="date" name="mes_prestacao_servico" id="mes_input" value="{{ pagamento.mes_prestacao_servico }}">
                 </div>
             </div>
         </div>
@@ -162,28 +162,4 @@
 </div>
 
 <script src="/scripts/scriptPagamentos.js"></script>
-
-<script>
-    // Lógica do Status e Observação (Específico da Edição)
-    function toggleObservacao() {
-        const statusSelect = document.getElementById('status_select');
-        const obsBox = document.getElementById('box_observacao');
-        const obsInput = document.getElementById('observacao_input');
-        
-        if (statusSelect && obsBox && obsInput) {
-            if (statusSelect.value === 'PENDENTE' || statusSelect.value === 'CANCELADO') {
-                obsBox.style.display = 'block';
-                obsInput.setAttribute('required', 'true');
-            } else {
-                obsBox.style.display = 'none';
-                obsInput.removeAttribute('required');
-                obsInput.value = ''; // Limpa se mudar para status normal
-            }
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        toggleObservacao(); // Roda ao carregar a página
-    });
-</script>
 {% endblock %}

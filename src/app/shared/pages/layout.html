@@ -36,13 +36,11 @@
                 <a href="/pagamentos"><i class="fa-solid fa-file-invoice-dollar"></i> PAGAMENTOS</a>
 
                 <ul class="submenu-list">
-                    <!-- Loop dinâmico que lê o array enviado pelo middleware -->
                     {% for emp in counts.empresas_pagamentos %}
                     <li class="submenu-item">
+                        <!-- Limpamos os parâmetros ao clicar direto na empresa, criando um recomeço -->
                         <a href="/pagamentos/empresa/{{ emp.id }}" class="submenu-link {% if activeSubMenu == emp.id %}active-sub{% endif %}">
                             <i class="fa-solid fa-chevron-right"></i> {{ emp.nome_exibicao }}
-                            
-                            <!-- Só exibe o badge vermelho se houver pagamentos Pendentes ou Solicitados -->
                             {% if emp.qtd > 0 %}
                                 <span class="badge-sub">{{ emp.qtd }}</span>
                             {% endif %}
@@ -50,7 +48,6 @@
                     </li>
                     {% endfor %}
                 </ul>
-                
             </li>
             {% endif %}
 
@@ -97,23 +94,6 @@
             <div class="menu-links">
                 <a href="/" class="menu-link-btn {% if activeTab == 'abertos' %}active{% endif %}">
                     <i class="fa-solid fa-folder-open"></i> Solicitações
-                    {% if counts.abertos > 0 %}<span class="badge-counter">{{ counts.abertos }}</span>{% endif %}
-                </a>
-
-                {% if session.isAdmin %}
-                <a href="/admin/edit" class="menu-link-btn {% if activeTab == 'edit' %}active{% endif %}">
-                    <i class="fa-solid fa-pen-to-square"></i> Edição Massiva
-                </a>
-                {% endif %}
-
-                <a href="/resolvidos" class="menu-link-btn {% if activeTab == 'resolvidos' %}active{% endif %}">
-                    <i class="fa-solid fa-check-double"></i> Pedidos Resolvidos
-                    {% if counts.resolvidos > 0 %}<span class="badge-counter">{{ counts.resolvidos }}</span>{% endif %}
-                </a>
-
-                <a href="/pendentes" class="menu-link-btn {% if activeTab == 'pendentes' %}active{% endif %}">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Pedidos Pendentes
-                    {% if counts.pendentes > 0 %}<span class="badge-counter">{{ counts.pendentes }}</span>{% endif %}
                 </a>
             </div>
 
@@ -125,17 +105,34 @@
             </div>
 
             {% elif activeMenu == 'pagamentos' %}
-            <div class="menu-links">
-                <!-- Abas exclusivas do Módulo Pagamentos com as devidas verificações de active -->
-                <a href="/pagamentos" class="menu-link-btn {% if topMenu == 'painel' or not topMenu %}active{% endif %}">
-                    <i class="fa-solid fa-chart-pie"></i> Painel
-                </a>
-                <a href="/pagamentos/pendentes" class="menu-link-btn {% if topMenu == 'pendentes' %}active{% endif %}">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Pendentes
-                </a>
-                <a href="/pagamentos/concluidos" class="menu-link-btn {% if topMenu == 'concluidos' %}active{% endif %}">
-                    <i class="fa-solid fa-check-double"></i> Concluídos
-                </a>
+            <div class="top-header-menus" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                
+                <div style="display: flex; gap: 15px;">
+                    <!-- A URL agora repassa os filtros de data e empresa atuais para persistir na navegação -->
+                    <a href="/pagamentos?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&empresas={{ empresasSelecionadas }}" class="btn-topo-header {% if topMenu == 'painel' or not topMenu %}active{% endif %}">
+                        <i class="fa-solid fa-chart-pie"></i> Painel
+                    </a>
+                    <a href="/pagamentos/pendentes?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&empresas={{ empresasSelecionadas }}" class="btn-topo-header {% if topMenu == 'pendentes' %}active{% endif %}">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Pendentes
+                    </a>
+                    <a href="/pagamentos/concluidos?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&empresas={{ empresasSelecionadas }}" class="btn-topo-header {% if topMenu == 'concluidos' %}active{% endif %}">
+                        <i class="fa-solid fa-check-double"></i> Concluídos
+                    </a>
+                </div>
+                
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="date" id="filtroDataInicio" class="input-header-dark" value="{{ dataInicio }}" title="Data Início">
+                    <input type="date" id="filtroDataFim" class="input-header-dark" value="{{ dataFim }}" title="Data Fim">
+                    <button class="btn-buscar-header" onclick="aplicarFiltroDataGlobal()" title="Filtrar Período" style="margin-right: 10px;">
+                        <i class="fa-solid fa-filter"></i>
+                    </button>
+
+                    <div class="search-wrapper-dark">
+                        <input type="text" id="buscaTabelaGlob" class="input-header-dark" placeholder="Buscar #, Doc, Pedido ou Fornecedor...">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                </div>
+
             </div>
 
             {% elif activeMenu == 'avarias' %}
@@ -148,7 +145,6 @@
 
         </div>
 
-        <!-- CONTEÚDO DA PÁGINA (MIOLO) -->
         {% block content %}{% endblock %}
     </div>
 

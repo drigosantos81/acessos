@@ -16,7 +16,8 @@
     </div>
     <hr class="divider-header">
 
-    <form id="formPagamento" method="POST" action="/pagamentos/form" enctype="multipart/form-data">
+    <!-- Adicionado o atributo NOVALIDATE para permitir o bloqueio via Javascript -->
+    <form id="formPagamento" method="POST" action="/pagamentos/form" enctype="multipart/form-data" novalidate>
         
         <!-- GRUPO 1: SOLICITANTE, EMPRESA E PEDIDO -->
         <div class="grid-2-colunas">
@@ -87,7 +88,7 @@
                 <input type="file" name="anexo_nota_fatura" class="input-file">
             </div>
             <div class="field field-pag">
-                <label>Data de Emissão *</label>
+                <label>Data da Emissão *</label>
                 <input type="date" name="data_emissao_nota" required>
             </div>
         </div>
@@ -98,7 +99,7 @@
                 <input type="text" name="valor" id="valor_input" placeholder="R$ 0,00" required>
             </div>
             <div class="field field-pag">
-                <label>Data Vencimento *</label>
+                <label>Data do Vencimento *</label>
                 <input type="date" name="data_vencimento" id="data_vencimento" required>
             </div>
         </div>
@@ -116,14 +117,14 @@
                 </div>
             </div>
             <div class="field field-pag">
-                <label>O Serviço/Material foi entregue na data completa? *</label>
+                <label>O Serviço/Material foi entregue? *</label>
                 <div class="radio radio-pag">
                     <label><input type="radio" name="servico_material_entregue" value="SIM" onchange="togglePagamentos()"> SIM</label>
                     <label><input type="radio" name="servico_material_entregue" value="NAO" checked onchange="togglePagamentos()"> NÃO</label>
                 </div>
-                <div id="box_mes" class="box-condicional" style="display: none; border: none; background: transparent;">
-                    <label class="label-condicional">Mês (MM/AAAA) *</label>
-                    <input type="text" name="mes_prestacao_servico" id="mes_input" placeholder="11/2026" maxlength="7">
+                <div id="box_mes" class="box-condicional" style="display: none; border: none; background: transparent; padding-left: 0;">
+                    <label class="label-condicional">Data *</label>
+                    <input type="date" name="mes_prestacao_servico" id="mes_input">
                 </div>
             </div>
         </div>
@@ -136,75 +137,4 @@
 </div>
 
 <script src="/scripts/scriptPagamentos.js"></script>
-
-<script>
-    // Scripts exclusivos desta página
-    function togglePagamentos() {
-        const tipoBoleto = document.querySelector('input[name="tipo_pagamento"][value="Boleto"]')?.checked;
-        const boxBoleto = document.getElementById('box_boleto');
-        const inputBoleto = document.getElementById('input_boleto');
-        if (boxBoleto && inputBoleto) {
-            if (tipoBoleto) {
-                boxBoleto.style.display = 'block';
-                inputBoleto.setAttribute('required', 'true');
-            } else {
-                boxBoleto.style.display = 'none';
-                inputBoleto.removeAttribute('required');
-                inputBoleto.value = "";
-            }
-        }
-
-        const entregueSim = document.querySelector('input[name="servico_material_entregue"][value="SIM"]')?.checked;
-        const boxMes = document.getElementById('box_mes');
-        const inputMes = document.getElementById('mes_input');
-        if (boxMes && inputMes) {
-            if (entregueSim) {
-                boxMes.style.display = 'block';
-                inputMes.setAttribute('required', 'true');
-            } else {
-                boxMes.style.display = 'none';
-                inputMes.removeAttribute('required');
-                inputMes.value = "";
-            }
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        togglePagamentos();
-
-        const cnpjInput = document.getElementById('cnpj_input');
-        if(cnpjInput) {
-            cnpjInput.addEventListener('input', function() {
-                let v = this.value.replace(/\D/g, "");
-                v = v.replace(/^(\d{2})(\d)/, "$1.$2");
-                v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
-                v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
-                v = v.replace(/(\d{4})(\d)/, "$1-$2");
-                this.value = v;
-            });
-        }
-
-        const valorInput = document.getElementById('valor_input');
-        if(valorInput) {
-            valorInput.addEventListener('input', function() {
-                let v = this.value.replace(/\D/g, "");
-                if(v) {
-                    v = (parseInt(v) / 100).toFixed(2) + '';
-                    v = v.replace(".", ",");
-                    v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-                    this.value = "R$ " + v;
-                }
-            });
-        }
-
-        const mesInput = document.getElementById('mes_input');
-        if(mesInput) {
-            mesInput.addEventListener('input', function() {
-                let v = this.value.replace(/\D/g, "");
-                if (v.length > 2) { v = v.substring(0,2) + "/" + v.substring(2,6); }
-                this.value = v;
-            });
-        }
-    });
-</script>
 {% endblock %}

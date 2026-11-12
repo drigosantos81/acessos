@@ -27,13 +27,27 @@ class Pagamentos {
         return await db.query(query, values);
     }
 
-    async getDashboardStats(userId: number, isAdmin: boolean) {
-        let query = `SELECT status, COUNT(*) as count FROM pagamentos WHERE 1=1`;
+    async getDashboardStats(userId: number, isAdmin: boolean, dataInicio: string, dataFim: string, empresasArr: number[]) {
+        let query = `SELECT status, COUNT(*) as count FROM pagamentos p WHERE 1=1`;
         const params: any[] = [];
 
         if (!isAdmin) {
-            query += ` AND user_id = ?`;
+            query += ` AND p.user_id = ?`;
             params.push(userId);
+        }
+        if (dataInicio !== '') {
+            query += ` AND DATE(p.data_abertura) >= ?`;
+            params.push(dataInicio);
+        }
+        if (dataFim !== '') {
+            query += ` AND DATE(p.data_abertura) <= ?`;
+            params.push(dataFim);
+        }
+        if (empresasArr.length > 0) {
+            query += ` AND p.empresa_id IN (${empresasArr.map(() => '?').join(',')})`;
+            params.push(...empresasArr);
+        } else {
+            query += ` AND 1 = 0`; // Nenhuma empresa selecionada
         }
 
         query += ` GROUP BY status`;
@@ -41,10 +55,10 @@ class Pagamentos {
         return Array.isArray(results) ? results : (results?.rows || []);
     }
 
-    async getByStatus(statusList: string[], userId: number, isAdmin: boolean) {
+    async getByStatus(statusList: string[], userId: number, isAdmin: boolean, dataInicio: string, dataFim: string, empresasArr: number[]) {
         let query = `
             SELECT p.ticket, p.status, p.numero_nota_fatura, p.razao_social, p.valor,
-                   p.data_vencimento, p.anexo_nota_fatura, p.anexo_boleto, 
+                   p.data_vencimento, p.anexo_nota_fatura, p.anexo_boleto, p.data_abertura, p.pedido_compra,
                    e.nome_exibicao AS empresa_nome, e.id AS empresa_id, u.name AS user_nome
             FROM pagamentos p
             JOIN empresa e ON p.empresa_id = e.id
@@ -56,6 +70,20 @@ class Pagamentos {
         if (!isAdmin) {
             query += ` AND p.user_id = ?`;
             params.push(userId);
+        }
+        if (dataInicio !== '') {
+            query += ` AND DATE(p.data_abertura) >= ?`;
+            params.push(dataInicio);
+        }
+        if (dataFim !== '') {
+            query += ` AND DATE(p.data_abertura) <= ?`;
+            params.push(dataFim);
+        }
+        if (empresasArr.length > 0) {
+            query += ` AND p.empresa_id IN (${empresasArr.map(() => '?').join(',')})`;
+            params.push(...empresasArr);
+        } else {
+            query += ` AND 1 = 0`; 
         }
 
         query += ` ORDER BY p.ticket DESC`;
@@ -72,10 +100,10 @@ class Pagamentos {
         });
     }
 
-    async getByEmpresaId(empresaId: number, userId: number, isAdmin: boolean) {
+    async getByEmpresaId(empresaId: number, userId: number, isAdmin: boolean, dataInicio: string, dataFim: string) {
         let query = `
             SELECT p.ticket, p.status, p.numero_nota_fatura, p.valor, p.data_vencimento, 
-                   p.razao_social, p.anexo_nota_fatura, p.anexo_boleto,
+                   p.razao_social, p.anexo_nota_fatura, p.anexo_boleto, p.data_abertura, p.pedido_compra,
                    e.nome_exibicao AS empresa_nome, u.name AS user_nome 
             FROM pagamentos p
             JOIN users u ON p.user_id = u.id
@@ -87,6 +115,14 @@ class Pagamentos {
         if (!isAdmin) {
             query += ` AND p.user_id = ?`;
             params.push(userId);
+        }
+        if (dataInicio !== '') {
+            query += ` AND DATE(p.data_abertura) >= ?`;
+            params.push(dataInicio);
+        }
+        if (dataFim !== '') {
+            query += ` AND DATE(p.data_abertura) <= ?`;
+            params.push(dataFim);
         }
 
         query += ` ORDER BY p.ticket DESC`;

@@ -2,22 +2,22 @@
    TELA DE VISUALIZAÇÃO - ESTRUTURA GERAL
 ========================================== */
 .view-page-card {
-    background-color: #f8fafc !important;
+    background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    padding: 0 !important;
+    padding: 0 20px !important;
+    margin-top: 5px !important;
 }
 
 /* ==========================================
    CABEÇALHO DA TELA DE VISUALIZAÇÃO
 ========================================== */
-/* Container que afasta o Título à esquerda e a Barra Cinza à direita */
 .view-header-page {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     flex-wrap: nowrap;
 }
 
@@ -27,7 +27,6 @@
     white-space: nowrap;
 }
 
-/* Barra cinza dinâmica alinhada à direita */
 .view-resumo-topo-inline {
     display: inline-flex;
     align-items: center;
@@ -46,7 +45,6 @@
     padding: 0 15px;
 }
 
-/* O separador visual | entre as colunas */
 .border-right-divider {
     border-right: 2px solid #cbd5e1;
 }
@@ -55,13 +53,11 @@
     padding-left: 0;
 }
 
-/* Responsividade do topo */
 @media (max-width: 1100px) {
     .view-header-page {
         flex-direction: column;
         align-items: flex-start;
     }
-
     .view-resumo-topo-inline {
         width: 100%;
         overflow-x: auto;
@@ -115,40 +111,13 @@
     font-weight: 500;
 }
 
-/* Espaçamentos e Destaques */
-.mb-0 {
-    margin-bottom: 0 !important;
-}
-
-.mt-5 {
-    margin-top: 5px;
-}
-
-.bg-light-gray {
-    background-color: #f1f5f9;
-}
-
-.value-destaque {
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.border-left-divider {
-    border-left: 2px solid #cbd5e1;
-    padding-left: 20px;
-}
-
-.icon-pdf {
-    font-size: 18px;
-}
-
-/* Base da tela (Datas à esquerda com espaço livre) */
-.view-grid-left {
-    display: flex;
-    gap: 0;
-    justify-content: flex-start;
-    width: 100%;
-}
+.mb-0 { margin-bottom: 0 !important; }
+.mt-5 { margin-top: 5px; }
+.bg-light-gray { background-color: #f1f5f9; }
+.value-destaque { font-weight: bold; font-size: 16px; }
+.border-left-divider { border-left: 2px solid #cbd5e1; padding-left: 20px; }
+.icon-pdf { font-size: 18px; }
+.view-grid-left { display: flex; gap: 0; justify-content: flex-start; width: 100%; }
 
 /* ==========================================
    BOTÕES PADRONIZADOS
@@ -157,9 +126,7 @@
     margin-top: 25px;
     display: flex;
     justify-content: flex-start;
-    /* Alinha os botões lado a lado por padrão */
     gap: 15px;
-    /* Espaço entre os botões */
 }
 
 .btn-action-padrao {
@@ -169,7 +136,6 @@
     gap: 8px;
     padding: 10px 25px;
     width: 160px;
-    /* Tamanho fixo para garantir que todos os botões sejam idênticos */
     font-weight: bold;
     font-size: 14px;
     font-family: inherit;
@@ -179,31 +145,13 @@
     cursor: pointer;
     transition: opacity 0.2s;
     box-sizing: border-box;
-    /* Garante que padding e width não conflitem */
 }
 
-.btn-action-padrao:hover {
-    opacity: 0.85;
-}
-
-.btn-voltar {
-    background-color: #e2e8f0;
-    color: #1e293b;
-}
-
-.btn-editar {
-    background-color: #FCBC88;
-    color: #ffffff;
-}
-
-.btn-novo { 
-    background-color: #00BEDD; 
-    color: #ffffff; 
-}
-
-.btn-novo:hover { 
-    background-color: #009ab3; 
-}
+.btn-action-padrao:hover { opacity: 0.85; }
+.btn-voltar { background-color: #e2e8f0; color: #1e293b; }
+.btn-editar { background-color: #FCBC88; color: #ffffff; }
+.btn-novo { background-color: #00BEDD; color: #ffffff; }
+.btn-novo:hover { background-color: #009ab3; }
 
 /* ==========================================
    MODAL DE VISUALIZAÇÃO DE ANEXOS (PDF)
@@ -214,32 +162,27 @@
     text-decoration: none;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     cursor: pointer;
     font-size: 14px;
     transition: color 0.2s;
 }
 
-.anexo-link:hover {
-    color: #011C43;
-}
+.anexo-link:hover { color: #011C43; }
 
 .modal-overlay-pdf {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.7);
     z-index: 9999;
     justify-content: center;
     align-items: center;
 }
 
-.modal-overlay-pdf.active {
-    display: flex;
-}
+.modal-overlay-pdf.active { display: flex; }
 
 .modal-content-pdf {
     width: 85%;
@@ -279,20 +222,11 @@
     line-height: 1;
 }
 
-.modal-body-pdf {
-    flex: 1;
-    padding: 0;
-    background: #e2e8f0;
-}
-
-.modal-body-pdf iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-}
+.modal-body-pdf { flex: 1; padding: 0; background: #e2e8f0; }
+.modal-body-pdf iframe { width: 100%; height: 100%; border: none; }
 
 /* ==========================================
-   BADGES DE STATUS E DASHBOARD (Mantidos das iterações anteriores)
+   BADGES DE STATUS E DASHBOARD
 ========================================== */
 .status-pag {
     display: inline-block;
@@ -307,22 +241,10 @@
     white-space: nowrap;
 }
 
-.status-pag-solicitado {
-    background-color: #007bff;
-}
-
-.status-pag-confirmado {
-    background-color: #16a34a;
-}
-
-.status-pag-pendente {
-    background-color: #eab308;
-    color: #000000 !important;
-}
-
-.status-pag-cancelado {
-    background-color: #dc2626;
-}
+.status-pag-solicitado { background-color: #007bff; }
+.status-pag-confirmado { background-color: #16a34a; }
+.status-pag-pendente { background-color: #eab308; color: #000000 !important; }
+.status-pag-cancelado { background-color: #dc2626; }
 
 .dashboard-card {
     text-align: center;
@@ -340,44 +262,10 @@
     align-items: center;
 }
 
-.btn-novo-pagamento {
-    text-decoration: none;
-    width: auto;
-    font-size: 13px;
-}
-
 .chart-container {
     width: 350px;
     height: 350px;
     margin: 0 auto;
-}
-
-/* Menu Superior de Abas */
-.top-menu-pagamentos {
-    display: flex;
-    gap: 20px;
-    border-bottom: 2px solid #e2e8f0;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-}
-
-.top-menu-pagamentos a {
-    text-decoration: none;
-    color: #64748b;
-    font-weight: bold;
-    font-size: 15px;
-    padding: 5px 10px;
-    transition: color 0.2s;
-}
-
-.top-menu-pagamentos a:hover {
-    color: #011C43;
-}
-
-.top-menu-pagamentos a.active {
-    color: #00BEDD;
-    border-bottom: 3px solid #00BEDD;
-    padding-bottom: 8px;
 }
 
 /* Filtros de Empresa */
@@ -391,11 +279,7 @@
     gap: 15px;
 }
 
-.checkbox-group {
-    display: flex;
-    gap: 20px;
-}
-
+.checkbox-group { display: flex; gap: 20px; }
 .checkbox-group label {
     cursor: pointer;
     font-size: 14px;
@@ -404,33 +288,6 @@
     align-items: center;
     gap: 5px;
 }
-
-/* Ordenação de Tabela (Setas) */
-th.sortable {
-    cursor: pointer;
-    user-select: none;
-}
-
-th.sortable:hover {
-    background-color: #f1f5f9;
-}
-
-th.sortable i {
-    color: #cbd5e1;
-    margin-left: 5px;
-    font-size: 12px;
-}
-
-th.sortable.asc i {
-    color: #00BEDD;
-}
-
-/* fa-sort-up via JS */
-th.sortable.desc i {
-    color: #00BEDD;
-}
-
-/* fa-sort-down via JS */
 
 /* ==========================================
    MENU SUPERIOR (BARRA ESCURA DO LAYOUT)
@@ -446,26 +303,68 @@ th.sortable.desc i {
     text-decoration: none;
     border-radius: 6px;
     transition: background-color 0.2s, color 0.2s;
-    background-color: transparent; /* Fundo invisível por padrão */
+    background-color: transparent;
 }
 
-/* Efeito ao passar o mouse */
-.btn-topo-header:hover {
+.btn-topo-header:hover { background-color: rgba(255, 255, 255, 0.1); }
+.btn-topo-header.active { background-color: #00BEDD; color: #ffffff; }
+.btn-topo-header i { font-size: 16px; }
+
+/* ==========================================
+   INPUTS DO MENU SUPERIOR (AZUL ESCURO)
+========================================== */
+.input-header-dark {
     background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* A classe active deixa o botão com a cor azul ciano destacada */
-.btn-topo-header.active {
-    background-color: #00BEDD; /* Azul claro do sistema */
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+    height: 32px;
+    box-sizing: border-box;
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
-.btn-topo-header i {
-    font-size: 16px;
+.input-header-dark::placeholder { color: rgba(255, 255, 255, 0.6); }
+.input-header-dark:focus { background-color: rgba(255, 255, 255, 0.2); border-color: #00BEDD; }
+.input-header-dark::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+.btn-buscar-header {
+    background-color: #00BEDD;
+    color: #ffffff;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    height: 32px;
+    transition: background-color 0.2s;
+}
+
+.btn-buscar-header:hover { background-color: #009ab3; }
+
+.search-wrapper-dark {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-wrapper-dark .input-header-dark {
+    padding-right: 28px;
+    width: 220px;
+}
+
+.search-wrapper-dark i {
+    position: absolute;
+    right: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+    font-size: 13px;
 }
 
 /* ==========================================
-   FORMULÁRIO DE CADASTRO
+   FORMULÁRIO DE CADASTRO E EDIÇÃO
 ========================================== */
 .form-header {
     display: flex;
@@ -480,20 +379,9 @@ th.sortable.desc i {
     margin-bottom: 5px;
 }
 
-.divider-header {
-    margin-bottom: 25px;
-    border-top: 1px solid #e2e8f0;
-}
-
-.divider-section {
-    margin: 25px 0;
-    border-top: 2px solid #cbd5e1;
-}
-
-.input-file {
-    width: 95%;
-    background: white;
-}
+.divider-header { margin-bottom: 25px; border-top: 1px solid #e2e8f0; }
+.divider-section { margin: 25px 0; border-top: 2px solid #cbd5e1; }
+.input-file { width: 95%; background: white; }
 
 .box-condicional {
     display: none;
@@ -504,11 +392,7 @@ th.sortable.desc i {
     border: 1px dashed #cbd5e1;
 }
 
-.label-condicional {
-    font-size: 12px;
-    margin-bottom: 5px;
-    display: block;
-}
+.label-condicional { font-size: 12px; margin-bottom: 5px; display: block; }
 
 .form-footer {
     margin-top: 30px;
@@ -518,14 +402,11 @@ th.sortable.desc i {
     gap: 15px;
 }
 
-/* ==========================================
-   FORMULÁRIO DE CADASTRO
-========================================== */
 .card {
     background: white;
     width: 96%;
-    max-width: 1000px; /* Impede que expanda demais em telas grandes */
-    margin: 25px auto; /* Centraliza horizontalmente */
+    max-width: 1000px;
+    margin: 25px auto;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
@@ -538,11 +419,7 @@ th.sortable.desc i {
     margin-bottom: 15px;
 }
 
-.field-pag {
-    display: flex;
-    flex-direction: column;
-}
-
+.field-pag { display: flex; flex-direction: column; }
 .field-pag label {
     font-size: 13px;
     font-weight: bold;
@@ -554,13 +431,13 @@ th.sortable.desc i {
 .field-pag input[type="date"],
 .field-pag select,
 .input-file {
-    width: 100%; /* Garante que todos ocupem o mesmo espaço */
+    width: 100%;
     padding: 10px 12px;
     border-radius: 6px;
     border: 1px solid #cbd5e1;
     font-size: 14px;
     background-color: #ffffff;
-    box-sizing: border-box; /* O padding não soma à largura */
+    box-sizing: border-box;
     height: 40px;
 }
 
@@ -576,9 +453,55 @@ th.sortable.desc i {
     box-sizing: border-box;
 }
 
-/* Responsividade do Formulário para Celulares */
 @media (max-width: 768px) {
-    .grid-2-colunas {
-        grid-template-columns: 1fr;
-    }
+    .grid-2-colunas { grid-template-columns: 1fr; }
+}
+
+/* ==========================================
+   ESTILIZAÇÃO DE VALIDAÇÃO DE CAMPOS 
+========================================== */
+.input-error-pag { border: 2px solid #e11d48 !important; color: #e11d48 !important; }
+.input-error { border: 2px solid #e11d48 !important; background-color: #fff1f2 !important; }
+
+/* ==========================================
+   TABELA DE PAGAMENTOS (ESTILIZAÇÃO E ESPAÇAMENTO)
+========================================== */
+#tabelaPagamentos {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+}
+
+#tabelaPagamentos th {
+    background-color: #f8fafc;
+    color: #011C43; 
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center; /* Centraliza os títulos */
+    padding: 16px 10px; /* Mais altura no cabeçalho */
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+/* Ícones de ordenação */
+#tabelaPagamentos th.sortable { cursor: pointer; user-select: none; }
+#tabelaPagamentos th.sortable:hover { background-color: #f1f5f9; }
+#tabelaPagamentos th.sortable i { color: #cbd5e1; margin-left: 5px; font-size: 12px; }
+#tabelaPagamentos th.sortable.asc i, #tabelaPagamentos th.sortable.desc i { color: #00BEDD; }
+
+#tabelaPagamentos td {
+    padding: 16px 10px; /* Aumenta o espaçamento das linhas, tirando o aspecto achatado */
+    font-size: 13px;
+    color: #1e293b;
+    text-align: center; /* Centraliza os dados */
+    vertical-align: middle; 
+    border-bottom: 1px solid #f1f5f9;
+}
+
+#tabelaPagamentos tbody tr {
+    transition: background-color 0.2s;
+}
+
+#tabelaPagamentos tbody tr:hover {
+    background-color: #f1f5f9;
 }

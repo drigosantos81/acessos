@@ -4,12 +4,55 @@ import { PagamentosTable } from '../interfaces/PagamentosTable.js';
 
 // Função auxiliar (Fora da classe para evitar erro de escopo "this")
 function formatarLista(pagamentos: any[]) {
+    const formataDataHora = (d: string) => {
+        if (!d) return '-';
+        const parts = d.split(' ');
+        if (parts.length !== 2) return d;
+        const dataParts = parts[0].split('-');
+        if (dataParts.length !== 3) return parts[0];
+        return `${dataParts[2]}/${dataParts[1]}/${dataParts[0]} | ${parts[1].substring(0, 5)}h`;
+    };
+
+    const formataDataCurta = (d: string) => {
+        if (!d) return '-';
+        const dataStr = d.split(' ')[0];
+        const parts = dataStr.split('-');
+        if (parts.length !== 3) return dataStr;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    };
+
     return pagamentos.map(pag => {
-        pag.valorF = pag.valor !== null && pag.valor !== undefined 
-            ? Number(pag.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) 
+        pag.valorF = pag.valor !== null && pag.valor !== undefined
+            ? Number(pag.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             : '0,00';
+        pag.data_abertura_br = formataDataHora(pag.data_abertura);
+        pag.data_abertura_curta = formataDataCurta(pag.data_abertura);
         return pag;
     });
+}
+
+function getFiltros(reqQuery: any, empresasAtivas: any[]) {
+    const hoje = new Date();
+    const firstDay = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const lastDay = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+    const formatDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    const dataInicio = reqQuery.dataInicio !== undefined ? String(reqQuery.dataInicio) : formatDate(firstDay);
+    const dataFim = reqQuery.dataFim !== undefined ? String(reqQuery.dataFim) : formatDate(lastDay);
+    
+    let empresasArr: number[] = [];
+    
+    // Lógica para repassar os IDs: Se a URL tem parâmetro 'empresas', e não está vazio, mapeia. 
+    // Se está vazio ('?empresas='), então desmarcou tudo, fica vazio.
+    // Se nem tem o parâmetro, assumimos carga inicial e usamos todas ativas.
+    if (reqQuery.empresas !== undefined) {
+        if (reqQuery.empresas !== '') empresasArr = String(reqQuery.empresas).split(',').map(Number);
+    } else {
+        empresasArr = empresasAtivas.map((e: any) => e.id); 
+    }
+    
+    const empresasSelecionadas = empresasArr.join(',');
+    return { dataInicio, dataFim, empresasArr, empresasSelecionadas };
 }
 
 class PagamentoControllers {
@@ -18,20 +61,22 @@ class PagamentoControllers {
         try {
             const userId = req.session.userId!;
             const isAdmin = req.session.isAdmin!;
+            
+            const empresasAtivas = await Pagamentos.getEmpresasAtivas();
+            const { dataInicio, dataFim, empresasArr, empresasSelecionadas } = getFiltros(req.query, empresasAtivas);
 
-            const statsDB = await Pagamentos.getDashboardStats(userId, isAdmin);
-            const stats = { solicitado: 0, pendente: 0, confirmado: 0, cancelado: 0 };
+            const statsDB = await Pagamentos.getDashboardStats(userId, isAdmin, dataInicio, dataFim, empresasArr);
+            const stats = { solicitado: 0, pendente: 0 };
 
             statsDB.forEach((s: any) => {
                 const status = String(s.status).toUpperCase();
                 if (status === 'SOLICITADO') stats.solicitado = s.count;
                 else if (status === 'PENDENTE') stats.pendente = s.count;
-                else if (status === 'CONFIRMADO') stats.confirmado = s.count;
-                else if (status === 'CANCELADO') stats.cancelado = s.count;
             });
 
             return res.render('../../pagamentos/pages/dashboard', {
-                stats, activeMenu: 'pagamentos', topMenu: 'painel'
+                stats, empresas: empresasAtivas, dataInicio, dataFim, empresasArr, empresasSelecionadas,
+                activeMenu: 'pagamentos', topMenu: 'painel'
             });
         } catch (error) {
             console.error("Erro ao carregar dashboard:", error);
@@ -39,40 +84,19 @@ class PagamentoControllers {
         }
     }
 
-    async listByEmpresa(req: Request, res: Response) {
-        try {
-            const empresaId = Number(req.params.id);
-            const userId = req.session.userId!;
-            const isAdmin = req.session.isAdmin!;
-
-            const empresa = await Pagamentos.getEmpresaById(empresaId);
-            if (!empresa) return res.status(404).send("Empresa não encontrada.");
-
-            let pagamentos = await Pagamentos.getByEmpresaId(empresaId, userId, isAdmin);
-            pagamentos = formatarLista(pagamentos);
-
-            return res.render('../../pagamentos/pages/index', {
-                pagamentos, activeMenu: 'pagamentos', activeSubMenu: empresaId,
-                titulo: `Pagamentos - ${empresa.nome_exibicao}`
-            });
-        } catch (error) {
-            console.error("Erro ao listar por empresa:", error);
-            return res.status(500).send("Erro ao carregar a lista.");
-        }
-    }
-
     async listPendentes(req: Request, res: Response) {
         const userId = req.session.userId!;
         const isAdmin = req.session.isAdmin!;
         
-        let pagamentos = await Pagamentos.getByStatus(['SOLICITADO', 'PENDENTE'], userId, isAdmin);
-        pagamentos = formatarLista(pagamentos);
+        const empresasAtivas = await Pagamentos.getEmpresasAtivas();
+        const { dataInicio, dataFim, empresasArr, empresasSelecionadas } = getFiltros(req.query, empresasAtivas);
         
-        const empresas = await Pagamentos.getEmpresasAtivas();
+        let pagamentos = await Pagamentos.getByStatus(['SOLICITADO', 'PENDENTE'], userId, isAdmin, dataInicio, dataFim, empresasArr);
+        pagamentos = formatarLista(pagamentos);
 
         return res.render('../../pagamentos/pages/index', {
-            pagamentos, empresas, activeMenu: 'pagamentos', topMenu: 'pendentes',
-            titulo: 'Pagamentos - Pendentes'
+            pagamentos, empresas: empresasAtivas, dataInicio, dataFim, empresasArr, empresasSelecionadas,
+            activeMenu: 'pagamentos', topMenu: 'pendentes', titulo: 'Pagamentos - Pendentes'
         });
     }
 
@@ -80,15 +104,40 @@ class PagamentoControllers {
         const userId = req.session.userId!;
         const isAdmin = req.session.isAdmin!;
         
-        let pagamentos = await Pagamentos.getByStatus(['CONFIRMADO', 'CANCELADO'], userId, isAdmin);
-        pagamentos = formatarLista(pagamentos);
+        const empresasAtivas = await Pagamentos.getEmpresasAtivas();
+        const { dataInicio, dataFim, empresasArr, empresasSelecionadas } = getFiltros(req.query, empresasAtivas);
         
-        const empresas = await Pagamentos.getEmpresasAtivas();
+        let pagamentos = await Pagamentos.getByStatus(['CONFIRMADO', 'CANCELADO'], userId, isAdmin, dataInicio, dataFim, empresasArr);
+        pagamentos = formatarLista(pagamentos);
 
         return res.render('../../pagamentos/pages/index', {
-            pagamentos, empresas, activeMenu: 'pagamentos', topMenu: 'concluidos',
-            titulo: 'Pagamentos - Concluídos'
+            pagamentos, empresas: empresasAtivas, dataInicio, dataFim, empresasArr, empresasSelecionadas,
+            activeMenu: 'pagamentos', topMenu: 'concluidos', titulo: 'Pagamentos - Confirmados'
         });
+    }
+
+    async listByEmpresa(req: Request, res: Response) {
+        try {
+            const empresaId = Number(req.params.id);
+            const userId = req.session.userId!;
+            const isAdmin = req.session.isAdmin!;
+            
+            // Aqui as empresasAtivas não importam tanto porque forçaremos a filtragem pela empresa do menu
+            const { dataInicio, dataFim } = getFiltros(req.query, []);
+            const empresa = await Pagamentos.getEmpresaById(empresaId);
+            if (!empresa) return res.status(404).send("Empresa não encontrada.");
+
+            let pagamentos = await Pagamentos.getByEmpresaId(empresaId, userId, isAdmin, dataInicio, dataFim);
+            pagamentos = formatarLista(pagamentos);
+
+            return res.render('../../pagamentos/pages/index', {
+                pagamentos, dataInicio, dataFim, activeMenu: 'pagamentos', activeSubMenu: empresaId,
+                titulo: `Pagamentos - ${empresa.nome_exibicao}`
+            });
+        } catch (error) {
+            console.error("Erro ao listar por empresa:", error);
+            return res.status(500).send("Erro ao carregar a lista.");
+        }
     }
 
     async create(req: Request, res: Response) {
@@ -261,4 +310,5 @@ class PagamentoControllers {
         }
     }
 }
+
 export default new PagamentoControllers();
