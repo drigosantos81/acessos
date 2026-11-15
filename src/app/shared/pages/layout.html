@@ -33,16 +33,18 @@
 
             {% if session.isAdmin or (session.modulosPermitidos and 'pagamentos' in session.modulosPermitidos) %}
             <li class="menu-item {% if activeMenu == 'pagamentos' %}active{% endif %}">
+                <!-- Direciona para o Painel -->
                 <a href="/pagamentos"><i class="fa-solid fa-file-invoice-dollar"></i> PAGAMENTOS</a>
 
                 <ul class="submenu-list">
                     {% for emp in counts.empresas_pagamentos %}
                     <li class="submenu-item">
-                        <!-- Limpamos os parâmetros ao clicar direto na empresa, criando um recomeço -->
-                        <a href="/pagamentos/empresa/{{ emp.id }}" class="submenu-link {% if activeSubMenu == emp.id %}active-sub{% endif %}">
+                        <!-- O clique no submenu agora redireciona para "Pendentes" passando a respectiva empresa selecionada, mantendo o intervalo de datas atual -->
+                        <a href="/pagamentos/pendentes?empresas={{ emp.id }}&dataInicio={{ dataInicio }}&dataFim={{ dataFim }}"
+                            class="submenu-link {% if activeSubMenu == emp.id %}active-sub{% endif %}">
                             <i class="fa-solid fa-chevron-right"></i> {{ emp.nome_exibicao }}
                             {% if emp.qtd > 0 %}
-                                <span class="badge-sub">{{ emp.qtd }}</span>
+                            <span class="badge-sub">{{ emp.qtd }}</span>
                             {% endif %}
                         </a>
                     </li>
@@ -52,7 +54,8 @@
             {% endif %}
 
             {% if session.isAdmin or (session.modulosPermitidos and 'fornecedores' in session.modulosPermitidos) %}
-            <li class="menu-item {% if activeMenu == 'fornecedores' or activeMenu == 'cad_fornecedor' %}active{% endif %}">
+            <li
+                class="menu-item {% if activeMenu == 'fornecedores' or activeMenu == 'cad_fornecedor' %}active{% endif %}">
                 <a href="/fornecedores"><i class="fa-solid fa-fax"></i> CADASTRO FORNECEDOR</a>
             </li>
             {% endif %}
@@ -105,30 +108,37 @@
             </div>
 
             {% elif activeMenu == 'pagamentos' %}
-            <div class="top-header-menus" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                
+            <div class="top-header-menus"
+                style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+
                 <div style="display: flex; gap: 15px;">
-                    <!-- A URL agora repassa os filtros de data e empresa atuais para persistir na navegação -->
-                    <a href="/pagamentos?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&empresas={{ empresasSelecionadas }}" class="btn-topo-header {% if topMenu == 'painel' or not topMenu %}active{% endif %}">
+                    <a href="/pagamentos?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&empresas={{ empresasSelecionadas }}"
+                        class="btn-topo-header {% if topMenu == 'painel' or not topMenu %}active{% endif %}">
                         <i class="fa-solid fa-chart-pie"></i> Painel
                     </a>
-                    <a href="/pagamentos/pendentes?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&empresas={{ empresasSelecionadas }}" class="btn-topo-header {% if topMenu == 'pendentes' %}active{% endif %}">
+                    <a href="/pagamentos/pendentes?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&empresas={{ empresasSelecionadas }}"
+                        class="btn-topo-header {% if topMenu == 'pendentes' %}active{% endif %}">
                         <i class="fa-solid fa-triangle-exclamation"></i> Pendentes
                     </a>
-                    <a href="/pagamentos/concluidos?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&empresas={{ empresasSelecionadas }}" class="btn-topo-header {% if topMenu == 'concluidos' %}active{% endif %}">
+                    <a href="/pagamentos/concluidos?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&empresas={{ empresasSelecionadas }}"
+                        class="btn-topo-header {% if topMenu == 'concluidos' %}active{% endif %}">
                         <i class="fa-solid fa-check-double"></i> Concluídos
                     </a>
                 </div>
-                
+
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <input type="date" id="filtroDataInicio" class="input-header-dark" value="{{ dataInicio }}" title="Data Início">
-                    <input type="date" id="filtroDataFim" class="input-header-dark" value="{{ dataFim }}" title="Data Fim">
-                    <button class="btn-buscar-header" onclick="aplicarFiltroDataGlobal()" title="Filtrar Período" style="margin-right: 10px;">
+                    <input type="date" id="filtroDataInicio" class="input-header-dark" value="{{ dataInicio }}"
+                        title="Data Início">
+                    <input type="date" id="filtroDataFim" class="input-header-dark" value="{{ dataFim }}"
+                        title="Data Fim">
+                    <button class="btn-buscar-header" onclick="aplicarFiltroDataGlobal()" title="Filtrar Período"
+                        style="margin-right: 10px;">
                         <i class="fa-solid fa-filter"></i>
                     </button>
 
                     <div class="search-wrapper-dark">
-                        <input type="text" id="buscaTabelaGlob" class="input-header-dark" placeholder="Buscar #, Doc, Pedido ou Fornecedor...">
+                        <input type="text" id="buscaTabelaGlob" class="input-header-dark"
+                            placeholder="Buscar #, Doc, Pedido ou Fornecedor...">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </div>
                 </div>

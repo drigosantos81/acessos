@@ -12,9 +12,6 @@ routes.get('/visualizar/:ticket', PagamentosControllers.viewOne);
 routes.get('/pendentes', PagamentosControllers.listPendentes);
 routes.get('/concluidos', PagamentosControllers.listConcluidos);
 
-// Rotas das Tabelas Filiais
-routes.get('/empresa/:id', PagamentosControllers.listByEmpresa);
-
 // Rotas de Cadastro
 routes.get('/form', PagamentosControllers.create);
 routes.post('/form', uploadPagamentos, PagamentosControllers.store);
