@@ -5,32 +5,13 @@
 {% endblock %}
 
 {% block content %}
-
 {% if success %}
 <div class="messages success">{{ success }}</div>
 {% endif %}
 
 <div class="card">
-    <div class="header-page">
+    <div class="header-page" style="margin-bottom: 25px;">
         <h2>Agendamentos</h2>
-        <input type="text" id="buscaIndex" placeholder="Nome ou Ticket...">
-
-        <!-- O input agora usa onchange e onkeypress chamando a nova função JS -->
-        <input type="date" id="dataFiltroIndex" name="data_filtro" value="{{ dataAtual }}"
-            onchange="atualizarDataIndex(this)" onkeypress="atualizarDataIndex(this, event)">
-
-        <div style="display: flex; gap: 10px;">
-            {% if session.isAdmin %}
-                <button class="button-send" style="background-color: #08A2A6;"
-                    onclick="window.location.href='/download-csv'">
-                    <i class="fa-solid fa-download"></i> Download
-                </button>
-            {% endif %}
-
-            <button class="button-send" onclick="window.location.href='/form'">
-                Solicitar Acesso
-            </button>
-        </div>
     </div>
 
     <div class="table-container">
@@ -39,20 +20,20 @@
                 <tr>
                     <th>Ticket</th>
                     <th>Nome</th>
-                    <th class="col-empresa">Empresa</th> <!-- Classe de expansão aqui -->
+                    <th class="col-empresa">Empresa</th>
                     <th>Data do<br>Acesso</th>
                     <th>Data Final</th>
                     <th>Dias</th>
                     <th>Veículo</th>
-                    <th>Solicitante</th> <!-- Nova Coluna -->
+                    <th>Solicitante</th>
                     <th>Prévia</th>
                     <th>Autorizado</th>
                 </tr>
             </thead>
-
             <tbody>
                 {% for acesso in acessos %}
-                <tr data-ticket="{{ acesso.ticket }}">
+                <!-- Caso você tenha um onclick na TR, o stopPropagation abaixo impede conflito -->
+                <tr data-ticket="{{ acesso.ticket }}" onclick="window.location.href='/visualizar/{{ acesso.ticket }}'">
                     <td>{{ acesso.ticket }}</td>
                     <td>{{ acesso.nome }}</td>
                     <td>{{ acesso.empresa }}</td>
@@ -60,35 +41,33 @@
                     <td>{{ acesso.data_limite }}</td>
                     <td>{{ acesso.qtd_dias }}</td>
                     <td>{% if acesso.com_veiculo %} Sim {% else %} Não {% endif %}</td>
+                    <td>{{ acesso.solicitante }}</td>
 
-                    <td>{{ acesso.solicitante }}</td> <!-- Novo Dado -->
-
-                    <td class="td-previa" data-ticket="{{ acesso.ticket }}">
-                        <span style="color: #00BEDD; cursor: pointer; text-decoration: underline; font-weight: 500;">
-                            Ver Prévia
-                        </span>
+                    <!-- event.stopPropagation() garante que SÓ o modal abra -->
+                    <td class="td-previa-cell" onclick="event.stopPropagation(); abrirModalPrevia('{{ acesso.ticket }}')" title="Clique para ver a prévia">
+                        Ver Prévia
                     </td>
 
-                    <td class="autorizado {{ acesso.autorizado | lower | replace('ã','a') | replace(' ','-') }}">
+                    <!-- Ícones Removidos -->
+                    <td>
                         {% if acesso.autorizado == 'ACESSO AUTORIZADO' %}
-                            <i class="fa-solid fa-circle-check" style="color: #28a745;"></i> ACESSO AUTORIZADO
+                            <span class="status-badge status-acesso-autorizado">{{ acesso.autorizado }}</span>
                         {% elif acesso.autorizado == 'EM ANÁLISE' %}
-                            <i class="fa-solid fa-circle-pause" style="color: #007bff;"></i> EM ANÁLISE
+                            <span class="status-badge status-em-analise">{{ acesso.autorizado }}</span>
                         {% elif acesso.autorizado == 'ACESSO NEGADO' %}
-                            <i class="fa-solid fa-circle-xmark" style="color: #dc3545;"></i> ACESSO NEGADO
+                            <span class="status-badge status-acesso-negado">{{ acesso.autorizado }}</span>
                         {% elif acesso.autorizado == 'PENDENTE' %}
-                            <i class="fa-solid fa-circle-exclamation" style="color: #ffc107;"></i> PENDENTE
+                            <span class="status-badge status-pendente">{{ acesso.autorizado }}</span>
                         {% else %}
-                            {{ acesso.autorizado }}
+                            <span class="status-badge status-em-analise">{{ acesso.autorizado }}</span>
                         {% endif %}
                     </td>
-
                 </tr>
+                {% else %}
+                <tr><td colspan="10" style="text-align: center;">Nenhum agendamento encontrado no período.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-
 </div>
-
 {% endblock %}

@@ -2,7 +2,7 @@ import db from "../../../config/db.js";
 import { Acesso } from "../interfaces/AcessosTable.js";
 
 export default {
-    
+
     // ==========================================
     // FUNÇÃO: ALL (Usada por Admins em consultas legadas)
     // ==========================================
@@ -46,7 +46,7 @@ export default {
             let values: any[] = [];
 
             if (termoFiltro) {
-                const termoLimpo = termoFiltro.replace(/\D/g, ''); 
+                const termoLimpo = termoFiltro.replace(/\D/g, '');
                 whereClause = "WHERE nome LIKE ? OR numero_doc LIKE ? OR ticket LIKE ?";
                 values.push(`%${termoFiltro}%`, `%${termoLimpo || termoFiltro}%`, `%${termoFiltro}%`);
             }
@@ -240,89 +240,68 @@ export default {
     },
 
     // ==========================================
-    // FUNÇÃO: ALL RESOLVED (Admins)
+    // BUSCA PARA RESOLVIDOS (Com GROUP BY)
     // ==========================================
-    async allResolved() {
-        try {
-            return await db.query(`
-                SELECT a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite,
-                    a.qtd_dias, a.com_veiculo, a.autorizado, u.name AS solicitante, a.data_solicitacao
-                FROM acesso a LEFT JOIN users u ON a.user_id = u.id
-                WHERE UPPER(a.autorizado) IN ('ACESSO AUTORIZADO', 'ACESSO NEGADO')
-                GROUP BY a.ticket ORDER BY a.data_solicitacao DESC, CAST(a.ticket AS INTEGER) ASC;
-            `);
-        } catch (error) { console.log(error); throw error; }
+    async allResolved(dataInicio: string, dataFim: string, search: string) {
+        let query = `
+            SELECT a.*, u.name AS solicitante, MIN(a.data_do_acesso) as data_do_acesso
+            FROM acesso a
+            JOIN users u ON a.user_id = u.id
+            WHERE a.autorizado IN ('ACESSO AUTORIZADO', 'ACESSO NEGADO')
+    `;
+        const params: any[] = [];
+        if (dataInicio) { query += ` AND DATE(a.data_do_acesso) >= ?`; params.push(dataInicio); }
+        if (dataFim) { query += ` AND DATE(a.data_do_acesso) <= ?`; params.push(dataFim); }
+        if (search) { query += ` AND (a.nome LIKE ? OR a.ticket LIKE ?)`; params.push(`%${search}%`, `%${search}%`); }
+
+        query += ` GROUP BY a.ticket ORDER BY MAX(a.id) DESC`;
+        const results = await db.query(query, params);
+        return Array.isArray(results) ? results : (results?.rows || []);
+    },
+
+    async findResolvedByUser(userId: number, dataInicio: string, dataFim: string, search: string) {
+        let query = `
+            SELECT a.*, u.name AS solicitante, MIN(a.data_do_acesso) as data_do_acesso
+            FROM acesso a
+            JOIN users u ON a.user_id = u.id
+            WHERE a.autorizado IN ('ACESSO AUTORIZADO', 'ACESSO NEGADO') AND a.user_id = ?
+    `;
+        const params: any[] = [userId];
+        if (dataInicio) { query += ` AND DATE(a.data_do_acesso) >= ?`; params.push(dataInicio); }
+        if (dataFim) { query += ` AND DATE(a.data_do_acesso) <= ?`; params.push(dataFim); }
+        if (search) { query += ` AND (a.nome LIKE ? OR a.ticket LIKE ?)`; params.push(`%${search}%`, `%${search}%`); }
+
+        query += ` GROUP BY a.ticket ORDER BY MAX(a.id) DESC`;
+        const results = await db.query(query, params);
+        return Array.isArray(results) ? results : (results?.rows || []);
     },
 
     // ==========================================
-    // FUNÇÃO: FIND RESOLVED BY USER (Comuns)
+    // EXPORTAÇÃO CSV (SEM GROUP BY - Retorna todos os dias reais)
     // ==========================================
-    async findResolvedByUser(userId: number) {
-        try {
-            return await db.query(`
-            SELECT a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite,
-                a.qtd_dias, a.com_veiculo, a.autorizado, u.name AS solicitante, a.data_solicitacao
-            FROM acesso a LEFT JOIN users u ON a.user_id = u.id
-            WHERE a.user_id = ? AND UPPER(a.autorizado) IN ('ACESSO AUTORIZADO', 'ACESSO NEGADO')
-            GROUP BY a.ticket ORDER BY a.data_solicitacao DESC, CAST(a.ticket AS INTEGER) ASC;
-            `, [userId]);
-        } catch (error) { console.log(error); throw error; }
-    },
+    async getForCSV(dataInicio: string, dataFim: string, search: string, statusFilter?: string[], userId?: number) {
+        let query = `
+            SELECT a.*, u.name AS solicitante
+            FROM acesso a
+            JOIN users u ON a.user_id = u.id
+            WHERE 1=1
+    `;
+        const params: any[] = [];
 
-    // ==========================================
-    // FUNÇÃO: ALL PENDING (Admins)
-    // ==========================================
-    async allPending() {
-        try {
-            return await db.query(`
-                SELECT a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite,
-                    a.qtd_dias, a.com_veiculo, a.autorizado, u.name AS solicitante, a.data_solicitacao
-                FROM acesso a LEFT JOIN users u ON a.user_id = u.id
-                WHERE UPPER(a.autorizado) IN ('EM ANÁLISE', 'PENDENTE')
-                GROUP BY a.ticket ORDER BY a.data_solicitacao DESC, CAST(a.ticket AS INTEGER) ASC;
-            `);
-        } catch (error) { console.log(error); throw error; }
-    },
+        if (userId) { query += ` AND a.user_id = ?`; params.push(userId); }
+        if (dataInicio) { query += ` AND DATE(a.data_do_acesso) >= ?`; params.push(dataInicio); }
+        if (dataFim) { query += ` AND DATE(a.data_do_acesso) <= ?`; params.push(dataFim); }
+        if (search) { query += ` AND (a.nome LIKE ? OR a.ticket LIKE ?)`; params.push(`%${search}%`, `%${search}%`); }
 
-    // ==========================================
-    // FUNÇÃO: FIND PENDING BY USER (Comuns)
-    // ==========================================
-    async findPendingByUser(userId: number) {
-        try {
-            return await db.query(`
-                SELECT a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite,
-                    a.qtd_dias, a.com_veiculo, a.autorizado, u.name AS solicitante, a.data_solicitacao
-                FROM acesso a LEFT JOIN users u ON a.user_id = u.id
-                WHERE a.user_id = ? AND UPPER(a.autorizado) IN ('EM ANÁLISE', 'PENDENTE')
-                GROUP BY a.ticket ORDER BY a.data_solicitacao DESC, CAST(a.ticket AS INTEGER) ASC;
-            `, [userId]);
-        } catch (error) { console.log(error); throw error; }
-    },
-
-    // ==========================================
-    // FUNÇÃO: GET FOR CSV
-    // ==========================================
-    async getForCSV(userId?: number) {
-        try {
-            let query = `
-                SELECT ticket, nome, doc_nacional, numero_doc, empresa, data_do_acesso, 
-                qtd_dias, data_limite, com_veiculo, placa, tipo_veiculo, cnh, cat_habilitacao, 
-                data_validade_cnh, justificativa, portoes, visita_a, telefone, tel_interno, 
-                autorizado, data_solicitacao 
-                FROM acesso 
-                WHERE UPPER(autorizado) NOT IN ('ACESSO AUTORIZADO', 'ACESSO NEGADO')
-            `;
-            let values: any[] = [];
-            if (userId) {
-                query += ` AND user_id = ?`;
-                values.push(userId);
-            }
-            query += ` ORDER BY data_do_acesso ASC;`;
-            return await db.query(query, values);
-        } catch (error) {
-            console.log("Erro no getForCSV:", error);
-            throw error;
+        if (statusFilter && statusFilter.length > 0) {
+            query += ` AND a.autorizado IN (${statusFilter.map(() => '?').join(',')})`;
+            params.push(...statusFilter);
         }
+
+        // AQUI NÃO TEM GROUP BY! Ele exporta linha por linha para a portaria ver cada dia!
+        query += ` ORDER BY a.id DESC`;
+        const results = await db.query(query, params);
+        return Array.isArray(results) ? results : (results?.rows || []);
     },
 
     // ==========================================
@@ -346,77 +325,52 @@ export default {
     },
 
     // ==========================================
-    // FUNÇÃO: GET INDEX TABLE (Tela Solicitações)
+    // BUSCA PARA SOLICITAÇÕES (Apenas Pendentes/Em Análise com GROUP BY)
     // ==========================================
-    async getIndexTable(dataSelecionada: string, userId?: number) {
-        try {
-            const today = new Date().toISOString().slice(0, 10);
-            let whereClause = "";
-            let values: any[] = [];
+    async getIndexTable(dataInicio: string, dataFim: string, search: string, userId?: number) {
+        let query = `
+            SELECT a.*, u.name AS solicitante, MIN(a.data_do_acesso) as data_do_acesso
+            FROM acesso a
+            JOIN users u ON a.user_id = u.id
+            WHERE a.autorizado IN ('EM ANÁLISE', 'PENDENTE')
+    `;
+        const params: any[] = [];
 
-            if (dataSelecionada === today || !dataSelecionada) {
-                // Traz TUDO do dia atual (qualquer status) + TUDO que for Em Análise/Pendente (de qualquer data)
-                whereClause = `WHERE (a.data_do_acesso = ? OR UPPER(a.autorizado) IN ('EM ANÁLISE', 'PENDENTE'))`;
-                values.push(today);
-            } else {
-                // Traz rigorosamente tudo da data selecionada no calendário
-                whereClause = `WHERE a.data_do_acesso = ?`;
-                values.push(dataSelecionada);
-            }
+        if (userId) { query += ` AND a.user_id = ?`; params.push(userId); }
+        if (dataInicio) { query += ` AND DATE(a.data_do_acesso) >= ?`; params.push(dataInicio); }
+        if (dataFim) { query += ` AND DATE(a.data_do_acesso) <= ?`; params.push(dataFim); }
+        if (search) { query += ` AND (a.nome LIKE ? OR a.ticket LIKE ?)`; params.push(`%${search}%`, `%${search}%`); }
 
-            if (userId) {
-                whereClause += " AND a.user_id = ?";
-                values.push(userId);
-            }
-
-            const query = `
-                SELECT a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite, a.qtd_dias,
-                    a.com_veiculo, a.justificativa, a.autorizado, u.name AS solicitante, a.data_solicitacao
-                FROM acesso a
-                LEFT JOIN users u ON a.user_id = u.id
-                ${whereClause}
-                GROUP BY a.ticket
-                ORDER BY 
-                    CASE UPPER(a.autorizado)
-                        WHEN 'EM ANÁLISE' THEN 1
-                        WHEN 'PENDENTE' THEN 2
-                        ELSE 3
-                    END ASC,
-                    a.data_do_acesso DESC, 
-                    CAST(a.ticket AS INTEGER) ASC;
-            `;
-            return await db.query(query, values);
-        } catch (error) {
-            console.log("Erro no getIndexTable:", error);
-            throw error;
-        }
+        // Agrupa pelo ticket para não repetir na tela, mostrando 1 linha por agendamento
+        query += ` GROUP BY a.ticket ORDER BY MAX(a.id) DESC`;
+        const results = await db.query(query, params);
+        return Array.isArray(results) ? results : (results?.rows || []);
     },
 
     // ==========================================
-    // FUNÇÃO: GET MASS EDIT TABLE (Edição Massiva)
+    // BUSCA PARA EDIÇÃO MASSIVA (Com GROUP BY)
     // ==========================================
-    async getMassEditTable(dataInicio: string, dataFim: string) {
-        try {
-            let whereClause = "";
-            let values: any[] = [];
-            if (dataInicio && dataFim) {
-                whereClause = "WHERE a.data_do_acesso >= ? AND a.data_do_acesso <= ?";
-                values.push(dataInicio, dataFim);
-            } else if (dataInicio) {
-                whereClause = "WHERE a.data_do_acesso >= ?";
-                values.push(dataInicio);
-            }
-            const query = `
-                SELECT a.ticket, a.nome, a.empresa, MIN(a.data_do_acesso) AS data_do_acesso, a.data_limite, a.qtd_dias,
-                    a.com_veiculo, a.autorizado, u.name AS solicitante, a.data_solicitacao
-                FROM acesso a
-                LEFT JOIN users u ON a.user_id = u.id
-                ${whereClause}
-                GROUP BY a.ticket
-                ORDER BY a.data_do_acesso DESC, CAST(a.ticket AS INTEGER) ASC;
-            `;
-            return await db.query(query, values);
-        } catch (error) { console.log(error); throw error; }
+    async getMassEditTable(dataInicio: string, dataFim: string, search: string, statusFilter?: string[]) {
+        let query = `
+            SELECT a.*, u.name AS solicitante, MIN(a.data_do_acesso) as data_do_acesso
+            FROM acesso a
+            JOIN users u ON a.user_id = u.id
+            WHERE 1=1
+    `;
+        const params: any[] = [];
+
+        if (dataInicio) { query += ` AND DATE(a.data_do_acesso) >= ?`; params.push(dataInicio); }
+        if (dataFim) { query += ` AND DATE(a.data_do_acesso) <= ?`; params.push(dataFim); }
+        if (search) { query += ` AND (a.nome LIKE ? OR a.ticket LIKE ?)`; params.push(`%${search}%`, `%${search}%`); }
+
+        if (statusFilter && statusFilter.length > 0) {
+            query += ` AND a.autorizado IN (${statusFilter.map(() => '?').join(',')})`;
+            params.push(...statusFilter);
+        }
+
+        query += ` GROUP BY a.ticket ORDER BY MAX(a.id) DESC`;
+        const results = await db.query(query, params);
+        return Array.isArray(results) ? results : (results?.rows || []);
     },
 
     // ==========================================

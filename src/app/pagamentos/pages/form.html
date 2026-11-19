@@ -42,7 +42,8 @@
                 <select name="empresa_id" required>
                     <option value="">Selecione...</option>
                     {% for emp in empresas %}
-                        <option value="{{ emp.id }}">{{ emp.nome_exibicao }} ({{ emp.cnpj }})</option>
+                        <!-- Usa nome_fantasia se tiver, senão usa nome_exibicao -->
+                        <option value="{{ emp.id }}">{{ emp.nome_fantasia | default(emp.nome_exibicao) }} ({{ emp.cnpj }})</option>
                     {% endfor %}
                 </select>
             </div>

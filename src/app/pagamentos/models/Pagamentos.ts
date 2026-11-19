@@ -59,7 +59,7 @@ class Pagamentos {
         let query = `
             SELECT p.ticket, p.status, p.numero_nota_fatura, p.razao_social, p.valor,
                    p.data_vencimento, p.anexo_nota_fatura, p.anexo_boleto, p.data_abertura, p.pedido_compra,
-                   e.nome_exibicao AS empresa_nome, e.id AS empresa_id, u.name AS user_nome
+                   e.nome_exibicao AS empresa_nome, e.nome_fantasia, e.id AS empresa_id, u.name AS user_nome
             FROM pagamentos p
             JOIN empresa e ON p.empresa_id = e.id
             JOIN users u ON p.user_id = u.id
@@ -104,7 +104,7 @@ class Pagamentos {
         let query = `
             SELECT p.ticket, p.status, p.numero_nota_fatura, p.valor, p.data_vencimento, 
                    p.razao_social, p.anexo_nota_fatura, p.anexo_boleto, p.data_abertura, p.pedido_compra,
-                   e.nome_exibicao AS empresa_nome, u.name AS user_nome 
+                   e.nome_exibicao AS empresa_nome, e.nome_fantasia, u.name AS user_nome 
             FROM pagamentos p
             JOIN users u ON p.user_id = u.id
             JOIN empresa e ON p.empresa_id = e.id
@@ -145,7 +145,7 @@ class Pagamentos {
     }
 
     async getEmpresasAtivas() {
-        const results = await db.query("SELECT id, nome_exibicao, cnpj FROM empresa WHERE ativo = 1 ORDER BY nome_exibicao ASC");
+        const results = await db.query("SELECT id, nome_exibicao, nome_fantasia, cnpj FROM empresa WHERE ativo = 1 ORDER BY nome_exibicao ASC");
         return Array.isArray(results) ? results : (results?.rows || []);
     }
 
@@ -156,7 +156,7 @@ class Pagamentos {
 
     async getByTicket(ticket: number) {
         const query = `
-            SELECT p.*, e.nome_exibicao AS empresa_nome, 
+            SELECT p.*, e.nome_exibicao AS empresa_nome, nome_fantasia,
                    u.name AS user_nome, u.email AS user_email, u.telefone AS user_telefone, u.empresa AS user_empresa
             FROM pagamentos p
             JOIN empresa e ON p.empresa_id = e.id

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-mail - Portal de Atendimento</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #435773;
+            /* Cor Secundária de texto da paleta */
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- Header --- */
+        .header {
+            background-color: #00BEDD;
+            /* Ciano Principal */
+            color: #011C43;
+            /* Azul Escuro */
+            padding: 15px 25px;
+            border-bottom: 4px solid #011C43;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .header span {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* --- Body --- */
+        .email-body {
+            padding: 20px 25px;
+            line-height: 1.35;
+            font-size: 14px;
+        }
+
+        .email-body p {
+            margin-bottom: 10px;
+        }
+
+        /* --- Caixa do Ticket --- */
+        .ticket-box {
+            background-color: #eaf8fb;
+            /* Fundo ciano bem claro */
+            border-left: 4px solid #011C43;
+            padding: 5px 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 200px;
+        }
+
+        .ticket-label {
+            font-size: 12px;
+            color: #435773;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .ticket-number {
+            font-size: 22px;
+            font-weight: bold;
+            color: #011C43;
+            margin: 0;
+        }
+
+        /* --- Tabela de Detalhes --- */
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        .details-table th,
+        .details-table td {
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        .details-table th {
+            color: #435773;
+            font-weight: normal;
+            width: 30%;
+        }
+
+        /* --- Badges de Status (Cores Solicitadas) --- */
+        .status-badge {
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #ffffff;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .status-em-analise {
+            background-color: #007bff;
+        }
+
+        /* Solicitado / Em Análise */
+        .status-acesso-autorizado {
+            background-color: #16a34a;
+        }
+
+        /* Confirmado / Autorizado */
+        .status-pendente {
+            background-color: #eab308;
+            color: #000000 !important;
+        }
+
+        /* Pendente */
+        .status-acesso-negado {
+            background-color: #dc2626;
+        }
+
+        /* Cancelado / Negado */
+
+        /* --- Footer --- */
+        .email-footer {
+            background-color: #F2F2F2;
+            padding: 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #435773;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="email-container">
+        <div class="header">
+            <h2>Wilson,Sons</h2>
+            <span>PORTAL DE ATENDIMENTO - TECON SALVADOR</span>
+        </div>
+        <div class="email-body">
+            <h3 style="margin: 0 0 10px 0; color: #011C43; font-size: 16px;">Solicitação Registrada</h3>
+
+            <!-- A variável aqui pode ser solicitante, user_name ou acesso.user_name dependendo de como você enviar para o template do e-mail -->
+            <p>Olá, <strong>{{ solicitante }}</strong>,</p>
+
+            <p>Sua solicitação de acesso foi registrada com sucesso em nosso portal. Abaixo está o número do seu ticket
+                gerado para acompanhamento.</p>
+
+            <div style="text-align: center;">
+                <div class="ticket-box">
+                    <div class="ticket-label">Ticket</div>
+                    <div class="ticket-number">{{ acesso.ticket }}</div>
+                </div>
+            </div>
+
+            <table class="details-table">
+                <tr>
+                    <th>Empresa:</th>
+                    <td>{{ acesso.empresa }}</td>
+                </tr>
+                <tr>
+                    <th>Visitante:</th>
+                    <td>{{ acesso.nome | upper }}</td>
+                </tr>
+                <tr>
+                    <th>Data do Acesso:</th>
+                    <!-- Como a data_limite já é calculada no controller, utilizamos as duas variáveis aqui -->
+                    <td>{{ acesso.data_do_acesso }} à {{ acesso.data_limite }}</td>
+                </tr>
+                <tr>
+                    <th>Veículo:</th>
+                    <td>
+                        {% if acesso.com_veiculo %}
+                        Sim | Placa: {{ acesso.placa }}
+                        {% else %}
+                        Não
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Status:</th>
+                    <td>
+                        {% if acesso.autorizado == 'ACESSO AUTORIZADO' %}
+                        <span class="status-badge status-acesso-autorizado">ACESSO AUTORIZADO</span>
+                        {% elif acesso.autorizado == 'EM ANÁLISE' %}
+                        <span class="status-badge status-em-analise">EM ANÁLISE</span>
+                        {% elif acesso.autorizado == 'ACESSO NEGADO' %}
+                        <span class="status-badge status-acesso-negado">ACESSO NEGADO</span>
+                        {% elif acesso.autorizado == 'PENDENTE' %}
+                        <span class="status-badge status-pendente">PENDENTE</span>
+                        {% else %}
+                        <span class="status-badge status-em-analise">{{ acesso.autorizado }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+
+            <p style="margin-top: 15px;">Você pode consultar o status atualizado ou ver a prévia a qualquer momento
+                através do Portal de Atendimento.</p>
+            <p>Atenciosamente,<br>Equipe Tecon Salvador</p>
+        </div>
+        <div class="email-footer">
+            Este é um e-mail automático. Por favor, não responda.<br>
+            © 2026 Wilson Sons.
+        </div>
+    </div>
+
+</body>
+
+</html>

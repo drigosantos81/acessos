@@ -4,18 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     {% block head %}
     <title>Portal de Atendimento</title>
     {% endblock %}
-
     <link rel="stylesheet" href="/css/acessos/styleAcessos.css">
     <link rel="stylesheet" href="/css/acessos/styleModalAcessos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/shared/style-layout.css">
 </head>
 
 <body>
-
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="/img/logo-ws.png" alt="Logo TECON">
@@ -24,7 +22,6 @@
         </div>
 
         <ul class="sidebar-menu">
-
             {% if session.isAdmin or (session.modulosPermitidos and 'acessos' in session.modulosPermitidos) %}
             <li class="menu-item {% if activeMenu == 'acessos' or activeMenu == 'form_acessos' %}active{% endif %}">
                 <a href="/"><i class="fa-solid fa-address-card"></i> ACESSOS</a>
@@ -33,19 +30,14 @@
 
             {% if session.isAdmin or (session.modulosPermitidos and 'pagamentos' in session.modulosPermitidos) %}
             <li class="menu-item {% if activeMenu == 'pagamentos' %}active{% endif %}">
-                <!-- Direciona para o Painel -->
                 <a href="/pagamentos"><i class="fa-solid fa-file-invoice-dollar"></i> PAGAMENTOS</a>
-
                 <ul class="submenu-list">
                     {% for emp in counts.empresas_pagamentos %}
                     <li class="submenu-item">
-                        <!-- O clique no submenu agora redireciona para "Pendentes" passando a respectiva empresa selecionada, mantendo o intervalo de datas atual -->
                         <a href="/pagamentos/pendentes?empresas={{ emp.id }}&dataInicio={{ dataInicio }}&dataFim={{ dataFim }}"
                             class="submenu-link {% if activeSubMenu == emp.id %}active-sub{% endif %}">
                             <i class="fa-solid fa-chevron-right"></i> {{ emp.nome_exibicao }}
-                            {% if emp.qtd > 0 %}
-                            <span class="badge-sub">{{ emp.qtd }}</span>
-                            {% endif %}
+                            {% if emp.qtd > 0 %}<span class="badge-sub">{{ emp.qtd }}</span>{% endif %}
                         </a>
                     </li>
                     {% endfor %}
@@ -65,7 +57,6 @@
                 <a href="/avarias"><i class="fa-solid fa-car-burst"></i> AVARIAS</a>
             </li>
             {% endif %}
-
         </ul>
 
         <div class="sidebar-footer">
@@ -75,7 +66,6 @@
                     <i class="fa-solid fa-user"></i> {{ session.userName }}
                 </a>
             </div>
-
             <form action="/logout" method="POST" class="sidebar-logout-form">
                 <button type="submit" class="sidebar-logout-btn">
                     Sair <i class="fa-solid fa-right-from-bracket"></i>
@@ -90,27 +80,65 @@
     </div>
 
     <div class="main-content">
-
         <div class="menu">
 
             {% if activeMenu == 'acessos' %}
-            <div class="menu-links">
-                <a href="/" class="menu-link-btn {% if activeTab == 'abertos' %}active{% endif %}">
-                    <i class="fa-solid fa-folder-open"></i> Solicitações
-                </a>
+            <div class="top-header-menus">
+
+                <div style="display: flex; gap: 15px;">
+                    <a href="/?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&search={{ search }}"
+                        class="btn-topo-header {% if activeTab == 'abertos' %}active{% else %}inactive{% endif %}">
+                        <i class="fa-solid fa-folder-open"></i> Solicitações
+                        {% if counts.abertos > 0 %}<span class="badge-counter">{{ counts.abertos }}</span>{% endif %}
+                    </a>
+
+                    {% if session.isAdmin %}
+                    <a href="/admin/edit?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&search={{ search }}"
+                        class="btn-topo-header {% if activeTab == 'edit' %}active{% else %}inactive{% endif %}">
+                        <i class="fa-solid fa-pen-to-square"></i> Massivo
+                    </a>
+                    {% endif %}
+
+                    <a href="/resolvidos?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&search={{ search }}"
+                        class="btn-topo-header {% if activeTab == 'resolvidos' %}active{% else %}inactive{% endif %}">
+                        <i class="fa-solid fa-check-double"></i> Resolvidos
+                    </a>
+                </div>
+
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="date" id="filtroAcessosInicio" class="input-header-dark" value="{{ dataInicio }}"
+                        title="Data Início">
+                    <input type="date" id="filtroAcessosFim" class="input-header-dark" value="{{ dataFim }}"
+                        title="Data Fim">
+
+                    <button class="btn-buscar-header" onclick="aplicarFiltroAcessos({key: 'Enter'})"
+                        title="Filtrar Período" style="margin-right: 10px;">
+                        <i class="fa-solid fa-filter"></i>
+                    </button>
+
+                    <div class="search-wrapper-dark">
+                        <input type="text" id="buscaAcessosInput" class="input-header-dark" value="{{ search }}"
+                            placeholder="Buscar Nome ou Ticket..." onkeypress="aplicarFiltroAcessos(event)">
+                        <i class="fa-solid fa-magnifying-glass" style="cursor: pointer; pointer-events: auto;"
+                            onclick="aplicarFiltroAcessos({key: 'Enter'})"></i>
+                    </div>
+
+                    <a href="/form" class="btn-action-padrao btn-novo"
+                        style="margin-left: 10px; height: 30px; padding: 4px 15px; width: auto; font-size: 13px; color: white; display: flex; align-items: center;">
+                        Solicitar Acesso
+                    </a>
+                </div>
             </div>
 
             {% elif activeMenu == 'form_acessos' %}
-            <div class="menu-links">
-                <div class="menu-link-btn active" style="cursor: default; pointer-events: none;">
+            <div class="top-header-menus">
+                <div class="btn-topo-header active" style="cursor: default; pointer-events: none;">
                     <i class="fa-solid fa-folder-open"></i> Nova Solicitação
                 </div>
             </div>
 
             {% elif activeMenu == 'pagamentos' %}
-            <div class="top-header-menus"
-                style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-
+            <div class="top-header-menus">
                 <div style="display: flex; gap: 15px;">
                     <a href="/pagamentos?dataInicio={{ dataInicio }}&dataFim={{ dataFim }}&empresas={{ empresasSelecionadas }}"
                         class="btn-topo-header {% if topMenu == 'painel' or not topMenu %}active{% endif %}">
@@ -135,19 +163,17 @@
                         style="margin-right: 10px;">
                         <i class="fa-solid fa-filter"></i>
                     </button>
-
                     <div class="search-wrapper-dark">
                         <input type="text" id="buscaTabelaGlob" class="input-header-dark"
                             placeholder="Buscar #, Doc, Pedido ou Fornecedor...">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </div>
                 </div>
-
             </div>
 
             {% elif activeMenu == 'avarias' %}
-            <div class="menu-links">
-                <a href="/avarias" class="menu-link-btn active">
+            <div class="top-header-menus">
+                <a href="/avarias" class="btn-topo-header active">
                     <i class="fa-solid fa-car-burst"></i> Módulo Avarias
                 </a>
             </div>

@@ -14,8 +14,8 @@ async function createSuperAdmin() {
             VALUES (?, ?, ?, ?)
         `;
         const values = [
-            'Marcela Macedo',
-            'marcela.macedo@wilsonsons.com.br', 
+            'Emanuele Neri',
+            'emanuele.neri@wilsonsons.com.br', 
             passwordHash,
             0 // 1 define que o usuário é Administrador
         ];

@@ -6,9 +6,8 @@
 
 {% block content %}
 <div class="card">
-    <div class="header-page">
+    <div class="header-page" style="margin-bottom: 25px;">
         <h2>Solicitações Pendentes e Atrasadas</h2>
-        <input type="text" id="buscaNome" placeholder="Nome ou Ticket...">
     </div>
 
     <div class="table-container">
@@ -28,7 +27,7 @@
             </thead>
             <tbody>
                 {% for acesso in acessos %}
-                <tr data-ticket="{{ acesso.ticket }}">
+                <tr data-ticket="{{ acesso.ticket }}" onclick="window.location.href='/visualizar/{{ acesso.ticket }}'">
                     <td>{{ acesso.ticket }}</td>
                     <td>{{ acesso.nome }}</td>
                     <td>{{ acesso.empresa }}</td>
@@ -36,25 +35,23 @@
                     <td>{{ acesso.data_limite }}</td>
                     <td>{{ acesso.qtd_dias }}</td>
                     <td>{% if acesso.com_veiculo %} Sim {% else %} Não {% endif %}</td>
-                    <td class="td-previa" data-ticket="{{ acesso.ticket }}">
-                        <span style="color: #00BEDD; cursor: pointer; text-decoration: underline; font-weight: 500;">
-                            Ver Prévia
-                        </span>
+                    
+                    <td class="td-previa-cell" onclick="event.stopPropagation(); abrirModalPrevia('{{ acesso.ticket }}')" title="Clique para ver a prévia">
+                        Ver Prévia
                     </td>
-                    <td class="autorizado {{ acesso.autorizado | lower | replace('ã','a') | replace(' ','-') }}">
-                        {% if acesso.autorizado == 'ACESSO AUTORIZADO' %}
-                            <i class="fa-solid fa-circle-check" style="color: #28a745;"></i> ACESSO AUTORIZADO
-                        {% elif acesso.autorizado == 'EM ANÁLISE' %}
-                            <i class="fa-solid fa-circle-pause" style="color: #007bff;"></i> EM ANÁLISE
-                        {% elif acesso.autorizado == 'ACESSO NEGADO' %}
-                            <i class="fa-solid fa-circle-xmark" style="color: #dc3545;"></i> ACESSO NEGADO
+
+                    <td>
+                        {% if acesso.autorizado == 'EM ANÁLISE' %}
+                            <span class="status-badge status-em-analise">{{ acesso.autorizado }}</span>
                         {% elif acesso.autorizado == 'PENDENTE' %}
-                            <i class="fa-solid fa-circle-exclamation" style="color: #ffc107;"></i> PENDENTE
+                            <span class="status-badge status-pendente">{{ acesso.autorizado }}</span>
                         {% else %}
-                            {{ acesso.autorizado }}
+                            <span class="status-badge status-em-analise">{{ acesso.autorizado }}</span>
                         {% endif %}
                     </td>
                 </tr>
+                {% else %}
+                <tr><td colspan="9" style="text-align: center;">Nenhuma solicitação pendente no período.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

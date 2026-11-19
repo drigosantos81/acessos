@@ -1,0 +1,127 @@
+/* ==========================================
+   MENU SUPERIOR (BARRA ESCURA DO LAYOUT)
+========================================== */
+.menu {
+    background: #011C43;
+    width: 100%;
+    padding: 12px 25px; /* Reduzido o padding para deixar a barra mais fina */
+    box-sizing: border-box;
+    margin: 0;
+    border-radius: 0 !important;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-header-menus {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* Os botões de navegação das abas */
+.btn-topo-header, .menu-link-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px; /* Diminuído para um tamanho mais sutil */
+    color: #ffffff !important;
+    font-weight: bold;
+    font-size: 14px; /* Fonte levemente menor */
+    text-decoration: none !important;
+    border-radius: 6px;
+    background-color: transparent;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-topo-header:hover, .menu-link-btn:hover { 
+    background-color: rgba(255, 255, 255, 0.1); 
+}
+
+/* O botão selecionado */
+.btn-topo-header.active, .menu-link-btn.active { 
+    background-color: #00BEDD; 
+    color: #ffffff !important; 
+}
+
+/* O botão desativado explicitamente (Acessos) */
+.btn-topo-header.inactive, .menu-link-btn.inactive { 
+    background-color: rgba(255, 255, 255, 0.1); 
+    color: #ffffff !important; 
+}
+
+.btn-topo-header i, .menu-link-btn i { font-size: 14px; } /* Ícone menor */
+
+/* Contadores vermelhos nos botões */
+.badge-counter {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background-color: #e83f5b;
+    color: white;
+    font-size: 10px; /* Reduzido */
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 50%;
+    border: 2px solid #011C43;
+}
+
+/* ==========================================
+   INPUTS DE BUSCA E DATA DO MENU AZUL ESCURO
+========================================== */
+.input-header-dark {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+    height: 30px; /* Diminuído para alinhar com os novos botões */
+    box-sizing: border-box;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.input-header-dark::placeholder { color: rgba(255, 255, 255, 0.6); }
+.input-header-dark:focus { background-color: rgba(255, 255, 255, 0.2); border-color: #00BEDD; }
+.input-header-dark::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+/* O botão do funil de Pagamentos */
+.btn-buscar-header {
+    background-color: #00BEDD;
+    color: #ffffff;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    height: 30px; /* Igual aos inputs */
+    transition: background-color 0.2s;
+}
+
+.btn-buscar-header:hover { background-color: #009ab3; }
+
+.search-wrapper-dark {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-wrapper-dark .input-header-dark {
+    padding-right: 28px;
+    width: 200px; /* Largura reduzida para o campo de busca */
+}
+
+.search-wrapper-dark i {
+    position: absolute;
+    right: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+    font-size: 13px;
+}
