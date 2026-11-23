@@ -1,4 +1,7 @@
 import { Request, Response } from 'express';
+import path from 'path';
+import fs from 'fs';
+import { uploadDir } from '../../shared/middlewares/upload.js';
 import Pagamentos from '../models/Pagamentos.js';
 import { PagamentosTable } from '../interfaces/PagamentosTable.js';
 
@@ -302,6 +305,65 @@ class PagamentoControllers {
             return res.status(500).send("Erro ao atualizar solicitação.");
         }
     }
+
+    // Função acionada quando o Admin clica em "Assumir Tarefa"
+    async assumir(req: Request, res: Response) {
+        try {
+            const ticket = Number(req.params.ticket);
+            const adminId = req.session.userId!; // Garante que é o admin logado
+            
+            await Pagamentos.assumirTarefa(ticket, adminId);
+            return res.redirect(`/pagamentos/visualizar/${ticket}`);
+        } catch (error) {
+            console.error("Erro ao assumir tarefa:", error);
+            return res.status(500).send("Erro ao assumir a solicitação.");
+        }
+    }
+
+    // Função acionada quando o Admin clica em "Devolver para Ajuste"
+    async devolverPendente(req: Request, res: Response) {
+        try {
+            const ticket = Number(req.params.ticket);
+            // Captura a string de campos selecionados pelo Admin no formulário
+            const camposPendentes = req.body.campos_selecionados || ''; 
+            
+            await Pagamentos.devolverTarefaPendente(ticket, camposPendentes);
+            return res.redirect(`/pagamentos/visualizar/${ticket}`);
+        } catch (error) {
+            console.error("Erro ao devolver tarefa:", error);
+            return res.status(500).send("Erro ao processar a devolução.");
+        }
+    }
+
+    async downloadAnexo(req: Request, res: Response) {
+        try {
+            const nomeArquivo = path.basename(String(req.params.arquivo));
+            const caminhoCompleto = path.join(uploadDir, nomeArquivo);
+
+            if (!fs.existsSync(caminhoCompleto)) {
+                return res.status(404).send('Arquivo não encontrado.');
+            }
+
+            const isDownload = req.query.download === '1';
+
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+
+            if (isDownload) {
+                res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+                res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
+            } else {
+                // Permite visualização apenas dentro de iframes do próprio domínio
+                res.setHeader('Content-Security-Policy', "frame-ancestors 'self'");
+                res.setHeader('Content-Disposition', `inline; filename="${nomeArquivo}"`);
+            }
+
+            return res.sendFile(caminhoCompleto);
+        } catch (error) {
+            console.error('Erro ao processar anexo:', error);
+            return res.status(500).send('Erro ao processar o arquivo.');
+        }
+    }
+
 }
 
 export default new PagamentoControllers();

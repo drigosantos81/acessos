@@ -13,7 +13,10 @@ const sqliteDb = new sqlite3.Database(dbPath, (err: any) => {
     if (err) {
         console.error('Erro ao conectar ao banco de dados SQLite:', err.message);
     } else {
-        console.log('✅ Conectado ao banco SQLite com sucesso!');
+        if (process.env.NODE_ENV !== 'test') {
+            console.log('✅ Conectado ao banco SQLite com sucesso!');
+        }
+        
         // Ativa as chaves estrangeiras
         sqliteDb.run('PRAGMA foreign_keys = ON;'); 
         // ATIVA O MODO DE ALTA CONCORRÊNCIA DO SQLITE

@@ -109,8 +109,8 @@
                 <span class="view-info-label">Nota / Fatura / Recibo</span>
                 <span class="view-info-value mt-5">
                     {% if pagamento.anexo_nota_fatura %}
-                    <!-- Caminho corrigido: apenas /uploads/nome_do_arquivo -->
-                    <span class="anexo-link btn-open-pdf" data-url="/uploads/{{ pagamento.anexo_nota_fatura }}">
+                    <!-- Caminho corrigido: apenas /pagamentos/download/nome_do_arquivo -->
+                    <span class="anexo-link btn-open-pdf" data-url="/pagamentos/download/{{ pagamento.anexo_nota_fatura }}">
                         <i class="fa-solid fa-file-pdf icon-pdf"></i> Visualizar Documento
                     </span>
                     {% else %}
@@ -122,8 +122,8 @@
                 <span class="view-info-label">Boleto</span>
                 <span class="view-info-value mt-5">
                     {% if pagamento.anexo_boleto %}
-                    <!-- Caminho corrigido: apenas /uploads/nome_do_arquivo -->
-                    <span class="anexo-link btn-open-pdf" data-url="/uploads/{{ pagamento.anexo_boleto }}">
+                    <!-- Caminho corrigido: apenas /pagamentos/download/nome_do_arquivo -->
+                    <span class="anexo-link btn-open-pdf" data-url="/pagamentos/download/{{ pagamento.anexo_boleto }}">
                         <i class="fa-solid fa-file-invoice icon-pdf"></i> Visualizar Boleto
                     </span>
                     {% else %}

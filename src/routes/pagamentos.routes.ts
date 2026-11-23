@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import PagamentosControllers from '../app/pagamentos/controllers/PagamentosControllers.js';
-import { uploadPagamentos } from '../app/shared/middlewares/upload.js';
+import { onlyUsers, requireModulo } from '../app/shared/middlewares/session.js';
+import { uploadPagamentos, validateMagicBytes } from '../app/shared/middlewares/upload.js';
 
 const routes = Router();
 
@@ -14,10 +15,13 @@ routes.get('/concluidos', PagamentosControllers.listConcluidos);
 
 // Rotas de Cadastro
 routes.get('/form', PagamentosControllers.create);
-routes.post('/form', uploadPagamentos, PagamentosControllers.store);
+routes.post('/form', uploadPagamentos, validateMagicBytes, PagamentosControllers.store);
 
 // Rotas de Edição
 routes.get('/editar/:ticket', PagamentosControllers.edit);
-routes.post('/editar/:ticket', uploadPagamentos, PagamentosControllers.update);
+routes.post('/editar/:ticket', uploadPagamentos, validateMagicBytes, PagamentosControllers.update);
+
+// Rota autenticada para visualização no modal ou download (?download=1)
+routes.get('/download/:arquivo', onlyUsers, PagamentosControllers.downloadAnexo);
 
 export default routes;

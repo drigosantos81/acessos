@@ -55,12 +55,12 @@
                         <td>R$ {{ pag.valorF }}</td>
                         <td onclick="event.stopPropagation();">
                             {% if pag.anexo_nota_fatura %}
-                                <span class="anexo-link btn-open-pdf" data-url="/uploads/{{ pag.anexo_nota_fatura }}" title="Nota Fiscal">
+                                <span class="anexo-link btn-open-pdf" data-url="/pagamentos/download/{{ pag.anexo_nota_fatura }}" title="Nota Fiscal">
                                     <i class="fa-solid fa-file-pdf icon-pdf"></i>
                                 </span>
                             {% endif %}
                             {% if pag.anexo_boleto %}
-                                <span class="anexo-link btn-open-pdf" data-url="/uploads/{{ pag.anexo_boleto }}" title="Boleto" style="margin-left: 10px;">
+                                <span class="anexo-link btn-open-pdf" data-url="/pagamentos/download/{{ pag.anexo_boleto }}" title="Boleto" style="margin-left: 10px;">
                                     <i class="fa-solid fa-file-invoice icon-pdf"></i>
                                 </span>
                             {% endif %}

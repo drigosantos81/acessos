@@ -11,14 +11,13 @@ dotenv.config();
 
 const port = process.env.PORT || 3000;
 const SQLiteStore = connectSqlite3(session);
-const app = express();
+export const app = express();
 
 app.use(express.static("public"));
 app.use(express.static("img"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride('_method'));
-app.use('/uploads', express.static('C:/Users/remd/Documents/uploadscsc'));
 
 app.use((req, res, next) => {
     res.set("Cache-Control", "no-store");
@@ -34,7 +33,7 @@ nunjucks.configure([
     path.join(process.cwd(), "src", "app", "pagamentos", "pages"),
     path.join(process.cwd(), "src", "app", "fornecedores", "pages"),
     path.join(process.cwd(), "src", "app", "shared", "pages")
-],    
+],
     {
         express: app,
         autoescape: false,
@@ -74,6 +73,8 @@ app.use((req, res, next) => {
 // ==========================================
 app.use(routes);
 
-app.listen(port, () => {
-    console.log(`Servidor ligado: http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(port, () => {
+        console.log(`Servidor ligado: http://localhost:${port}`);
+    });
+}

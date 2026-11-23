@@ -1,6 +1,7 @@
 /.vscode
 /node_modules
 /nodemon.json
+/uploads_privados
 .env
 # Banco de dados de sessões
 src/database/sessions.sqlite

@@ -201,5 +201,25 @@ class Pagamentos {
 
         return await db.query(query, values);
     }
+
+    // Função para implementar a mecânica "Assumir Tarefa"
+    async assumirTarefa(ticket: number, adminId: number) {
+        const query = `
+            UPDATE pagamentos 
+            SET status = 'EM ANÁLISE', admin_id = ? 
+            WHERE ticket = ? AND status = 'SOLICITADO'
+        `;
+        return await db.query(query, [adminId, ticket]);
+    }
+
+    // Função para implementar o "Desbloqueio Seletivo"
+    async devolverTarefaPendente(ticket: number, camposPendentes: string) {
+        const query = `
+            UPDATE pagamentos 
+            SET status = 'PENDENTE', campos_pendentes = ? 
+            WHERE ticket = ?
+        `;
+        return await db.query(query, [camposPendentes, ticket]);
+    }
 }
 export default new Pagamentos();
