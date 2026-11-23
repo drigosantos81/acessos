@@ -83,7 +83,7 @@ class Pagamentos {
             query += ` AND p.empresa_id IN (${empresasArr.map(() => '?').join(',')})`;
             params.push(...empresasArr);
         } else {
-            query += ` AND 1 = 0`; 
+            query += ` AND 1 = 0`;
         }
 
         query += ` ORDER BY p.ticket DESC`;
@@ -156,15 +156,26 @@ class Pagamentos {
 
     async getByTicket(ticket: number) {
         const query = `
-            SELECT p.*, e.nome_exibicao AS empresa_nome, nome_fantasia,
-                   u.name AS user_nome, u.email AS user_email, u.telefone AS user_telefone, u.empresa AS user_empresa
+            SELECT p.*, e.nome_exibicao AS empresa_nome, e.nome_fantasia,
+                   u.name AS user_nome, u.email AS user_email, u.telefone AS user_telefone, u.empresa AS user_empresa,
+                   a.name AS admin_nome
             FROM pagamentos p
             JOIN empresa e ON p.empresa_id = e.id
             JOIN users u ON p.user_id = u.id
+            LEFT JOIN users a ON p.admin_id = a.id
             WHERE p.ticket = ?
         `;
         const results = await db.query(query, [ticket]);
         return Array.isArray(results) && results.length > 0 ? results[0] : (results?.rows ? results.rows[0] : null);
+    }
+
+    async assumirTarefa(ticket: number, adminId: number) {
+        const query = `
+            UPDATE pagamentos 
+            SET status = 'EM ANÁLISE', admin_id = ? 
+            WHERE ticket = ? AND status = 'SOLICITADO' AND admin_id IS NULL
+        `;
+        return await db.query(query, [adminId, ticket]);
     }
 
     async update(ticket: number, data: any) {
@@ -176,17 +187,16 @@ class Pagamentos {
             pedido_compra = ?, cnpj_nota = ?, razao_social = ?, numero_nota_fatura = ?,
             data_emissao_nota = ?, data_vencimento = ?, valor = ?, tipo_pagamento = ?,
             servico_material_entregue = ?, mes_prestacao_servico = ?, status = ?,
-            observacao = ?, updated_at = ?`;
+            observacao = ?, campos_pendentes = ?, updated_at = ?`;
 
         const values = [
             data.empresa_id, data.setor, data.tipo_documento, data.contato_interno,
             data.pedido_compra, data.cnpj_nota, data.razao_social, data.numero_nota_fatura,
             data.data_emissao_nota, data.data_vencimento, data.valor, data.tipo_pagamento,
             data.servico_material_entregue, data.mes_prestacao_servico, data.status,
-            data.observacao || null, dataHoraAtual
+            data.observacao || null, data.campos_pendentes || null, dataHoraAtual
         ];
 
-        // Só atualiza os anexos se novos arquivos foram enviados
         if (data.anexo_nota_fatura) {
             query += `, anexo_nota_fatura = ?`;
             values.push(data.anexo_nota_fatura);
@@ -200,16 +210,6 @@ class Pagamentos {
         values.push(ticket);
 
         return await db.query(query, values);
-    }
-
-    // Função para implementar a mecânica "Assumir Tarefa"
-    async assumirTarefa(ticket: number, adminId: number) {
-        const query = `
-            UPDATE pagamentos 
-            SET status = 'EM ANÁLISE', admin_id = ? 
-            WHERE ticket = ? AND status = 'SOLICITADO'
-        `;
-        return await db.query(query, [adminId, ticket]);
     }
 
     // Função para implementar o "Desbloqueio Seletivo"

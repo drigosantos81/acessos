@@ -16,10 +16,11 @@ const routes = Router();
 // ==========================================
 // INJEÇÃO GLOBAL DA SESSÃO E CONTAGEM (Nunjucks)
 // ==========================================
-routes.use((req, res, next) => {
-    res.locals.session = req.session;
-    next();
-});
+// routes.use((req, res, next) => {
+//     res.locals.session = req.session;
+//     next();
+// });
+
 routes.use(loadMenuCounts);
 
 

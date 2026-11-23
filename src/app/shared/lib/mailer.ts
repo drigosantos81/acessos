@@ -6,13 +6,12 @@ import nodemailer from 'nodemailer';
 
 // 1. Configuração do Servidor de E-mail (SMTP)
 const transporter = nodemailer.createTransport({
-    host: "smtp.suaempresa.com.br", // Ex: smtp.gmail.com ou smtp.office365.com
-    port: 587, // Geralmente 587 ou 465
-    secure: false, // true para 465, false para outras portas
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT) || 2525,
     auth: {
-        user: "seu-email-de-envio@empresa.com.br",
-        pass: "sua-senha-ou-senha-de-aplicativo"
-    }
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
 });
 
 // 2. Função genérica que servirá para Acessos, Avarias e Pagamentos

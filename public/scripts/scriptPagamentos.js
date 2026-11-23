@@ -177,7 +177,12 @@ window.togglePagamentos = function () {
     if (boxBoleto && inputBoleto) {
         if (tipoBoleto) {
             boxBoleto.style.display = 'block';
-            inputBoleto.setAttribute('required', 'true');
+            // Só exige novo upload se ainda NÃO existir um boleto salvo no banco
+            if (inputBoleto.getAttribute('data-has-file') !== 'true') {
+                inputBoleto.setAttribute('required', 'true');
+            } else {
+                inputBoleto.removeAttribute('required');
+            }
         } else {
             boxBoleto.style.display = 'none';
             inputBoleto.removeAttribute('required');

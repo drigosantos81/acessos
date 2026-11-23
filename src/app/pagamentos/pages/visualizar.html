@@ -30,7 +30,7 @@
                 <span class="view-info-label">DATA EMISSÃO</span>
                 <span class="view-info-value">{{ pagamento.data_emissao_nota }}</span>
             </div>
-            <div class="view-info-inline border-right-divider" style="padding-right: 25px;">
+            <div class="view-info-inline border-right-divider view-info-vencimento">
                 <span class="view-info-label">DATA VENCIMENTO</span>
                 <span class="view-info-value">{{ pagamento.data_vencimento }}</span>
             </div>
@@ -42,15 +42,24 @@
         </div>
     </div>
 
-    <!-- CARD 0: Dados do Solicitante -->
-    <div class="view-card" style="padding: 15px 25px; margin-bottom: 20px; background-color: #f1f5f9;">
-        <div style="font-size: 14px; color: #1e293b;">
-            <strong>Solicitante</strong> &nbsp;|&nbsp; 
-            {{ pagamento.user_nome }} &nbsp;|&nbsp; 
-            {{ pagamento.user_email }} &nbsp;|&nbsp; 
-            {{ pagamento.user_telefone | default('Sem telefone') }} &nbsp;|&nbsp; 
-            {{ pagamento.user_empresa | default('Wilson Sons') }}
+    <!-- CARD 0: Dados do Solicitante + Botão Assumir Tarefa -->
+    <div class="view-card view-solicitante-bar">
+        <div class="view-solicitante-texto">
+            <strong>Solicitante</strong> &nbsp;|&nbsp; {{ pagamento.solicitante_formatado }}
         </div>
+
+        {% if session.isAdmin and pagamento.status == 'SOLICITADO' and not pagamento.admin_id %}
+            <form method="POST" action="/pagamentos/assumir/{{ pagamento.ticket }}" class="form-inline-action">
+                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                <button type="submit" class="btn-action-padrao btn-assumir">
+                    <i class="fa-solid fa-hand-pointer"></i> Assumir Tarefa
+                </button>
+            </form>
+        {% elif pagamento.admin_id %}
+            <div class="info-admin-lock">
+                <i class="fa-solid fa-lock"></i> Em análise por: <strong>{{ pagamento.admin_nome }}</strong>
+            </div>
+        {% endif %}
     </div>
 
     <!-- CARD 1: Dados da Empresa -->
@@ -99,6 +108,13 @@
             </div>
             {% endif %}
         </div>
+
+        {% if pagamento.observacao %}
+        <div class="view-observacao-box">
+            <span class="view-info-label">Observações</span>
+            <span class="view-info-value">{{ pagamento.observacao }}</span>
+        </div>
+        {% endif %}
     </div>
 
     <!-- CARD 3: Anexos -->
@@ -107,37 +123,41 @@
         <div class="view-grid mb-0">
             <div class="view-info-group">
                 <span class="view-info-label">Nota / Fatura / Recibo</span>
-                <span class="view-info-value mt-5">
+                <span class="view-info-value mt-5 anexo-acoes">
                     {% if pagamento.anexo_nota_fatura %}
-                    <!-- Caminho corrigido: apenas /pagamentos/download/nome_do_arquivo -->
-                    <span class="anexo-link btn-open-pdf" data-url="/pagamentos/download/{{ pagamento.anexo_nota_fatura }}">
-                        <i class="fa-solid fa-file-pdf icon-pdf"></i> Visualizar Documento
-                    </span>
+                        <span class="anexo-link btn-open-pdf" data-url="/pagamentos/download/{{ pagamento.anexo_nota_fatura }}">
+                            <i class="fa-solid fa-file-pdf icon-pdf"></i> Visualizar Documento
+                        </span>
+                        <a href="/pagamentos/download/{{ pagamento.anexo_nota_fatura }}?download=1" class="btn-download-icon" title="Baixar Documento">
+                            <i class="fa-solid fa-download"></i>
+                        </a>
                     {% else %}
-                    -
+                        -
                     {% endif %}
                 </span>
             </div>
             <div class="view-info-group">
                 <span class="view-info-label">Boleto</span>
-                <span class="view-info-value mt-5">
+                <span class="view-info-value mt-5 anexo-acoes">
                     {% if pagamento.anexo_boleto %}
-                    <!-- Caminho corrigido: apenas /pagamentos/download/nome_do_arquivo -->
-                    <span class="anexo-link btn-open-pdf" data-url="/pagamentos/download/{{ pagamento.anexo_boleto }}">
-                        <i class="fa-solid fa-file-invoice icon-pdf"></i> Visualizar Boleto
-                    </span>
+                        <span class="anexo-link btn-open-pdf" data-url="/pagamentos/download/{{ pagamento.anexo_boleto }}">
+                            <i class="fa-solid fa-file-invoice icon-pdf"></i> Visualizar Boleto
+                        </span>
+                        <a href="/pagamentos/download/{{ pagamento.anexo_boleto }}?download=1" class="btn-download-icon" title="Baixar Boleto">
+                            <i class="fa-solid fa-download"></i>
+                        </a>
                     {% else %}
-                    -
+                        -
                     {% endif %}
                 </span>
             </div>
         </div>
     </div>
 
-    <!-- CARD 4: Rodapé / Rastreamento (Alinhado à esquerda e espaçoso) -->
+    <!-- CARD 4: Rodapé / Rastreamento -->
     <div class="view-card bg-light-gray">
         <div class="view-grid-left mb-0">
-            <div class="view-info-group" style="min-width: 250px;">
+            <div class="view-info-group view-rastreamento-col">
                 <span class="view-info-label">Data de Abertura</span>
                 <span class="view-info-value">{{ pagamento.data_abertura_br | default('-') }}</span>
             </div>
@@ -150,14 +170,14 @@
 
     <!-- Botões de Ação Padronizados -->
     <div class="view-actions-container">
-        <button class="btn-action-padrao btn-voltar btn-back-action">
+        <a href="/pagamentos/pendentes" class="btn-action-padrao btn-voltar">
             <i class="fa-solid fa-arrow-left"></i> Voltar
-        </button>
-
-        {% if session.isAdmin %}
-        <a href="/pagamentos/editar/{{ pagamento.ticket }}" class="btn-action-padrao btn-editar">
-            <i class="fa-solid fa-pen"></i> Editar
         </a>
+
+        {% if session.isAdmin and (not pagamento.admin_id or pagamento.admin_id == session.userId) %}
+            <a href="/pagamentos/editar/{{ pagamento.ticket }}" class="btn-action-padrao btn-editar">
+                <i class="fa-solid fa-pen"></i> Editar
+            </a>
         {% endif %}
     </div>
 
@@ -168,7 +188,7 @@
     <div class="modal-content-pdf">
         <div class="modal-header-pdf">
             <h3><i class="fa-solid fa-file-pdf"></i> Visualizador de Documentos</h3>
-            <button class="btn-close-pdf">&times;</button>
+            <button type="button" class="btn-close-pdf">&times;</button>
         </div>
         <div class="modal-body-pdf">
             <iframe id="iframeVisualizador" src=""></iframe>

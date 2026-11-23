@@ -20,8 +20,8 @@
             </div>
 
             <!-- A rota de envio muda dinamicamente baseada no contexto -->
-            <form action="{% if user %}/perfil/editar{% else %}/criar-acesso{% endif %}" method="POST"
-                class="auth-form">
+            <form action="{% if user %}/perfil/editar{% else %}/criar-acesso{% endif %}" method="POST" class="auth-form">
+                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
 
                 {% if user %}
                 <!-- Envia o ID oculto para o Back-end saber qual usuário atualizar -->

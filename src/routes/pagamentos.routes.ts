@@ -20,6 +20,7 @@ routes.post('/form', uploadPagamentos, validateMagicBytes, PagamentosControllers
 // Rotas de Edição
 routes.get('/editar/:ticket', PagamentosControllers.edit);
 routes.post('/editar/:ticket', uploadPagamentos, validateMagicBytes, PagamentosControllers.update);
+routes.post('/assumir/:ticket', onlyUsers, PagamentosControllers.assumir);
 
 // Rota autenticada para visualização no modal ou download (?download=1)
 routes.get('/download/:arquivo', onlyUsers, PagamentosControllers.downloadAnexo);

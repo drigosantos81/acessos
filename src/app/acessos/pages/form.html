@@ -19,6 +19,7 @@
     <h2>Cadastro de Acesso</h2>
 
     <form id="meuForm" method="POST" action="/" novalidate>
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
 
         <div class="row-name">
             <div class="field grow">

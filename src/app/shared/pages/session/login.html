@@ -22,6 +22,8 @@
         {% endif %}
 
         <form action="/login" method="POST">
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            
             <div class="field">
                 <label for="email">E-mail</label>
                 <input type="email" id="email" name="email" value="{{ user.email }}" placeholder="admin@tecon.com.br"

@@ -100,7 +100,7 @@ class PagamentoControllers {
 
             const activeSubMenu = empresasArr.length === 1 ? empresasArr[0] : null;
 
-            let pagamentos = await Pagamentos.getByStatus(['SOLICITADO', 'PENDENTE'], userId, isAdmin, dataInicio, dataFim, empresasArr);
+            let pagamentos = await Pagamentos.getByStatus(['SOLICITADO', 'EM ANÁLISE', 'PENDENTE'], userId, isAdmin, dataInicio, dataFim, empresasArr);
             pagamentos = formatarLista(pagamentos);
 
             return res.render('../../pagamentos/pages/index', {
@@ -201,6 +201,12 @@ class PagamentoControllers {
 
             if (!pagamento) return res.status(404).send("Pagamento não encontrado.");
 
+            // Regra: Usuário comum com registro PENDENTE vai direto para a tela de edição seletiva
+            const isAdmin = Boolean(req.session.isAdmin);
+            if (!isAdmin && pagamento.status === 'PENDENTE' && pagamento.user_id === req.session.userId) {
+                return res.redirect(`/pagamentos/editar/${ticket}`);
+            }
+
             const formataData = (d: string) => {
                 if (!d || !d.includes('-')) return d;
                 const [ano, mes, dia] = d.split('-');
@@ -208,6 +214,7 @@ class PagamentoControllers {
             };
             pagamento.data_emissao_nota = formataData(pagamento.data_emissao_nota);
             pagamento.data_vencimento = formataData(pagamento.data_vencimento);
+            pagamento.mes_prestacao_servico = formataData(pagamento.mes_prestacao_servico);
 
             const formataDataHora = (d: string) => {
                 if (!d) return '-';
@@ -218,16 +225,35 @@ class PagamentoControllers {
             pagamento.data_abertura_br = formataDataHora(pagamento.data_abertura);
             pagamento.updated_at_br = formataDataHora(pagamento.updated_at);
 
-            if (pagamento.valor !== undefined && pagamento.valor !== null) {
-                pagamento.valorF = Number(pagamento.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            } else {
-                pagamento.valorF = '0,00';
-            }
+            pagamento.valorF = pagamento.valor !== undefined && pagamento.valor !== null
+                ? Number(pagamento.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : '0,00';
+
+            const infoSolicitante = [pagamento.user_nome, pagamento.user_email, pagamento.user_telefone]
+                .filter((item) => item && String(item).trim() !== '');
+            pagamento.solicitante_formatado = infoSolicitante.join(' | ');
 
             return res.render('../../pagamentos/pages/visualizar', { pagamento, activeMenu: 'pagamentos' });
         } catch (error) {
             console.error("Erro ao visualizar:", error);
             return res.status(500).send("Erro ao carregar o registro.");
+        }
+    }
+
+    async assumir(req: Request, res: Response) {
+        try {
+            if (!req.session.isAdmin) {
+                return res.status(403).send("Apenas administradores podem assumir tarefas.");
+            }
+
+            const ticket = Number(req.params.ticket);
+            const adminId = req.session.userId!;
+
+            await Pagamentos.assumirTarefa(ticket, adminId);
+            return res.redirect(`/pagamentos/visualizar/${ticket}`);
+        } catch (error) {
+            console.error("Erro ao assumir tarefa:", error);
+            return res.redirect(`/pagamentos/visualizar/${req.params.ticket}`);
         }
     }
 
@@ -237,6 +263,18 @@ class PagamentoControllers {
             const pagamento = await Pagamentos.getByTicket(ticket);
 
             if (!pagamento) return res.status(404).send("Pagamento não encontrado.");
+
+            // Bloqueio de segurança no backend:
+            // Admin pode editar se ninguém assumiu ainda (!admin_id) ou se ele mesmo assumiu
+            // Usuário comum só pode editar se for o solicitante e o status for PENDENTE
+            const isAdmin = Boolean(req.session.isAdmin);
+            const userId = req.session.userId!;
+            const adminPermitido = isAdmin && (!pagamento.admin_id || pagamento.admin_id === userId);
+            const solicitantePendente = !isAdmin && pagamento.status === 'PENDENTE' && pagamento.user_id === userId;
+
+            if (!adminPermitido && !solicitantePendente) {
+                return res.status(403).send("Você não tem permissão para editar esta solicitação no momento.");
+            }
 
             if (pagamento.valor !== null && pagamento.valor !== undefined) {
                 pagamento.valorFormInput = "R$ " + Number(pagamento.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -250,8 +288,12 @@ class PagamentoControllers {
                 return { ...emp, cnpj };
             });
 
+            const camposPendentes = pagamento.campos_pendentes
+                ? String(pagamento.campos_pendentes).split(',').map((c) => c.trim())
+                : [];
+
             return res.render('../../pagamentos/pages/edit', {
-                activeMenu: 'pagamentos', pagamento, empresas, setores
+                activeMenu: 'pagamentos', pagamento, empresas, setores, camposPendentes
             });
         } catch (error) {
             console.error("Erro ao carregar edição:", error);
@@ -262,6 +304,18 @@ class PagamentoControllers {
     async update(req: Request, res: Response) {
         try {
             const ticket = Number(req.params.ticket);
+            const pagamentoAtual = await Pagamentos.getByTicket(ticket);
+            if (!pagamentoAtual) return res.status(404).send("Pagamento não encontrado.");
+
+            const isAdmin = Boolean(req.session.isAdmin);
+            const userId = req.session.userId!;
+            const adminPermitido = isAdmin && (!pagamentoAtual.admin_id || pagamentoAtual.admin_id === userId);
+            const solicitantePendente = !isAdmin && pagamentoAtual.status === 'PENDENTE' && pagamentoAtual.user_id === userId;
+
+            if (!adminPermitido && !solicitantePendente) {
+                return res.status(403).send("Ação não permitida para este registro.");
+            }
+
             const body = req.body;
             const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
@@ -270,12 +324,25 @@ class PagamentoControllers {
 
             let valorLimpo = 0;
             if (body.valor) {
-                let stringValor = body.valor.replace(/[R$\s.]/g, '');
-                stringValor = stringValor.replace(',', '.');
+                let stringValor = String(body.valor).replace(/[R$\s.]/g, '').replace(',', '.');
                 valorLimpo = parseFloat(stringValor);
             }
 
-            const statusAtualizado = body.status ? body.status : body.status_original;
+            // Se usuário comum corrigiu, volta automaticamente para EM ANÁLISE e limpa os campos pendentes
+            const statusAtualizado = isAdmin ? (body.status || pagamentoAtual.status) : 'EM ANÁLISE';
+
+            let camposPendentesString: string | null = null;
+            if (isAdmin && statusAtualizado === 'PENDENTE') {
+                if (Array.isArray(body.campos_pendentes)) {
+                    camposPendentesString = body.campos_pendentes.join(',');
+                } else if (body.campos_pendentes) {
+                    camposPendentesString = String(body.campos_pendentes);
+                }
+
+                if (!camposPendentesString || !body.observacao || String(body.observacao).trim() === '') {
+                    return res.status(400).send("Para definir como PENDENTE, preencha a observação e marque ao menos um campo para correção.");
+                }
+            }
 
             const data: any = {
                 empresa_id: Number(body.empresa_id),
@@ -294,6 +361,7 @@ class PagamentoControllers {
                 mes_prestacao_servico: body.mes_prestacao_servico,
                 status: statusAtualizado,
                 observacao: body.observacao,
+                campos_pendentes: camposPendentesString,
                 anexo_boleto: nomeBoleto,
                 anexo_nota_fatura: nomeNota
             };
@@ -306,27 +374,13 @@ class PagamentoControllers {
         }
     }
 
-    // Função acionada quando o Admin clica em "Assumir Tarefa"
-    async assumir(req: Request, res: Response) {
-        try {
-            const ticket = Number(req.params.ticket);
-            const adminId = req.session.userId!; // Garante que é o admin logado
-            
-            await Pagamentos.assumirTarefa(ticket, adminId);
-            return res.redirect(`/pagamentos/visualizar/${ticket}`);
-        } catch (error) {
-            console.error("Erro ao assumir tarefa:", error);
-            return res.status(500).send("Erro ao assumir a solicitação.");
-        }
-    }
-
     // Função acionada quando o Admin clica em "Devolver para Ajuste"
     async devolverPendente(req: Request, res: Response) {
         try {
             const ticket = Number(req.params.ticket);
             // Captura a string de campos selecionados pelo Admin no formulário
-            const camposPendentes = req.body.campos_selecionados || ''; 
-            
+            const camposPendentes = req.body.campos_selecionados || '';
+
             await Pagamentos.devolverTarefaPendente(ticket, camposPendentes);
             return res.redirect(`/pagamentos/visualizar/${ticket}`);
         } catch (error) {

@@ -16,41 +16,65 @@
     </div>
     <hr class="divider-header">
 
-    <!-- Adicionado o atributo NOVALIDATE aqui também -->
-    <form id="formPagamento" method="POST" action="/pagamentos/editar/{{ pagamento.ticket }}" enctype="multipart/form-data" novalidate>
-        
-        <!-- Mantém o status original oculto caso não seja alterado (para usuários não-admin) -->
+    <form id="formPagamento" method="POST" action="/pagamentos/editar/{{ pagamento.ticket }}?_csrf={{ csrfToken }}" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
         <input type="hidden" name="status_original" value="{{ pagamento.status }}">
 
-        {% if session.isAdmin %}
-        <!-- GRUPO ADMIN: STATUS E OBSERVAÇÃO -->
-        <div class="grid-2-colunas" style="background-color: #f1f5f9; padding: 20px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 25px;">
+        <!-- CAIXA DE STATUS E OBSERVAÇÃO (SEM CHECKBOXES DE CORREÇÃO) -->
+        <div class="grid-2-colunas box-admin-status">
             <div class="field field-pag">
-                <label>Status do Pagamento</label>
-                <select name="status" id="status_select" onchange="toggleObservacao()" style="border-color: #011C43; font-weight: bold;">
-                    <option value="SOLICITADO" {% if pagamento.status == 'SOLICITADO' %}selected{% endif %}>SOLICITADO</option>
-                    <option value="PENDENTE" {% if pagamento.status == 'PENDENTE' %}selected{% endif %}>PENDENTE</option>
-                    <option value="CONFIRMADO" {% if pagamento.status == 'CONFIRMADO' %}selected{% endif %}>CONFIRMADO</option>
-                    <option value="CANCELADO" {% if pagamento.status == 'CANCELADO' %}selected{% endif %}>CANCELADO</option>
-                </select>
+                <label class="label-status-destaque">Status do Pagamento</label>
+                {% if session.isAdmin %}
+                    <select name="status" id="status_select" class="status-select-destaque" onchange="toggleObservacao()">
+                        <option value="EM ANÁLISE" {% if pagamento.status == 'EM ANÁLISE' %}selected{% endif %}>EM ANÁLISE</option>
+                        <option value="PENDENTE" {% if pagamento.status == 'PENDENTE' %}selected{% endif %}>PENDENTE</option>
+                        <option value="CONFIRMADO" {% if pagamento.status == 'CONFIRMADO' %}selected{% endif %}>CONFIRMADO</option>
+                        <option value="CANCELADO" {% if pagamento.status == 'CANCELADO' %}selected{% endif %}>CANCELADO</option>
+                    </select>
+                {% else %}
+                    <input type="text" value="EM ANÁLISE (Retorna para o Admin após correção)" readonly class="input-bloqueado">
+                    <input type="hidden" name="status" value="EM ANÁLISE">
+                {% endif %}
             </div>
-            
-            <div class="field field-pag" id="box_observacao" style="display: none;">
-                <label>Observação (Obrigatório para Pendente/Cancelado)</label>
-                <input type="text" name="observacao" id="observacao_input" value="{{ pagamento.observacao | default('') }}" placeholder="Motivo da pendência ou cancelamento...">
-            </div>
+
+            {% if session.isAdmin %}
+                <div class="field field-pag box-oculto" id="box_observacao">
+                    <label>Observação (Obrigatório para Pendente/Cancelado)</label>
+                    <input type="text" name="observacao" id="observacao_input" value="{{ pagamento.observacao | default('') }}" placeholder="Motivo da pendência ou cancelamento...">
+                </div>
+            {% else %}
+                <div class="field field-pag">
+                    <label>Observação / Motivo da Pendência</label>
+                    <input type="text" name="observacao" value="{{ pagamento.observacao | default('') }}" readonly class="input-bloqueado">
+                </div>
+            {% endif %}
         </div>
-        {% endif %}
 
         <!-- GRUPO 1: SOLICITANTE, EMPRESA E PEDIDO -->
         <div class="grid-2-colunas">
             <div class="field field-pag">
-                <label>Nome Contato Wilson Sons *</label>
-                <input type="text" name="contato_interno" value="{{ pagamento.contato_interno }}" required>
+                <div class="field-pag-header">
+                    <label>Nome Contato Wilson Sons *</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="contato_interno" {% if camposPendentes.includes('contato_interno') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <input type="text" name="contato_interno" value="{{ pagamento.contato_interno }}"
+                    {% if not session.isAdmin and not camposPendentes.includes('contato_interno') %}readonly class="input-bloqueado"{% endif %} required>
             </div>
+
             <div class="field field-pag">
-                <label>Setor</label>
-                <select name="setor">
+                <div class="field-pag-header">
+                    <label>Setor</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="setor" {% if camposPendentes.includes('setor') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <select name="setor" {% if not session.isAdmin and not camposPendentes.includes('setor') %}class="input-bloqueado select-bloqueado" tabindex="-1"{% endif %}>
                     <option value="">Selecione...</option>
                     {% for s in setores %}
                         <option value="{{ s.nome }}" {% if pagamento.setor == s.nome %}selected{% endif %}>{{ s.nome }}</option>
@@ -61,17 +85,33 @@
 
         <div class="grid-2-colunas">
             <div class="field field-pag">
-                <label>Empresa *</label>
-                <select name="empresa_id" required>
+                <div class="field-pag-header">
+                    <label>Empresa *</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="empresa_id" {% if camposPendentes.includes('empresa_id') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <select name="empresa_id" required {% if not session.isAdmin and not camposPendentes.includes('empresa_id') %}class="input-bloqueado select-bloqueado" tabindex="-1"{% endif %}>
                     <option value="">Selecione...</option>
                     {% for emp in empresas %}
                         <option value="{{ emp.id }}" {% if pagamento.empresa_id == emp.id %}selected{% endif %}>{{ emp.nome_exibicao }} ({{ emp.cnpj }})</option>
                     {% endfor %}
                 </select>
             </div>
+
             <div class="field field-pag">
-                <label>Pedido *</label>
-                <input type="text" name="pedido_compra" value="{{ pagamento.pedido_compra }}" required>
+                <div class="field-pag-header">
+                    <label>Pedido *</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="pedido_compra" {% if camposPendentes.includes('pedido_compra') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <input type="text" name="pedido_compra" value="{{ pagamento.pedido_compra }}"
+                    {% if not session.isAdmin and not camposPendentes.includes('pedido_compra') %}readonly class="input-bloqueado"{% endif %} required>
             </div>
         </div>
 
@@ -80,82 +120,190 @@
         <!-- GRUPO 2: DADOS DO PAGAMENTO -->
         <div class="grid-2-colunas">
             <div class="field field-pag">
-                <label>CNPJ *</label>
-                <input type="text" name="cnpj_nota" id="cnpj_input" value="{{ pagamento.cnpj_nota }}" maxlength="18" required>
+                <div class="field-pag-header">
+                    <label>CNPJ *</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="cnpj_nota" {% if camposPendentes.includes('cnpj_nota') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <input type="text" name="cnpj_nota" id="cnpj_input" value="{{ pagamento.cnpj_nota }}" maxlength="18"
+                    {% if not session.isAdmin and not camposPendentes.includes('cnpj_nota') %}readonly class="input-bloqueado"{% endif %} required>
             </div>
+
             <div class="field field-pag">
-                <label>Fornecedor (Razão Social) *</label>
-                <input type="text" name="razao_social" value="{{ pagamento.razao_social }}" required>
+                <div class="field-pag-header">
+                    <label>Fornecedor (Razão Social) *</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="razao_social" {% if camposPendentes.includes('razao_social') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <input type="text" name="razao_social" value="{{ pagamento.razao_social }}"
+                    {% if not session.isAdmin and not camposPendentes.includes('razao_social') %}readonly class="input-bloqueado"{% endif %} required>
             </div>
         </div>
 
         <div class="grid-2-colunas">
             <div class="field field-pag">
-                <label>Tipo Documento *</label>
-                <select name="tipo_documento" required>
+                <div class="field-pag-header">
+                    <label>Tipo Documento *</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="tipo_documento" {% if camposPendentes.includes('tipo_documento') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <select name="tipo_documento" required {% if not session.isAdmin and not camposPendentes.includes('tipo_documento') %}class="input-bloqueado select-bloqueado" tabindex="-1"{% endif %}>
                     <option value="NOTA FISCAL" {% if pagamento.tipo_documento == 'NOTA FISCAL' %}selected{% endif %}>Nota Fiscal</option>
                     <option value="FATURA" {% if pagamento.tipo_documento == 'FATURA' %}selected{% endif %}>Fatura</option>
                     <option value="RECIBO" {% if pagamento.tipo_documento == 'RECIBO' %}selected{% endif %}>Recibo</option>
                 </select>
             </div>
+
             <div class="field field-pag">
-                <label>Número Documento</label>
-                <input type="text" name="numero_nota_fatura" value="{{ pagamento.numero_nota_fatura }}">
+                <div class="field-pag-header">
+                    <label>Número Documento</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="numero_nota_fatura" {% if camposPendentes.includes('numero_nota_fatura') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <input type="text" name="numero_nota_fatura" value="{{ pagamento.numero_nota_fatura }}"
+                    {% if not session.isAdmin and not camposPendentes.includes('numero_nota_fatura') %}readonly class="input-bloqueado"{% endif %}>
             </div>
         </div>
 
         <div class="grid-2-colunas">
             <div class="field field-pag">
-                <label>Substituir Anexo (Opcional)</label>
-                <input type="file" name="anexo_nota_fatura" class="input-file">
+                <div class="field-pag-header">
+                    <label>Substituir Anexo (Opcional)</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="anexo_nota_fatura" {% if camposPendentes.includes('anexo_nota_fatura') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <input type="file" name="anexo_nota_fatura"
+                    class="input-file {% if not session.isAdmin and not camposPendentes.includes('anexo_nota_fatura') %}input-bloqueado select-bloqueado{% endif %}"
+                    {% if not session.isAdmin and not camposPendentes.includes('anexo_nota_fatura') %}tabindex="-1"{% endif %}>
                 {% if pagamento.anexo_nota_fatura %}
-                    <small style="color: #64748b; margin-top: 5px;">Arquivo atual: {{ pagamento.anexo_nota_fatura }}</small>
+                    <small class="texto-arquivo-atual">Arquivo atual: {{ pagamento.anexo_nota_fatura }}</small>
                 {% endif %}
             </div>
+
             <div class="field field-pag">
-                <label>Data da Emissão *</label>
-                <input type="date" name="data_emissao_nota" value="{{ pagamento.data_emissao_nota }}" required>
+                <div class="field-pag-header">
+                    <label>Data da Emissão *</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="data_emissao_nota" {% if camposPendentes.includes('data_emissao_nota') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <input type="date" name="data_emissao_nota" value="{{ pagamento.data_emissao_nota }}"
+                    {% if not session.isAdmin and not camposPendentes.includes('data_emissao_nota') %}readonly class="input-bloqueado"{% endif %} required>
             </div>
         </div>
 
         <div class="grid-2-colunas">
             <div class="field field-pag">
-                <label>Valor *</label>
-                <input type="text" name="valor" id="valor_input" value="{{ pagamento.valorFormInput }}" required>
+                <div class="field-pag-header">
+                    <label>Valor *</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="valor" {% if camposPendentes.includes('valor') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <input type="text" name="valor" id="valor_input" value="{{ pagamento.valorFormInput }}"
+                    {% if not session.isAdmin and not camposPendentes.includes('valor') %}readonly class="input-bloqueado"{% endif %} required>
             </div>
+
             <div class="field field-pag">
-                <label>Data do Vencimento *</label>
-                <input type="date" name="data_vencimento" id="data_vencimento" value="{{ pagamento.data_vencimento }}" required>
+                <div class="field-pag-header">
+                    <label>Data do Vencimento *</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="data_vencimento" {% if camposPendentes.includes('data_vencimento') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <input type="date" name="data_vencimento" id="data_vencimento" value="{{ pagamento.data_vencimento }}"
+                    {% if not session.isAdmin and not camposPendentes.includes('data_vencimento') %}readonly class="input-bloqueado"{% endif %} required>
             </div>
         </div>
 
         <div class="grid-2-colunas">
             <div class="field field-pag">
-                <label>Tipo Pagamento</label>
-                <div class="radio radio-pag">
+                <div class="field-pag-header">
+                    <label>Tipo Pagamento</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="tipo_pagamento" {% if camposPendentes.includes('tipo_pagamento') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <div class="radio radio-pag {% if not session.isAdmin and not camposPendentes.includes('tipo_pagamento') %}select-bloqueado{% endif %}">
                     <label><input type="radio" name="tipo_pagamento" value="TED" {% if pagamento.tipo_pagamento == 'TED' %}checked{% endif %} onchange="togglePagamentos()"> TED</label>
                     <label><input type="radio" name="tipo_pagamento" value="Boleto" {% if pagamento.tipo_pagamento == 'Boleto' %}checked{% endif %} onchange="togglePagamentos()"> Boleto</label>
                 </div>
                 <div id="box_boleto" class="box-condicional">
-                    <label class="label-condicional">Substituir Boleto (Opcional)</label>
-                    <input type="file" name="anexo_boleto" id="input_boleto" class="input-file">
+                    <div class="field-pag-header">
+                        <label class="label-condicional">Substituir Boleto (Opcional)</label>
+                        {% if session.isAdmin %}
+                            <label class="check-pendencia">
+                                <input type="checkbox" name="campos_pendentes" value="anexo_boleto" {% if camposPendentes.includes('anexo_boleto') %}checked{% endif %}> Solicitar Correção
+                            </label>
+                        {% endif %}
+                    </div>
+                    <input type="file" name="anexo_boleto" id="input_boleto"
+                        data-has-file="{{ 'true' if pagamento.anexo_boleto else 'false' }}"
+                        class="input-file {% if not session.isAdmin and not camposPendentes.includes('anexo_boleto') %}input-bloqueado select-bloqueado{% endif %}"
+                        {% if not session.isAdmin and not camposPendentes.includes('anexo_boleto') %}tabindex="-1"{% endif %}>
+                    {% if pagamento.anexo_boleto %}
+                        <small class="texto-arquivo-atual">Arquivo atual: {{ pagamento.anexo_boleto }}</small>
+                    {% endif %}
                 </div>
             </div>
+
             <div class="field field-pag">
-                <label>O Serviço/Material foi entregue? *</label>
-                <div class="radio radio-pag">
+                <div class="field-pag-header">
+                    <label>O Serviço/Material foi entregue? *</label>
+                    {% if session.isAdmin %}
+                        <label class="check-pendencia">
+                            <input type="checkbox" name="campos_pendentes" value="servico_material_entregue" {% if camposPendentes.includes('servico_material_entregue') %}checked{% endif %}> Solicitar Correção
+                        </label>
+                    {% endif %}
+                </div>
+                <div class="radio radio-pag {% if not session.isAdmin and not camposPendentes.includes('servico_material_entregue') %}select-bloqueado{% endif %}">
                     <label><input type="radio" name="servico_material_entregue" value="SIM" {% if pagamento.servico_material_entregue == 'SIM' %}checked{% endif %} onchange="togglePagamentos()"> SIM</label>
                     <label><input type="radio" name="servico_material_entregue" value="NAO" {% if pagamento.servico_material_entregue == 'NAO' %}checked{% endif %} onchange="togglePagamentos()"> NÃO</label>
                 </div>
-                <div id="box_mes" class="box-condicional" style="display: none; border: none; background: transparent; padding-left: 0;">
-                    <label class="label-condicional">Data *</label>
-                    <input type="date" name="mes_prestacao_servico" id="mes_input" value="{{ pagamento.mes_prestacao_servico }}">
+                <div id="box_mes" class="box-condicional box-condicional-limpo box-oculto">
+                    <div class="field-pag-header">
+                        <label class="label-condicional">Data *</label>
+                        {% if session.isAdmin %}
+                            <label class="check-pendencia">
+                                <input type="checkbox" name="campos_pendentes" value="mes_prestacao_servico" {% if camposPendentes.includes('mes_prestacao_servico') %}checked{% endif %}> Solicitar Correção
+                            </label>
+                        {% endif %}
+                    </div>
+                    <input type="date" name="mes_prestacao_servico" id="mes_input" value="{{ pagamento.mes_prestacao_servico }}"
+                        {% if not session.isAdmin and not camposPendentes.includes('mes_prestacao_servico') %}readonly class="input-bloqueado"{% endif %}>
                 </div>
             </div>
         </div>
 
         <div class="form-actions form-footer">
-            <button type="button" class="button-cancel btn-action-padrao btn-voltar" onclick="window.history.back()">Cancelar</button>
+            {% if session.isAdmin %}
+                <a href="/pagamentos/visualizar/{{ pagamento.ticket }}" class="button-cancel btn-action-padrao btn-voltar">Cancelar</a>
+            {% else %}
+                <a href="/pagamentos/pendentes" class="button-cancel btn-action-padrao btn-voltar">Cancelar</a>
+            {% endif %}
             <button type="submit" class="button-send btn-action-padrao btn-editar">Atualizar</button>
         </div>
     </form>

@@ -17,7 +17,8 @@
     <hr class="divider-header">
 
     <!-- Adicionado o atributo NOVALIDATE para permitir o bloqueio via Javascript -->
-    <form id="formPagamento" method="POST" action="/pagamentos/form" enctype="multipart/form-data" novalidate>
+    <form id="formPagamento" method="POST" action="/pagamentos/form?_csrf={{ csrfToken }}" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
         
         <!-- GRUPO 1: SOLICITANTE, EMPRESA E PEDIDO -->
         <div class="grid-2-colunas">

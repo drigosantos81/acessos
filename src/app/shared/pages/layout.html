@@ -7,6 +7,7 @@
     {% block head %}
     <title>Portal de Atendimento</title>
     {% endblock %}
+    <meta name="csrf-token" content="{{ csrfToken }}">
     <link rel="stylesheet" href="/css/acessos/styleAcessos.css">
     <link rel="stylesheet" href="/css/acessos/styleModalAcessos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -67,6 +68,7 @@
                 </a>
             </div>
             <form action="/logout" method="POST" class="sidebar-logout-form">
+                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
                 <button type="submit" class="sidebar-logout-btn">
                     Sair <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
